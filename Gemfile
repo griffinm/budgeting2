@@ -11,6 +11,8 @@ gem "solid_cable"
 gem "bootsnap", require: false
 gem "rack-cors"
 gem "dotenv-rails"
+gem "jwt"
+gem "lograge"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
