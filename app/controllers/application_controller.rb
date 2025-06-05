@@ -1,17 +1,24 @@
 class ApplicationController < ActionController::API
   
   def current_user
-    @current_user ||= authenticate_request
+    @current_user ||= get_user
   end
-  
-  def authenticate_request
-    token = request.headers["x-budgeting-jwt"]
-    if token.blank?
+
+  def require_authenticated_user!
+    unless current_user
       render json: { error: "Unauthorized" }, status: :unauthorized
+      return false
     end
 
-    begin
-      @current_user = AuthService.new.user_from_token(token: token)
+    return true
+  end
+  
+  def get_user
+    token = request.headers["x-budgeting-jwt"]
+    if token.blank?
+      return false
     end
+
+    @current_user = AuthService.user_from_token(token: token)
   end
 end

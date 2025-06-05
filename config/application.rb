@@ -18,7 +18,7 @@ module Budgeting2
     config.load_defaults 8.0
     config.autoload_lib(ignore: %w[assets tasks])
 
-    config.time_zone = "Central Time (US & Canada)"
+    config.time_zone = "UTC"
     config.api_only = true
   end
 end

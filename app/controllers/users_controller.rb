@@ -1,4 +1,11 @@
 class UsersController < ApplicationController
+
+  before_action :require_authenticated_user!, except: [:create]
+
+  def current
+    render json: current_user, status: :ok
+  end
+
   def create
     user = User.create!(user_params)
     render json: { user: user }, status: :created
