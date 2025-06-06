@@ -11,6 +11,7 @@ import {
   DashboardPage,
   LoginPage,
 } from './pages';
+import { CurrentUserProvider } from '@/providers';
 
 // Create the router
 const router = createBrowserRouter([
@@ -38,6 +39,8 @@ const router = createBrowserRouter([
 
 export function AppRoutes() {
   return (
-    <RouterProvider router={router} />
+    <CurrentUserProvider>
+      <RouterProvider router={router} />
+    </CurrentUserProvider>
   )
 }

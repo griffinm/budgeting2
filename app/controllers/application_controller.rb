@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::API
-  
+  before_action :require_authenticated_user!
+
   def current_user
     @current_user ||= get_user
   end
@@ -14,10 +15,8 @@ class ApplicationController < ActionController::API
   end
   
   def get_user
-    token = request.headers["x-budgeting-jwt"]
-    if token.blank?
-      return false
-    end
+    token = request.headers["x-budgeting-token"]
+    return false if token.blank?
 
     @current_user = AuthService.user_from_token(token: token)
   end

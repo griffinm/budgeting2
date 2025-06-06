@@ -1,0 +1,38 @@
+import axios from 'axios';
+import { urls } from '@/utils/urls';
+import { AUTH_TOKEN_STORAGE_KEY, AUTH_TOKEN_HEADER_KEY } from '@/utils/constants';
+
+const apiUrl = import.meta.env.VITE_API_URL;
+
+const baseClient = axios.create({
+  baseURL: apiUrl,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Add auth token to the request headers
+baseClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  if (token && config.headers) {
+    config.headers.set(AUTH_TOKEN_HEADER_KEY, token);
+  }
+  return config;
+});
+
+// Handle 401 and 403 errors
+baseClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (window.location.pathname !== urls.login.path()) {
+      if (error.response.status === 401 || error.response.status === 403) {
+        localStorage.removeItem('token');
+        window.location.href = urls.login.path();
+      }
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default baseClient;
