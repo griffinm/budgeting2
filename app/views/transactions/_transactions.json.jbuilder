@@ -15,3 +15,7 @@ json.currencyCode transaction.currency_code
 json.merchant do
   json.partial! "merchants/merchant", merchant: transaction.merchant
 end
+
+json.plaidAccount do
+  json.partial! "plaid_account/plaid_account", plaid_account: transaction.plaid_account
+end

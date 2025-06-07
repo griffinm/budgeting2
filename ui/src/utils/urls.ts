@@ -16,6 +16,12 @@ export const urls: Record<string, Url> = {
     section: 'main',
     title: () => 'Dashboard' + TITLE_SUFFIX,
   },
+  transactions: {
+    path: () =>'/transactions',
+    label: 'Transactions',
+    section: 'main',
+    title: () => 'Transactions' + TITLE_SUFFIX,
+  },
   login: {
     path: () =>'/auth/login',
     label: 'Login',

@@ -12,6 +12,7 @@ import {
   LoginPage,
 } from './pages';
 import { CurrentUserProvider } from '@/providers';
+import { TransactionsPage } from './pages/TransactionsPage/TransactionsPage';
 
 // Create the router
 const router = createBrowserRouter([
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <DashboardPage />,
+      },
+      {
+        path: 'transactions',
+        element: <TransactionsPage />,
       },
     ],
   },

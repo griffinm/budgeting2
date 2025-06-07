@@ -16,9 +16,10 @@ class TransactionSearchService < BaseService
   end
 
   def call
-    transactions = PlaidTransaction.joins(:plaid_account)
+    transactions = PlaidTransaction.joins(:plaid_account, :merchant)
+      .includes(:plaid_account, :merchant)
       .where(plaid_transactions: { account_id: @account_id })
-      .order(date: :asc)
+      .order(date: :desc)
 
     if @user_id.present?
       transactions = transactions.where(plaid_accounts: { user_id: @user_id })
