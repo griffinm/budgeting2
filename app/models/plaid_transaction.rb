@@ -16,6 +16,6 @@ class PlaidTransaction < ApplicationRecord
   def self.all_for_account(account_id)
     PlaidTransaction.joins(:account)
       .where(account: { id: account_id })
-      .order(authorized_at: :desc)
+      .order(date: :asc)
   end
 end 

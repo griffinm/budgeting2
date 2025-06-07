@@ -1,0 +1,10 @@
+json.id merchant.id
+json.name merchant.merchant_name
+json.logoUrl merchant.logo_url
+json.address merchant.address
+json.city merchant.city
+json.state merchant.state
+json.zip merchant.zip
+json.customName merchant.custom_name
+json.plaidEntityId merchant.plaid_entity_id
+json.website merchant.website

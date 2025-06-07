@@ -1,5 +1,5 @@
 json.transactions @transactions do |transaction|
-  transaction.to_builder.target!
+  json.partial! "transactions", transaction: transaction
 end
 json.partial! "page/page", page: @page
 
