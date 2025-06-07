@@ -12,6 +12,7 @@
 
 ActiveRecord::Schema[8.0].define(version: 2025_06_06_211118) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "accounts", force: :cascade do |t|
@@ -35,6 +36,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_211118) do
 
   create_table "merchants", force: :cascade do |t|
     t.bigint "account_id", null: false
+    t.string "merchant_name", null: false
     t.string "logo_url"
     t.string "address"
     t.string "city"
@@ -71,11 +73,13 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_211118) do
     t.string "plaid_id", null: false
     t.bigint "account_id", null: false
     t.bigint "user_id", null: false
-    t.string "mask"
-    t.string "name"
-    t.string "official_name"
-    t.string "account_type"
-    t.string "institution_id"
+    t.string "plaid_mask"
+    t.string "plaid_name"
+    t.string "plaid_official_name"
+    t.string "plaid_type"
+    t.string "plaid_subtype"
+    t.string "plaid_institution_id"
+    t.string "nickname"
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -97,12 +101,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_211118) do
 
   create_table "plaid_transactions", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.bigint "plaid_sync_event_id", null: false
+    t.bigint "plaid_sync_event_id"
     t.bigint "plaid_account_id", null: false
+    t.bigint "merchant_id", null: false
     t.string "plaid_id", null: false
     t.float "amount"
     t.string "name"
     t.datetime "authorized_at"
+    t.datetime "date"
     t.string "check_number"
     t.string "currency_code"
     t.boolean "pending"
@@ -113,6 +119,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_211118) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_plaid_transactions_on_account_id"
+    t.index ["merchant_id"], name: "index_plaid_transactions_on_merchant_id"
     t.index ["plaid_account_id"], name: "index_plaid_transactions_on_plaid_account_id"
     t.index ["plaid_sync_event_id"], name: "index_plaid_transactions_on_plaid_sync_event_id"
   end
@@ -140,6 +147,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_06_211118) do
   add_foreign_key "plaid_sync_events", "accounts"
   add_foreign_key "plaid_sync_events", "plaid_access_tokens"
   add_foreign_key "plaid_transactions", "accounts"
+  add_foreign_key "plaid_transactions", "merchants"
   add_foreign_key "plaid_transactions", "plaid_accounts"
   add_foreign_key "plaid_transactions", "plaid_sync_events"
   add_foreign_key "users", "accounts"

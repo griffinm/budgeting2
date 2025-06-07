@@ -22,11 +22,13 @@ class CreateTransactions < ActiveRecord::Migration[8.0]
       t.string :plaid_id, null: false
       t.references :account, null: false, foreign_key: true
       t.references :user, null: false, foreign_key: true
-      t.string :mask
-      t.string :name
-      t.string :official_name
-      t.string :account_type
-      t.string :institution_id
+      t.string :plaid_mask
+      t.string :plaid_name
+      t.string :plaid_official_name
+      t.string :plaid_type
+      t.string :plaid_subtype
+      t.string :plaid_institution_id
+      t.string :nickname
       t.datetime :deleted_at
 
       t.timestamps
@@ -34,6 +36,7 @@ class CreateTransactions < ActiveRecord::Migration[8.0]
 
     create_table :merchants do |t|
       t.references :account, null: false, foreign_key: true
+      t.string :merchant_name, null: false
       t.string :logo_url
       t.string :address
       t.string :city
@@ -68,12 +71,14 @@ class CreateTransactions < ActiveRecord::Migration[8.0]
 
     create_table :plaid_transactions do |t|
       t.references :account, null: false, foreign_key: true
-      t.references :plaid_sync_event, null: false, foreign_key: true
+      t.references :plaid_sync_event, foreign_key: true, null: true
       t.references :plaid_account, null: false, foreign_key: true
+      t.references :merchant, null: false, foreign_key: true
       t.string :plaid_id, null: false
       t.float :amount
       t.string :name
       t.datetime :authorized_at
+      t.datetime :date
       t.string :check_number
       t.string :currency_code
       t.boolean :pending

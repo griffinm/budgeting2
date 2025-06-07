@@ -1,5 +1,14 @@
+include Pagy::Backend
+
 class ApplicationController < ActionController::API
   before_action :require_authenticated_user!
+
+  def pagination_params
+    {
+      page: params[:page] || 1,
+      per_page: params[:per_page] || 25
+    }
+  end
 
   def current_user
     @current_user ||= get_user

@@ -5,6 +5,8 @@ Rails.application.routes.draw do
     post "users/login", to: "users#login"
     get "users/current", to: "users#current"
 
+    resources :transactions, only: [:index]
+
     resources :accounts, only: [:create] do
       resources :users, only: [:create]
     end
