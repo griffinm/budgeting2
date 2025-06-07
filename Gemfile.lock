@@ -163,6 +163,8 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.8-x86_64-linux-musl)
       racc (~> 1.4)
+    paranoia (3.0.1)
+      activerecord (>= 6, < 8.1)
     pg (1.5.9)
     pp (0.6.2)
       prettyprint
@@ -273,6 +275,7 @@ DEPENDENCIES
   jbuilder
   jwt
   lograge
+  paranoia
   pg (~> 1.1)
   puma (>= 5.0)
   rack-cors

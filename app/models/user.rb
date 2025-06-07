@@ -1,6 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
   belongs_to :account
+  has_many :plaid_accounts, dependent: :destroy
+  has_many :merchant_tags, dependent: :destroy
   
   validates :email, presence: true, uniqueness: true
   validates :first_name, presence: true
