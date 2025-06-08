@@ -4,7 +4,15 @@ import { urls } from '@/utils/urls';
 import { TransactionsTable } from '@/components/TransactionsTable';
 
 export function TransactionsPage() {
-  const { transactions, isLoading, error } = useTransactions();
+  const { 
+    transactions,
+    isLoading,
+    error,
+    page,
+    setPage,
+    setPerPage,
+    params,
+  } = useTransactions();
 
   const setTitle = usePageTitle();
   
@@ -14,11 +22,17 @@ export function TransactionsPage() {
 
   return (
     <div>
-      <TransactionsTable
-        transactions={transactions}
-        isLoading={isLoading}
-        error={error}
-      />
+      <div style={{ maxWidth: '800px'}}>
+        <TransactionsTable
+          transactions={transactions}
+          isLoading={isLoading}
+          error={error}
+          page={page}
+          setPage={setPage}
+          setPerPage={setPerPage}
+          params={params}
+        />
+      </div>
     </div>
   );
 }

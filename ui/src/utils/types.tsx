@@ -20,10 +20,9 @@ export interface User {
 }
 
 export interface Page {
-  count: number;
-  page: number;
-  items: number;
-  pages: number;
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
 }
 
 export interface PageResponse<T> {

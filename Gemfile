@@ -16,6 +16,7 @@ gem "lograge"
 gem 'active_model_serializers'
 gem "paranoia"
 gem "pagy"
+gem "typesense-rails"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

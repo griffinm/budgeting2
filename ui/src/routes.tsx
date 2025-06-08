@@ -5,8 +5,8 @@ import {
 import './index.css';
 import { 
   MainLayout,
-  AuthLayout,
-} from './layouts';
+} from '@/layouts';
+import { AuthLayout } from '@/layouts/AuthLayout';
 import {
   DashboardPage,
   LoginPage,

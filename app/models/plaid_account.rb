@@ -8,4 +8,8 @@ class PlaidAccount < ApplicationRecord
   validates :plaid_id, presence: true, uniqueness: { scope: :account_id }
 
   scope :active, -> { where(deleted_at: nil) }
+
+  def pick_name
+    nickname || plaid_official_name
+  end
 end 
