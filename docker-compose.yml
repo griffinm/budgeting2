@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: griffin
       POSTGRES_PASSWORD: griffin
-      POSTGRES_DB: budgeting2_development
+      POSTGRES_DB: postgres
     ports:
       - 5432:5432
     volumes:

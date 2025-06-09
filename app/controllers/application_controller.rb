@@ -2,6 +2,7 @@ include Pagy::Backend
 
 class ApplicationController < ActionController::API
   before_action :require_authenticated_user!
+  before_action :set_pagination_params
 
   def pagination_params
     {
@@ -23,6 +24,15 @@ class ApplicationController < ActionController::API
     return true
   end
   
+  def set_pagination_params
+    @page = params[:currentPage] || 1
+    @per_page = params[:perPage] || 25
+    request.params.delete(:currentPage)
+    request.params.delete(:perPage)
+    request.params[:page] = @page
+    request.params[:per_page] = @per_page
+  end
+
   def get_user
     token = request.headers["x-budgeting-token"]
     return false if token.blank?

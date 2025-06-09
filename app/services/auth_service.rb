@@ -1,12 +1,14 @@
-class AuthService < BaseService 
+class AuthService < BaseService
   def self.user_from_token(token:)
     begin
       # Test if the token is valid
-      decoded_token = JWT.decode(token, Rails.application.credentials.secret_key_base, true, { algorithm: 'HS256' })
+      decoded_token = JWT.decode(token, self.verification_key, true, { algorithm: 'HS256' })
 
       # Get the user id and account id from the token
       user_id = decoded_token[0]['user_id']
-      User.find(user_id)
+      user = User.find(user_id)
+      return user if user.present?
+      raise "User not found id: #{user_id}"
     rescue StandardError => e
       Rails.logger.warn("Error decoding token: #{e.message}")
       return nil
@@ -26,7 +28,7 @@ class AuthService < BaseService
           account_id: user.account_id,
           exp: Time.now.to_i + (30 * 24 * 60 * 60) # 30 days from now
         }
-        return JWT.encode(payload, Rails.application.credentials.secret_key_base, 'HS256')
+        return JWT.encode(payload, self.verification_key, 'HS256')
       else
         raise "Invalid password"
       end
@@ -34,5 +36,9 @@ class AuthService < BaseService
       Rails.logger.error("Error generating token: #{e.message}")
       return nil
     end
+  end
+
+  def self.verification_key
+    ENV.fetch("SECRET_KEY_BASE")
   end
 end

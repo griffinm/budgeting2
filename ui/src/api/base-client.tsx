@@ -16,7 +16,12 @@ baseClient.interceptors.request.use((config) => {
   const token = localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
   if (token && config.headers) {
     config.headers.set(AUTH_TOKEN_HEADER_KEY, token);
-    config.url = `${config.url}.json`;
+    // insert .json at the end of the url and before the query string
+    if (config.url && config.url.includes('?')) {
+      config.url = `${config.url.split('?')[0]}.json?${config.url.split('?')[1]}`;
+    } else {
+      config.url = `${config.url}.json`;
+    }
   }
   return config;
 });

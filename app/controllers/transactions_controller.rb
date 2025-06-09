@@ -1,15 +1,6 @@
 class TransactionsController < ApplicationController
 
   def index
-    if search_params[:search_term].present?
-      @transactions = PlaidTransaction.search(
-        search_params[:search_term]).results
-      @page = {
-        current_page: 1,
-        total_pages: 1,
-        total_count: @transactions.count,
-      }
-    else
       @page, @transactions = pagy(
         TransactionSearchService.new(
           account_id: current_user.account_id,
@@ -25,9 +16,9 @@ class TransactionsController < ApplicationController
           check_number: search_params[:check_number],
           currency_code: search_params[:currency_code],
           pending: search_params[:pending],
+          search_term: search_params[:search_term]
         ).call
       )
-    end
   end
 
   private def search_params
@@ -43,7 +34,7 @@ class TransactionsController < ApplicationController
       :check_number,
       :currency_code,
       :pending,
-      :search_term
+      :search_term,
     )
   end
 

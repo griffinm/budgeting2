@@ -1,5 +1,20 @@
 class TransactionSearchService < BaseService
-  def initialize(account_id:, user_id:, start_date: nil, end_date: nil, merchant_id: nil, merchant_name: nil, plaid_category_primary: nil, plaid_category_detail: nil, payment_channel: nil, transaction_type: nil, check_number: nil, currency_code: nil, pending: nil)
+  def initialize(
+    account_id:,
+    user_id:,
+    start_date: nil,
+    end_date: nil,
+    merchant_id: nil,
+    merchant_name: nil,
+    plaid_category_primary: nil,
+    plaid_category_detail: nil,
+    payment_channel: nil,
+    transaction_type: nil,
+    check_number: nil,
+    currency_code: nil,
+    pending: nil,
+    search_term: nil
+  )
     @account_id = account_id
     @user_id = user_id
     @start_date = start_date
@@ -13,6 +28,7 @@ class TransactionSearchService < BaseService
     @check_number = check_number
     @currency_code = currency_code
     @pending = pending
+    @search_term = search_term
   end
 
   def call
@@ -67,6 +83,10 @@ class TransactionSearchService < BaseService
 
     if @pending.present?
       transactions = transactions.where(pending: @pending)
+    end
+
+    if @search_term.present?
+      transactions = transactions.where("plaid_transactions.name ILIKE ? OR merchants.merchant_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")
     end
 
     transactions

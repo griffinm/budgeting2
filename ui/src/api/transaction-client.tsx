@@ -1,5 +1,6 @@
+import { queryStringFromObject } from '@/utils/queryStringFromObject';
 import baseClient from './base-client';
-import { Transaction, PageResponse } from '@/utils/types';
+import { Transaction, PageResponse, Page } from '@/utils/types';
 
 export interface TransactionSearchParams {
   start_date?: string;
@@ -13,11 +14,16 @@ export interface TransactionSearchParams {
   check_number?: string;
   currency_code?: string;
   pending?: boolean;
-  page?: number;
-  per_page?: number;
+  search_term?: string;
 }
 
-export const getTransactions = async (params?: TransactionSearchParams): Promise<PageResponse<Transaction>> => {
-  const response = await baseClient.get('/transactions', { params });
+export const getTransactions = async ({
+  params,
+  page,
+}: {
+  params: TransactionSearchParams;
+  page: Page;
+}): Promise<PageResponse<Transaction>> => {
+  const response = await baseClient.get(`/transactions?${queryStringFromObject({...params, ...page})}`);
   return response.data;
 }; 

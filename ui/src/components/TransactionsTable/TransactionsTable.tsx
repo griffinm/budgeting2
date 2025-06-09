@@ -27,6 +27,7 @@ export function TransactionsTable({
   setPerPage: (per_page: number) => void;
 }) {
 
+
   return (
     <div>
       <div className="mb-3">
