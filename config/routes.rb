@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     get "users/current", to: "users#current"
 
     resources :transactions, only: [:index]
+    resources :merchants, only: [:index]
 
     resources :accounts, only: [:create] do
       resources :users, only: [:create]
