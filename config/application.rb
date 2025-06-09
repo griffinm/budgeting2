@@ -11,6 +11,8 @@ require "action_cable/engine"
 #require "action_text/engine"
 #require "rails/test_unit/railtie"
 
+require_relative "../app/middleware/camel_to_snake_middleware"
+
 Bundler.require(*Rails.groups)
 
 module Budgeting2
@@ -20,5 +22,8 @@ module Budgeting2
 
     config.time_zone = "UTC"
     config.api_only = true
+    
+    config.middleware.use CamelToSnakeMiddleware
+
   end
 end
