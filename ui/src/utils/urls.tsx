@@ -4,6 +4,7 @@ import {
   MerchantsPage, 
   TransactionsPage,
 } from "@/pages";
+import { MerchantTagsPage } from "@/pages/MerchantTagsPage/MerchantTagsPage";
 
 type MenuSection = 'main'
 
@@ -44,7 +45,14 @@ export const urls: Record<string, Url> = {
     section: 'main',
     title: () => 'Merchants' + TITLE_SUFFIX,
     component: MerchantsPage,
-  }
+  },
+  merchantTags: {
+    path: () =>'/categories',
+    label: 'Categories',
+    section: 'main',
+    title: () => 'Categories' + TITLE_SUFFIX,
+    component: MerchantTagsPage,
+  },
 }
 
 export const MainNavLinks = Object.values(urls).filter(url => url.section === 'main');

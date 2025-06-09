@@ -10,4 +10,10 @@ class MerchantTag < ApplicationRecord
   has_many :merchants, through: :merchants_merchant_tags
   
   scope :active, -> { where(deleted_at: nil) }
+
+  before_create :initialize_color
+
+  def initialize_color
+    self.color = SecureRandom.hex(3)
+  end
 end 

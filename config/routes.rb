@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
     resources :transactions, only: [:index]
     resources :merchants, only: [:index, :update]
+    resources :merchant_tags, only: [:index, :update, :create]
 
     resources :accounts, only: [:create] do
       resources :users, only: [:create]

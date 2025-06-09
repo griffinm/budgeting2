@@ -77,3 +77,19 @@ export interface Transaction {
   merchant: Merchant;
   plaidAccount: PlaidAccount;
 }
+
+export interface MerchantTag {
+  id: number;
+  name: string;
+  parentMerchantTagId: number | null;
+  color: string;
+  createdAt: string;
+  updatedAt: string;
+  children: MerchantTag[];
+}
+
+export interface MantineTreeNode {
+  value: string;
+  label: string;
+  children?: MantineTreeNode[];
+}
