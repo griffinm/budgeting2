@@ -3,7 +3,7 @@ import { queryStringFromObject } from "@/utils/queryStringFromObject";
 import { PageResponse, Merchant } from "@/utils/types";
 
 export interface MerchantSearchParams {
-  name?: string;
+  searchTerm?: string;
 }
 
 export const fetchMerchants = async ({

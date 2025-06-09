@@ -9,7 +9,6 @@ export function MerchantsPage() {
   const { 
     merchants, 
     isLoading, 
-    error, 
     page, 
     setPage, 
     searchParams, 
@@ -27,13 +26,10 @@ export function MerchantsPage() {
         onUpdateMerchant={updateMerchant}
         merchants={merchants}
         isLoading={isLoading}
-        error={error}
         page={page}
         setPage={setPage}
         searchParams={searchParams}
         onSetSearchParams={setSearchParams}
-        setPerPage={() => {}}
-        setSearchParams={setSearchParams}
       />
     </div>
   );

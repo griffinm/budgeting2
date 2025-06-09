@@ -1,7 +1,10 @@
 class MerchantsController < ApplicationController
   def index
     @page, @merchants = pagy(
-      Merchant.where(account_id: current_user.account_id).order(:id)
+      MerchantSearchService.new(
+        account_id: current_user.account_id,
+        search_term: params[:search_term]
+      ).call
     )
   end
 

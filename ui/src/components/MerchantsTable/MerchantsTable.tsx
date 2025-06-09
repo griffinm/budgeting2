@@ -4,19 +4,23 @@ import { Merchant } from "@/utils/types";
 import { Pagination, Table } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { EditableLabel } from "@/components/EditableLabel";
+import { Search } from "./Search";
 
 export function MerchantsTable({
   merchants,
   isLoading,
   page,
   setPage,
+  searchParams,
+  onSetSearchParams,
   onUpdateMerchant,
 }: {
   merchants: Merchant[];
   isLoading: boolean;
   page: Page;
   setPage: (page: number) => void;
-  setSearchParams: (searchParams: MerchantSearchParams) => void;
+  searchParams: MerchantSearchParams;
+  onSetSearchParams: (searchParams: MerchantSearchParams) => void;
   onUpdateMerchant: (id: number, value: Partial<Merchant>) => void;
 }) {
 
@@ -26,6 +30,7 @@ export function MerchantsTable({
         <div className="flex justify-baseline items-baseline text-sm text-gray-500 self-end">
           {isLoading ? 'Loading...' : `Found ${page.totalCount.toLocaleString()} merchants`}
         </div>
+        <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
       </div>
       <Table>
         <Table.Thead>
