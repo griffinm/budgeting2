@@ -3,6 +3,8 @@ import { Transaction, Page } from "@/utils/types";
 import { Pagination, Table } from "@mantine/core";
 import { format as formatDate } from "date-fns";
 import { Search } from "./Search";
+import { TransactionSearchParams } from "@/api/transaction-client";
+import { TransactionAmount } from "@/components/TransactionAmount";
 
 const headers = [
   { label: 'Date', accessor: 'date' },
@@ -18,6 +20,8 @@ export function TransactionsTable({
   page,
   setPage,
   setPerPage,
+  searchParams,
+  onSetSearchParams,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
@@ -25,13 +29,18 @@ export function TransactionsTable({
   page: Page;
   setPage: (page: number) => void;
   setPerPage: (per_page: number) => void;
+  searchParams: TransactionSearchParams;
+  onSetSearchParams: (searchParams: TransactionSearchParams) => void;
 }) {
 
 
   return (
     <div>
-      <div className="mb-3">
-        <Search />
+      <div className="flex flex-row justify-between mb-3">
+        <div className="flex justify-baseline items-baseline text-sm text-gray-500 self-end">
+          {isLoading ? 'Loading...' : `Found ${page.totalCount.toLocaleString()} transactions`}
+        </div>
+        <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
       </div>
       <Table>
         <Table.Thead>
@@ -48,7 +57,7 @@ export function TransactionsTable({
                 {formatDate(transaction.date, 'MM/dd/yyyy')}
               </Table.Td>
               <Table.Td>
-                ${transaction.amount.toFixed(2)}
+                <TransactionAmount amount={transaction.amount} />
               </Table.Td>
               <Table.Td>{transaction.merchant.name}</Table.Td>
               <Table.Td>{transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}</Table.Td>

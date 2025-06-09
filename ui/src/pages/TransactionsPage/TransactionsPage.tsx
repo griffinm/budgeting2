@@ -11,7 +11,8 @@ export function TransactionsPage() {
     page,
     setPage,
     setPerPage,
-    params,
+    searchParams,
+    setSearchParams,
   } = useTransactions();
 
   const setTitle = usePageTitle();
@@ -30,7 +31,8 @@ export function TransactionsPage() {
           page={page}
           setPage={setPage}
           setPerPage={setPerPage}
-          params={params}
+          searchParams={searchParams}
+          onSetSearchParams={setSearchParams}
         />
       </div>
     </div>

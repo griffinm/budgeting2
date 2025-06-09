@@ -59,7 +59,7 @@ export const useTransactions = () => {
     }
   }, [state.searchParams, state.page.currentPage]);
 
-  const updateParams = useCallback((newParams: TransactionSearchParams) => {
+  const setSearchParams = useCallback((newParams: TransactionSearchParams) => {
     setState(prev => ({ ...prev, searchParams: { ...prev.searchParams, ...newParams }, page: { ...prev.page, currentPage: 1 } }));
   }, []);
 
@@ -80,6 +80,6 @@ export const useTransactions = () => {
     fetchTransactions,
     setPage,
     setPerPage,
-    updateParams,
+    setSearchParams,
   };
 }; 

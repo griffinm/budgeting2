@@ -1,16 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Input } from "@mantine/core";
 import { TransactionSearchParams } from "@/api/transaction-client";
 
-export function Search() {
+export function Search({
+  searchParams,
+  onSetSearchParams,
+}: {
+  searchParams: TransactionSearchParams;
+  onSetSearchParams: (searchParams: TransactionSearchParams) => void;
+}) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [search, setSearch] = useState('');
-  const [searchParams, setSearchParams] = useState<TransactionSearchParams>({});
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    console.log(searchParams);
-  }, [searchParams]);
 
   const updateSearchTerm = (value: string) => {
     setSearch(value);
@@ -18,18 +19,27 @@ export function Search() {
       clearTimeout(searchTimeout.current);
     }
     searchTimeout.current = setTimeout(() => {
-      setSearchParams({ ...searchParams, search_term: value });
+      onSetSearchParams({ ...searchParams, search_term: value });
     }, 250);
   };
 
   return (
-    <div className="flex">
-      <Input
-        placeholder="Search"
-        value={search}
-        onChange={(e) => updateSearchTerm(e.target.value)}
-      />
-      
+    <div className="flex flex-col justify-end items-end">
+      <div className="max-w-[200px]">
+        <Input
+          placeholder="Search"
+          value={search}
+          onChange={(e) => updateSearchTerm(e.target.value)}
+        />
+      </div>
+      <div className="mt-2 text-sm text-gray-500 cursor-pointer" onClick={() => setShowAdvanced(!showAdvanced)}>
+        {showAdvanced ? '- Hide Advanced Search' : '+ Show Advanced Search'}
+      </div>
+      {showAdvanced && (
+        <div className="mt-2">
+          Advanced Search
+        </div>
+      )}
     </div>
   );
 }
