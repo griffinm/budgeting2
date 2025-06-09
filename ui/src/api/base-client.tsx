@@ -41,4 +41,4 @@ baseClient.interceptors.response.use(
   }
 );
 
-export default baseClient;
+export { baseClient };

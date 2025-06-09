@@ -1,4 +1,4 @@
-import baseClient from './base-client';
+import { baseClient } from './base-client';
 import { User, LoginResponse, ErrorResponse } from '@/utils/types';
 import { AxiosResponse } from 'axios';
 

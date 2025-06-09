@@ -48,6 +48,16 @@ export interface PlaidAccount {
 export interface Merchant {
   id: number;
   name: string;
+  customName: string | null;
+  createdAt: string;
+  updatedAt: string;
+  logoUrl: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
+  plaidEntityId: string | null;
+  website: string | null;
 }
 
 export interface Transaction {

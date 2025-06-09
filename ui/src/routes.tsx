@@ -8,27 +8,20 @@ import {
 } from '@/layouts';
 import { AuthLayout } from '@/layouts/AuthLayout';
 import {
-  DashboardPage,
   LoginPage,
 } from './pages';
 import { CurrentUserProvider } from '@/providers';
-import { TransactionsPage } from './pages/TransactionsPage/TransactionsPage';
+import { MainNavLinks } from './utils/urls';
 
 // Create the router
 const router = createBrowserRouter([
   {
     path: '/',
     element: <MainLayout />,
-    children: [
-      {
-        index: true,
-        element: <DashboardPage />,
-      },
-      {
-        path: 'transactions',
-        element: <TransactionsPage />,
-      },
-    ],
+    children: MainNavLinks.map(url => ({
+      path: url.path(),
+      element: <url.component />,
+    })),
   },
   {
     path: '/auth',

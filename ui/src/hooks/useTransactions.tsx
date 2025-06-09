@@ -31,17 +31,11 @@ export const useTransactions = () => {
     const apiParams = {
       ...state.searchParams,
       page: state.page.currentPage,
-      // per_page: state.per_page, // Assuming per_page is part of the state
     };
 
     try {
-      // The `getTransactions` function in the API client expects `page` and `params`
-      // but the `page` object in the client is just `currentPage`, `totalPages` etc.
-      // The API endpoint itself probably just wants a `page` number and `per_page`.
-      // The client builds the query string. Let's pass only what's needed.
       const response = await getTransactions({
         params: apiParams,
-        page: { currentPage: state.page.currentPage, totalPages: state.page.totalPages, totalCount: state.page.totalCount },
       });
       setState(prev => ({
         ...prev,
@@ -68,7 +62,7 @@ export const useTransactions = () => {
   }, []);
 
   const setPerPage = useCallback((per_page: number) => {
-    setState(prev => ({ ...prev, per_page, page: { ...prev.page, currentPage: 1 } })); // Reset to first page when changing per_page
+    setState(prev => ({ ...prev, per_page, page: { ...prev.page, currentPage: 1 } }));
   }, []);
 
   useEffect(() => {

@@ -4,7 +4,8 @@ import { Pagination, Table } from "@mantine/core";
 import { format as formatDate } from "date-fns";
 import { Search } from "./Search";
 import { TransactionSearchParams } from "@/api/transaction-client";
-import { TransactionAmount } from "@/components/TransactionAmount";
+import { TransactionAmount } from "../TransactionAmount/TransactionAmount";
+import { merchantDisplayName } from "@/utils/merchantsUtils";
 
 const headers = [
   { label: 'Date', accessor: 'date' },
@@ -16,10 +17,8 @@ const headers = [
 export function TransactionsTable({
   transactions,
   isLoading,
-  error,
   page,
   setPage,
-  setPerPage,
   searchParams,
   onSetSearchParams,
 }: {
@@ -59,7 +58,7 @@ export function TransactionsTable({
               <Table.Td>
                 <TransactionAmount amount={transaction.amount} />
               </Table.Td>
-              <Table.Td>{transaction.merchant.name}</Table.Td>
+              <Table.Td>{merchantDisplayName(transaction.merchant)}</Table.Td>
               <Table.Td>{transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}</Table.Td>
             </Table.Tr>
           ))}

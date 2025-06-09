@@ -1,5 +1,5 @@
 import { queryStringFromObject } from '@/utils/queryStringFromObject';
-import baseClient from './base-client';
+import { baseClient } from './base-client';
 import { Transaction, PageResponse, Page } from '@/utils/types';
 
 export interface TransactionSearchParams {
@@ -19,11 +19,9 @@ export interface TransactionSearchParams {
 
 export const getTransactions = async ({
   params,
-  page,
 }: {
   params: TransactionSearchParams;
-  page: Page;
 }): Promise<PageResponse<Transaction>> => {
-  const response = await baseClient.get(`/transactions?${queryStringFromObject({...params, ...page})}`);
+  const response = await baseClient.get(`/transactions?${queryStringFromObject({...params})}`);
   return response.data;
 }; 

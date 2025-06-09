@@ -1,3 +1,10 @@
+import { 
+  DashboardPage, 
+  LoginPage, 
+  MerchantsPage, 
+  TransactionsPage,
+} from "@/pages";
+
 type MenuSection = 'main'
 
 const TITLE_SUFFIX = ' | Budgeting';
@@ -7,6 +14,7 @@ interface Url {
   label?: string;
   section?: MenuSection;
   title: () => string;
+  component: React.ComponentType;
 }
 
 export const urls: Record<string, Url> = {
@@ -15,18 +23,28 @@ export const urls: Record<string, Url> = {
     label: 'Dashboard',
     section: 'main',
     title: () => 'Dashboard' + TITLE_SUFFIX,
+    component: DashboardPage,
   },
   transactions: {
     path: () =>'/transactions',
     label: 'Transactions',
     section: 'main',
     title: () => 'Transactions' + TITLE_SUFFIX,
+    component: TransactionsPage,
   },
   login: {
     path: () =>'/auth/login',
     label: 'Login',
     title: () => 'Login' + TITLE_SUFFIX,
+    component: LoginPage,
   },
+  merchants: {
+    path: () =>'/merchants',
+    label: 'Merchants',
+    section: 'main',
+    title: () => 'Merchants' + TITLE_SUFFIX,
+    component: MerchantsPage,
+  }
 }
 
 export const MainNavLinks = Object.values(urls).filter(url => url.section === 'main');
