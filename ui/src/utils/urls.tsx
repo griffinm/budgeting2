@@ -6,15 +6,15 @@ import {
 } from "@/pages";
 import { MerchantTagsPage } from "@/pages/MerchantTagsPage/MerchantTagsPage";
 
-type MenuSection = 'main'
+type MenuSection = 'main' | 'none';
 
 const TITLE_SUFFIX = ' | Budgeting';
 
 interface Url {
-  path: () => string;
+  path: (...args: any[]) => string;
   label?: string;
   section?: MenuSection;
-  title: () => string;
+  title: (...args: any[]) => string;
   component: React.ComponentType;
 }
 
@@ -46,11 +46,17 @@ export const urls: Record<string, Url> = {
     title: () => 'Merchants' + TITLE_SUFFIX,
     component: MerchantsPage,
   },
+  merchant: {
+    path: (id: number) => `/merchants/${id}`,
+    section: 'none',
+    title: () => 'Merchant' + TITLE_SUFFIX,
+    component: () => <div>Merchant</div>,
+  },
   merchantTags: {
     path: () =>'/categories',
     label: 'Categories',
     section: 'main',
-    title: () => 'Categories' + TITLE_SUFFIX,
+    title: (name: string) => `${name} | Categories` + TITLE_SUFFIX,
     component: MerchantTagsPage,
   },
 }

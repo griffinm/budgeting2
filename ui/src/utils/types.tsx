@@ -45,6 +45,8 @@ export interface PlaidAccount {
   nickname: string;
 }
 
+export type TransactionType = 'expense' | 'income' | 'transfer';
+
 export interface Merchant {
   id: number;
   name: string;
@@ -58,6 +60,7 @@ export interface Merchant {
   zip: string | null;
   plaidEntityId: string | null;
   website: string | null;
+  defaultTransactionType: TransactionType;
 }
 
 export interface Transaction {
@@ -71,7 +74,7 @@ export interface Transaction {
   plaidCategoryPrimary: string | null;
   plaidCategoryDetail: string | null;
   paymentChannel: string | null;
-  transactionType: string | null;
+  transactionType: TransactionType;
   checkNumber: string | null;
   currencyCode: string;
   merchant: Merchant;

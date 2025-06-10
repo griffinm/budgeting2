@@ -8,3 +8,4 @@ json.zip merchant.zip
 json.customName merchant.custom_name
 json.plaidEntityId merchant.plaid_entity_id
 json.website merchant.website
+json.defaultTransactionType merchant.default_transaction_type

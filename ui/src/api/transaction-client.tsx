@@ -1,6 +1,6 @@
 import { queryStringFromObject } from '@/utils/queryStringFromObject';
 import { baseClient } from './base-client';
-import { Transaction, PageResponse, Page } from '@/utils/types';
+import { Transaction, PageResponse, TransactionType } from '@/utils/types';
 
 export interface TransactionSearchParams {
   start_date?: string;
@@ -17,6 +17,10 @@ export interface TransactionSearchParams {
   search_term?: string;
 }
 
+export interface TransactionUpdateParams {
+  transactionType: TransactionType;
+}
+
 export const getTransactions = async ({
   params,
 }: {
@@ -25,3 +29,14 @@ export const getTransactions = async ({
   const response = await baseClient.get(`/transactions?${queryStringFromObject({...params})}`);
   return response.data;
 }; 
+
+export const updateTransaction = async ({
+  id,
+  params,
+}: {
+  id: number;
+  params: TransactionUpdateParams;
+}): Promise<Transaction> => {
+  const response = await baseClient.patch<Transaction>(`/transactions/${id}`, { transaction: params });
+  return response.data;
+};

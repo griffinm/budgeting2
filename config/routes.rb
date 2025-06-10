@@ -5,7 +5,7 @@ Rails.application.routes.draw do
     post "users/login", to: "users#login"
     get "users/current", to: "users#current"
 
-    resources :transactions, only: [:index]
+    resources :transactions, only: [:index, :update]
     resources :merchants, only: [:index, :update]
     resources :merchant_tags, only: [:index, :update, :create]
 

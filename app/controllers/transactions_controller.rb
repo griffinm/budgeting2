@@ -1,5 +1,6 @@
 class TransactionsController < ApplicationController
 
+  # GET /transactions
   def index
       @page, @transactions = pagy(
         TransactionSearchService.new(
@@ -21,6 +22,16 @@ class TransactionsController < ApplicationController
       )
   end
 
+  # PATCH /transactions/:id
+  def update
+    @transaction = current_user.account.plaid_transactions.find(params[:id])
+    if @transaction.update(transaction_params)
+      render :show
+    else
+      render json: { errors: @transaction.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private def search_params
     params.permit(
       :start_date,
@@ -38,4 +49,7 @@ class TransactionsController < ApplicationController
     )
   end
 
+  private def transaction_params
+    params.require(:transaction).permit(:transaction_type)
+  end
 end

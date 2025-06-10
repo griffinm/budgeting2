@@ -13,6 +13,7 @@ export function TransactionsPage() {
     setPerPage,
     searchParams,
     setSearchParams,
+    updateTransaction,
   } = useTransactions();
 
   const setTitle = usePageTitle();
@@ -33,6 +34,7 @@ export function TransactionsPage() {
           setPerPage={setPerPage}
           searchParams={searchParams}
           onSetSearchParams={setSearchParams}
+          updateTransaction={updateTransaction}
         />
       </div>
     </div>

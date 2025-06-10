@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getTransactions, TransactionSearchParams } from '@/api/transaction-client';
+import { 
+  getTransactions,
+  TransactionSearchParams,
+  TransactionUpdateParams,
+  updateTransaction as updateTransactionApi,
+} from '@/api/transaction-client';
 import { Page, Transaction } from '@/utils/types';
 
 interface TransactionsState {
@@ -9,6 +14,7 @@ interface TransactionsState {
   searchParams: TransactionSearchParams;
   setSearchParams: (searchParams: TransactionSearchParams) => void;
   page: Page,
+  updateTransaction: (id: number, params: TransactionUpdateParams) => void;
 }
 
 export const useTransactions = () => {
@@ -18,6 +24,7 @@ export const useTransactions = () => {
     transactions: [],
     isLoading: false,
     error: null,
+    updateTransaction: () => {},
     page: {
       currentPage: 1,
       totalPages: 1,
@@ -65,6 +72,12 @@ export const useTransactions = () => {
     setState(prev => ({ ...prev, per_page, page: { ...prev.page, currentPage: 1 } }));
   }, []);
 
+  const updateTransaction = useCallback((id: number, params: TransactionUpdateParams) => {
+    updateTransactionApi({ id, params }).then(() => {
+      setState(prev => ({ ...prev, transactions: prev.transactions.map(transaction => transaction.id === id ? { ...transaction, ...params } : transaction) }));
+    });
+  }, []);
+
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
@@ -75,5 +88,6 @@ export const useTransactions = () => {
     setPage,
     setPerPage,
     setSearchParams,
+    updateTransaction,
   };
 }; 

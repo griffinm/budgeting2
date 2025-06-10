@@ -3,15 +3,19 @@ import { Transaction, Page } from "@/utils/types";
 import { Pagination, Table } from "@mantine/core";
 import { format as formatDate } from "date-fns";
 import { Search } from "./Search";
-import { TransactionSearchParams } from "@/api/transaction-client";
+import { TransactionSearchParams, TransactionUpdateParams } from "@/api/transaction-client";
 import { TransactionAmount } from "../TransactionAmount/TransactionAmount";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
+import { CategoryDisplay } from "./CategoryDisplay";
+import { Link } from "react-router-dom";
+import { urls } from "@/utils/urls";
 
 const headers = [
   { label: 'Date', accessor: 'date' },
   { label: 'Amount', accessor: 'amount' },
   { label: 'Merchant', accessor: 'merchant' },
   { label: 'Account', accessor: 'account' },
+  { label: 'Type', accessor: 'type' },
 ]
 
 export function TransactionsTable({
@@ -21,6 +25,7 @@ export function TransactionsTable({
   setPage,
   searchParams,
   onSetSearchParams,
+  updateTransaction,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
@@ -30,9 +35,8 @@ export function TransactionsTable({
   setPerPage: (per_page: number) => void;
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
+  updateTransaction: (id: number, params: TransactionUpdateParams) => void;
 }) {
-
-
   return (
     <div>
       <div className="flex flex-row justify-between mb-3">
@@ -53,13 +57,25 @@ export function TransactionsTable({
           {transactions.map((transaction) => (
             <Table.Tr key={transaction.id}>
               <Table.Td>
-                {formatDate(transaction.date, 'MM/dd/yyyy')}
+                {formatDate(transaction.date, 'M/d/yy')}
               </Table.Td>
               <Table.Td>
                 <TransactionAmount amount={transaction.amount} />
               </Table.Td>
-              <Table.Td>{merchantDisplayName(transaction.merchant)}</Table.Td>
-              <Table.Td>{transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}</Table.Td>
+              <Table.Td>
+                <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
+                  {merchantDisplayName(transaction.merchant)}
+                </Link>
+              </Table.Td>
+              <Table.Td>
+                {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
+              </Table.Td>
+              <Table.Td w={150}>
+                <CategoryDisplay
+                  transaction={transaction}
+                  onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
+                />
+              </Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
