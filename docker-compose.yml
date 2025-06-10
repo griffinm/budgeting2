@@ -9,13 +9,6 @@ services:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  typesense:
-    image: typesense/typesense:28.0
-    ports:
-      - 8108:8108
-    volumes:
-      - typesense_data:/data
-    command: '--data-dir /data --api-key=griffin --enable-cors'
 
 volumes:
   postgres_data:
