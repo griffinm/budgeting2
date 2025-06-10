@@ -1,27 +1,41 @@
 import { useState } from "react";
-import { Transaction, TransactionType } from "../../utils/types";
+import { Merchant, Transaction } from "../../utils/types";
+import { TransactionType as TransactionTypeType } from "@/utils/types";
 import { 
   Badge,
 } from "@mantine/core";
-import { TransactionTypeSelect } from "./TransactionTypeSelect";
+import { TypeSelector } from "./TypeSelector";
 
-export function CategoryDisplay({
+export function TransactionType({
   transaction,
+  merchant,
   onSave,
 }: {
-  transaction: Transaction;
-  onSave: (id: number, transactionType: TransactionType) => void;
+  transaction?: Transaction;
+  merchant?: Merchant;
+  onSave: (id: number, transactionType: TransactionTypeType) => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
 
-  const handleSave = (transactionType: TransactionType) => {
-    onSave(transaction.id, transactionType);
+
+  if (!transaction && !merchant) {
+    throw new Error('TransactionType must be passed either a transaction or a merchant');
+  }
+  if (transaction && merchant) {
+    throw new Error('TransactionType must be passed either a transaction or a merchant, not both');
+  }
+
+  const transactionType = transaction?.transactionType || merchant?.defaultTransactionType;
+  const id = transaction?.id || merchant?.id;
+  
+  const handleSave = (transactionType: TransactionTypeType) => {
+    onSave(id!, transactionType);
     setIsEditing(false);
   }
 
   const renderDisplayMode = () => {
     const badgeColor = (() => {
-      switch(transaction.transactionType) {
+      switch(transactionType) {
         case 'expense':
           return 'blue';
         case 'income':
@@ -33,7 +47,7 @@ export function CategoryDisplay({
       }
     })();
     const badgeText = (() => {
-      switch(transaction.transactionType) {
+      switch(transactionType) {
         case 'expense':
           return 'Expense';
         case 'income':
@@ -55,9 +69,9 @@ export function CategoryDisplay({
   const renderEditMode = () => {
     return (
       <div>
-        <TransactionTypeSelect
+        <TypeSelector
           onCancel={() => setIsEditing(false)}
-          transactionType={transaction.transactionType}
+          transactionType={transactionType!}
           onSave={handleSave}
         />
       </div>

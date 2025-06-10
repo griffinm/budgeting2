@@ -29,12 +29,12 @@ export const MerchantCategoryTreeView = () => {
   return (
     <div>
       <NewMerchantTagForm
-        alwaysShow={true}
+        onCancel={() => {}}
         saveMerchantTag={handleCreateMerchantTag}
       />
       {organizedMerchantTags.map((merchantTag) => (
-        <div className="mb-2">
-          <TreeItem key={merchantTag.id} merchantTag={merchantTag} handleCreateMerchantTag={handleCreateMerchantTag} />
+        <div className="mb-2" key={merchantTag.id}>
+          <TreeItem merchantTag={merchantTag} handleCreateMerchantTag={handleCreateMerchantTag} />
         </div>
       ))}
     </div>
@@ -95,9 +95,9 @@ export const TreeItem = ({
       {expanded && (
         <div>
           {merchantTag.children.map((child) => (
-            <div className="border-l-2 border-gray-200" style={{ paddingLeft: `${paddingLeft}px` }}>
+            <div key={child.id} className="border-l-2 border-gray-200" style={{ paddingLeft: `${paddingLeft}px` }}>
               <TreeItem
-                key={child.id}
+                
                 merchantTag={child}
                 handleCreateMerchantTag={(params) => {
                   handleCreateMerchantTag({

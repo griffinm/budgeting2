@@ -1,10 +1,11 @@
 import { MerchantSearchParams } from "@/api";
-import { Page } from "@/utils/types";
+import { Page, TransactionType as TransactionTypeType } from "@/utils/types";
 import { Merchant } from "@/utils/types";
 import { Pagination, Table } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { EditableLabel } from "@/components/EditableLabel";
 import { Search } from "./Search";
+import { TransactionType } from "@/components/TransactionType";
 
 export function MerchantsTable({
   merchants,
@@ -36,6 +37,8 @@ export function MerchantsTable({
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Name</Table.Th>
+            <Table.Th>Default Type</Table.Th>
+            <Table.Th>Default Category</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -44,12 +47,18 @@ export function MerchantsTable({
               <Table.Td>
                 <EditableLabel id={merchant.id} value={merchantDisplayName(merchant)} onSave={async (id: number, value: string) => await onUpdateMerchant(id, { customName: value })} />
               </Table.Td>
+              <Table.Td>
+                <TransactionType
+                  merchant={merchant}
+                  onSave={async (id: number, transactionType: TransactionTypeType) => await onUpdateMerchant(id, { defaultTransactionType: transactionType })}
+                />
+              </Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
         <Table.Tfoot>
           <Table.Tr>
-            <Table.Td colSpan={2}>
+            <Table.Td>
               <Pagination
                 total={page.totalPages}
                 value={page.currentPage}

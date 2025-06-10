@@ -1,6 +1,4 @@
 class MerchantTag < ApplicationRecord
-  acts_as_paranoid
-
   belongs_to :account
   belongs_to :user
   belongs_to :parent_merchant_tag, class_name: 'MerchantTag', optional: true

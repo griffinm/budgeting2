@@ -1,5 +1,5 @@
 import { TransactionType } from "@/utils/types";
-import { Button, Select } from "@mantine/core";
+import { Select } from "@mantine/core";
 
 const transactionTypeOptions: { value: TransactionType, label: string }[] = [
   { value: 'expense', label: 'Expense' },
@@ -7,7 +7,7 @@ const transactionTypeOptions: { value: TransactionType, label: string }[] = [
   { value: 'transfer', label: 'Transfer' },
 ]
 
-export function TransactionTypeSelect({
+export function TypeSelector({
   transactionType,
   onSave,
   onCancel,

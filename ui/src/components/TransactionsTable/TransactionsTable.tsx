@@ -6,7 +6,7 @@ import { Search } from "./Search";
 import { TransactionSearchParams, TransactionUpdateParams } from "@/api/transaction-client";
 import { TransactionAmount } from "../TransactionAmount/TransactionAmount";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
-import { CategoryDisplay } from "./CategoryDisplay";
+import { TransactionType } from "@/components/TransactionType";
 import { Link } from "react-router-dom";
 import { urls } from "@/utils/urls";
 
@@ -71,7 +71,7 @@ export function TransactionsTable({
                 {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
               </Table.Td>
               <Table.Td w={150}>
-                <CategoryDisplay
+                <TransactionType
                   transaction={transaction}
                   onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
                 />

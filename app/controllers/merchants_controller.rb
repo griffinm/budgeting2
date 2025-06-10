@@ -23,6 +23,6 @@ class MerchantsController < ApplicationController
   end
 
   private def update_params
-    params.require(:merchant).permit(:custom_name)
+    params.require(:merchant).permit(:custom_name, :default_transaction_type)
   end
 end
