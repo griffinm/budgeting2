@@ -61,6 +61,8 @@ export interface Merchant {
   plaidEntityId: string | null;
   website: string | null;
   defaultTransactionType: TransactionType;
+  defaultMerchantTagId?: number | null;
+  defaultMerchantTag: MerchantTag | null;
 }
 
 export interface Transaction {

@@ -9,3 +9,10 @@ json.customName merchant.custom_name
 json.plaidEntityId merchant.plaid_entity_id
 json.website merchant.website
 json.defaultTransactionType merchant.default_transaction_type
+json.defaultMerchantTagId merchant.default_merchant_tag_id
+
+json.defaultMerchantTag do
+  if merchant.default_merchant_tag
+    json.partial! 'merchant_tags/merchant_tag', merchant_tag: merchant.default_merchant_tag
+  end
+end

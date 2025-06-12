@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_09_235039) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_12_190652) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_09_235039) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "default_transaction_type"
+    t.integer "default_merchant_tag_id"
     t.index ["account_id"], name: "index_merchants_on_account_id"
   end
 
@@ -141,8 +142,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_09_235039) do
     t.string "transaction_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "merchant_tag_id"
     t.index ["account_id"], name: "index_plaid_transactions_on_account_id"
     t.index ["merchant_id"], name: "index_plaid_transactions_on_merchant_id"
+    t.index ["merchant_tag_id"], name: "index_plaid_transactions_on_merchant_tag_id"
     t.index ["plaid_account_id"], name: "index_plaid_transactions_on_plaid_account_id"
     t.index ["plaid_sync_event_id"], name: "index_plaid_transactions_on_plaid_sync_event_id"
   end
@@ -162,6 +165,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_09_235039) do
   add_foreign_key "merchant_tags", "merchant_tags", column: "parent_merchant_tag_id"
   add_foreign_key "merchant_tags", "users"
   add_foreign_key "merchants", "accounts"
+  add_foreign_key "merchants", "merchant_tags", column: "default_merchant_tag_id"
   add_foreign_key "merchants_merchant_tags", "merchant_tags"
   add_foreign_key "merchants_merchant_tags", "merchants"
   add_foreign_key "plaid_access_tokens", "accounts"
@@ -170,6 +174,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_09_235039) do
   add_foreign_key "plaid_sync_events", "accounts"
   add_foreign_key "plaid_sync_events", "plaid_access_tokens"
   add_foreign_key "plaid_transactions", "accounts"
+  add_foreign_key "plaid_transactions", "merchant_tags"
   add_foreign_key "plaid_transactions", "merchants"
   add_foreign_key "plaid_transactions", "plaid_accounts"
   add_foreign_key "plaid_transactions", "plaid_sync_events"

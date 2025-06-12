@@ -2,6 +2,11 @@ import { baseClient } from "@/api/base-client";
 import { queryStringFromObject } from "@/utils/queryStringFromObject";
 import { PageResponse, Merchant } from "@/utils/types";
 
+export interface UpdateMerchantParams {
+  id: number;
+  value: Omit<Partial<Merchant>, 'id'>;
+}
+
 export interface MerchantSearchParams {
   searchTerm?: string;
 }
@@ -18,12 +23,9 @@ export const fetchMerchants = async ({
 
 export const updateMerchant = async ({
   id,
-  merchant,
-}: {
-  id: number;
-  merchant: Partial<Merchant>;
-}): Promise<Merchant> => {
+  value,
+}: UpdateMerchantParams): Promise<Merchant> => {
   const url = `/merchants/${id}`;
-  const response = await baseClient.patch(url, { merchant });
+  const response = await baseClient.patch(url, { merchant: value });
   return response.data;
 };

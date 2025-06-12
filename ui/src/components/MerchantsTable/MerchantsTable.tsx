@@ -1,11 +1,13 @@
 import { MerchantSearchParams } from "@/api";
-import { Page, TransactionType as TransactionTypeType } from "@/utils/types";
+import { MerchantTag, Page, TransactionType as TransactionTypeType } from "@/utils/types";
 import { Merchant } from "@/utils/types";
 import { Pagination, Table } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { EditableLabel } from "@/components/EditableLabel";
 import { Search } from "./Search";
 import { TransactionType } from "@/components/TransactionType";
+import { CategoryDisplay } from "../Category/CategoryDisplay";
+import { UpdateMerchantParams } from "@/api/merchant-client";
 
 export function MerchantsTable({
   merchants,
@@ -15,6 +17,7 @@ export function MerchantsTable({
   searchParams,
   onSetSearchParams,
   onUpdateMerchant,
+  allMerchantTags,
 }: {
   merchants: Merchant[];
   isLoading: boolean;
@@ -22,7 +25,8 @@ export function MerchantsTable({
   setPage: (page: number) => void;
   searchParams: MerchantSearchParams;
   onSetSearchParams: (searchParams: MerchantSearchParams) => void;
-  onUpdateMerchant: (id: number, value: Partial<Merchant>) => void;
+  onUpdateMerchant: (params: UpdateMerchantParams) => void;
+  allMerchantTags: MerchantTag[];
 }) {
 
   return (
@@ -45,12 +49,23 @@ export function MerchantsTable({
           {merchants.map(merchant => (
             <Table.Tr key={merchant.id}>
               <Table.Td>
-                <EditableLabel id={merchant.id} value={merchantDisplayName(merchant)} onSave={async (id: number, value: string) => await onUpdateMerchant(id, { customName: value })} />
+                <EditableLabel
+                  id={merchant.id}
+                  value={merchantDisplayName(merchant)}
+                  onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { customName: value } })}
+                />
               </Table.Td>
               <Table.Td>
                 <TransactionType
                   merchant={merchant}
-                  onSave={async (id: number, transactionType: TransactionTypeType) => await onUpdateMerchant(id, { defaultTransactionType: transactionType })}
+                  onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { defaultTransactionType: value as TransactionTypeType } })}
+                />
+              </Table.Td>
+              <Table.Td>
+                <CategoryDisplay
+                  category={merchant.defaultMerchantTag}
+                  onSave={id => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
+                  allCategories={allMerchantTags}
                 />
               </Table.Td>
             </Table.Tr>

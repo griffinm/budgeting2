@@ -5,6 +5,7 @@ class PlaidTransaction < ApplicationRecord
   belongs_to :plaid_sync_event
   belongs_to :plaid_account
   belongs_to :merchant
+  belongs_to :merchant_tag, optional: true
   
   validates :transaction_type, presence: true, inclusion: { in: ['expense', 'income', 'transfer'] }
 

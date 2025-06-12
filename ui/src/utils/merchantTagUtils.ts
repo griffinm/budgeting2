@@ -42,3 +42,16 @@ export function formatMerchantTagsAsTree({ merchantTags }: { merchantTags: Merch
   
   return rootTags;
 }
+
+export function fullyQualifiedTagName(tag: MerchantTag, merchantTags: MerchantTag[]): string {
+  if (tag.parentMerchantTagId === null || tag.parentMerchantTagId === undefined) {
+    return tag.name;
+  }
+
+  const parentTag = merchantTags.find(t => t.id === tag.parentMerchantTagId);
+  if (!parentTag) {
+    return tag.name;
+  }
+
+  return `${fullyQualifiedTagName(parentTag, merchantTags)} > ${tag.name}`;
+}

@@ -3,6 +3,7 @@ import {
   fetchMerchants,
   MerchantSearchParams,
   updateMerchant as updateMerchantApi,
+  UpdateMerchantParams,
 } from '@/api';
 import { Page, Merchant } from '@/utils/types';
 
@@ -14,7 +15,7 @@ interface MerchantState {
   setSearchParams: (searchParams: MerchantSearchParams) => void;
   page: Page;
   setPage: (page: number) => void;
-  updateMerchant: (id: number, value: Partial<Merchant>) => Promise<void>;
+  updateMerchant: (params: UpdateMerchantParams) => void;
 }
 
 export const useMerchants = (): MerchantState => {
@@ -30,7 +31,7 @@ export const useMerchants = (): MerchantState => {
       totalCount: 0,
     },
     setPage: () => {},
-    updateMerchant: async () => {},
+    updateMerchant: () => {},
   });
 
   const getMerchants = useCallback(async () => {
@@ -69,14 +70,14 @@ export const useMerchants = (): MerchantState => {
     setState(prev => ({ ...prev, page: { ...prev.page, currentPage: newPage } }));
   }, []);
 
-  const updateMerchant = useCallback(async (id: number, value: Partial<Merchant>) => {
+  const updateMerchant = useCallback(async (params: UpdateMerchantParams) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
     try {
-      const updatedMerchant = await updateMerchantApi({ id, merchant: value });
+      const updatedMerchant = await updateMerchantApi(params);
       setState(prev => ({
         ...prev,
         merchants: prev.merchants.map(merchant =>
-          merchant.id === id ? updatedMerchant : merchant
+          merchant.id === params.id ? updatedMerchant : merchant
         ),
         isLoading: false,
         error: null,
