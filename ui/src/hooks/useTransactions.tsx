@@ -73,8 +73,11 @@ export const useTransactions = () => {
   }, []);
 
   const updateTransaction = useCallback((id: number, params: TransactionUpdateParams) => {
-    updateTransactionApi({ id, params }).then(() => {
-      setState(prev => ({ ...prev, transactions: prev.transactions.map(transaction => transaction.id === id ? { ...transaction, ...params } : transaction) }));
+    updateTransactionApi({ id, params }).then((newTransaction) => {
+      setState(prev => ({
+        ...prev,
+        transactions: prev.transactions.map(transaction => transaction.id === id ? newTransaction : transaction),
+      }));
     });
   }, []);
 

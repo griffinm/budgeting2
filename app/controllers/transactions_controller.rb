@@ -50,6 +50,6 @@ class TransactionsController < ApplicationController
   end
 
   private def transaction_params
-    params.require(:transaction).permit(:transaction_type)
+    params.require(:transaction).permit(:transaction_type, :merchant_tag_id)
   end
 end

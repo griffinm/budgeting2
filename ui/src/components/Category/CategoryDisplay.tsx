@@ -8,7 +8,7 @@ export function CategoryDisplay({
   onSave,
   allCategories,
 }: {
-  category: MerchantTag | null;
+  category?: MerchantTag | null;
   onSave: (id: number) => void;
   allCategories: MerchantTag[];
 }) {

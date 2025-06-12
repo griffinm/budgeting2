@@ -1,5 +1,5 @@
 // import { TransactionSearchParams } from "@/api/transaction-client";
-import { Transaction, Page } from "@/utils/types";
+import { Transaction, Page, MerchantTag } from "@/utils/types";
 import { Pagination, Table } from "@mantine/core";
 import { format as formatDate } from "date-fns";
 import { Search } from "./Search";
@@ -9,6 +9,7 @@ import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { TransactionType } from "@/components/TransactionType";
 import { Link } from "react-router-dom";
 import { urls } from "@/utils/urls";
+import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 
 const headers = [
   { label: 'Date', accessor: 'date' },
@@ -16,6 +17,7 @@ const headers = [
   { label: 'Merchant', accessor: 'merchant' },
   { label: 'Account', accessor: 'account' },
   { label: 'Type', accessor: 'type' },
+  { label: 'Category', accessor: 'category' },
 ]
 
 export function TransactionsTable({
@@ -26,6 +28,7 @@ export function TransactionsTable({
   searchParams,
   onSetSearchParams,
   updateTransaction,
+  merchantTags,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
@@ -36,6 +39,7 @@ export function TransactionsTable({
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
+  merchantTags: MerchantTag[];
 }) {
   return (
     <div>
@@ -59,23 +63,36 @@ export function TransactionsTable({
               <Table.Td>
                 {formatDate(transaction.date, 'M/d/yy')}
               </Table.Td>
+              
               <Table.Td>
                 <TransactionAmount amount={transaction.amount} />
               </Table.Td>
+
               <Table.Td>
                 <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
                   {merchantDisplayName(transaction.merchant)}
                 </Link>
               </Table.Td>
+
               <Table.Td>
                 {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
               </Table.Td>
+
               <Table.Td w={150}>
                 <TransactionType
                   transaction={transaction}
                   onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
                 />
               </Table.Td>
+
+              <Table.Td>
+                <CategoryDisplay
+                  category={transaction.merchantTag}
+                  onSave={newTagId => updateTransaction(transaction.id, { merchantTagId: newTagId })}
+                  allCategories={merchantTags}
+                />
+              </Table.Td>
+
             </Table.Tr>
           ))}
         </Table.Tbody>

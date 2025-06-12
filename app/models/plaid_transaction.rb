@@ -11,6 +11,11 @@ class PlaidTransaction < ApplicationRecord
 
   before_create :set_default_categories
 
+  def has_default_merchant_tag?
+    return false if self.merchant_tag_id.blank?
+    self.merchant_tag_id == self.merchant.default_merchant_tag_id
+  end
+
   def set_default_categories
     self.is_expense = self.merchant.default_is_expense
     self.is_transfer = self.merchant.default_is_transfer

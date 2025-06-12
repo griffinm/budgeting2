@@ -81,6 +81,8 @@ export interface Transaction {
   currencyCode: string;
   merchant: Merchant;
   plaidAccount: PlaidAccount;
+  merchantTag?: MerchantTag | null;
+  hasDefaultMerchantTag?: boolean;
 }
 
 export interface MerchantTag {

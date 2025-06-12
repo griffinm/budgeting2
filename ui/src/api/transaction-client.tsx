@@ -18,7 +18,8 @@ export interface TransactionSearchParams {
 }
 
 export interface TransactionUpdateParams {
-  transactionType: TransactionType;
+  transactionType?: TransactionType;
+  merchantTagId?: number | null;
 }
 
 export const getTransactions = async ({

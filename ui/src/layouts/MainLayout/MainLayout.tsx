@@ -21,7 +21,6 @@ export function MainLayout() {
     <AppShell
       header={{ height: 60 }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
-      aside={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}
       padding="md"
     >
       <AppShell.Header>
@@ -39,7 +38,7 @@ export function MainLayout() {
         ))}
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main style={{ maxWidth: '1400px' }}>
         <Outlet />
       </AppShell.Main>
     </AppShell>
