@@ -1,63 +1,64 @@
-import { 
-  DashboardPage, 
-  LoginPage, 
-  MerchantsPage, 
-  TransactionsPage,
-} from "@/pages";
-import { MerchantTagsPage } from "@/pages/MerchantTagsPage/MerchantTagsPage";
+import { lazy } from 'react';
 
 type MenuSection = 'main' | 'none';
 
 const TITLE_SUFFIX = ' | Budgeting';
 
+const DashboardPage = lazy(() => import('@/pages/DashboardPage/DashboardPage'));
+const TransactionsPage = lazy(() => import('@/pages/TransactionsPage/TransactionsPage'));
+const MerchantsPage = lazy(() => import('@/pages/MerchantsPage/MerchantsPage'));
+const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTagsPage'));
+const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
+
 interface Url {
   path: (...args: any[]) => string;
   label?: string;
-  section?: MenuSection;
   title: (...args: any[]) => string;
   component: React.ComponentType;
+  section?: MenuSection;
 }
 
 export const urls: Record<string, Url> = {
   dashboard: {
     path: () =>'/',
     label: 'Dashboard',
-    section: 'main',
     title: () => 'Dashboard' + TITLE_SUFFIX,
     component: DashboardPage,
+    section: 'main',
   },
   transactions: {
     path: () =>'/transactions',
     label: 'Transactions',
-    section: 'main',
     title: () => 'Transactions' + TITLE_SUFFIX,
     component: TransactionsPage,
+    section: 'main',
   },
   login: {
     path: () =>'/auth/login',
     label: 'Login',
     title: () => 'Login' + TITLE_SUFFIX,
     component: LoginPage,
+    section: 'none',
   },
   merchants: {
     path: () =>'/merchants',
     label: 'Merchants',
-    section: 'main',
     title: () => 'Merchants' + TITLE_SUFFIX,
     component: MerchantsPage,
+    section: 'main',
   },
   merchant: {
     path: (id: number) => `/merchants/${id}`,
-    section: 'none',
     title: () => 'Merchant' + TITLE_SUFFIX,
-    component: () => <div>Merchant</div>,
+    component: () => <p>Merchant</p>,
+    section: 'none',
   },
   merchantTags: {
     path: () =>'/categories',
     label: 'Categories',
-    section: 'main',
     title: (name: string) => `${name} | Categories` + TITLE_SUFFIX,
     component: MerchantTagsPage,
+    section: 'none',
   },
 }
 

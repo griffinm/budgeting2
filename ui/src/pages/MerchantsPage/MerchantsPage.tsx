@@ -6,7 +6,7 @@ import { MerchantsTable } from "@/components/MerchantsTable/MerchantsTable";
 import { MerchantTag } from "@/utils/types";
 import { fetchMerchantTags } from "@/api/merchant-tags-client";
 
-export function MerchantsPage() {
+export default function MerchantsPage() {
   const [allMerchantTags, setAllMerchantTags] = useState<MerchantTag[]>([]);
 
   const setTitle = usePageTitle();

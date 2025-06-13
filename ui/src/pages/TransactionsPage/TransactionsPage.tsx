@@ -5,7 +5,7 @@ import { TransactionsTable } from '@/components/TransactionsTable';
 import { MerchantTag } from '@/utils/types';
 import { fetchMerchantTags } from '@/api';
 
-export function TransactionsPage() {
+export default function TransactionsPage() {
   const { 
     transactions,
     isLoading,

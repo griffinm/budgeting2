@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Errors } from '@/components/Errors/Errors';
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
 
-export function LoginPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<ErrorResponse>({ messages: [] });

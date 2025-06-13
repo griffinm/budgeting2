@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
 import { urls } from '@/utils/urls';
 
-export function DashboardPage() {
+export default function DashboardPage() {
   const { user } = useContext(CurrentUserContext);
 
   useEffect(() => {

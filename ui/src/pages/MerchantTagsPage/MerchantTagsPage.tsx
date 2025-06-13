@@ -3,7 +3,7 @@ import { urls } from "@/utils/urls";
 import { useEffect } from "react";
 import { MerchantCategoryTreeView } from "./MerchantCategoryTreeView";
 
-export function MerchantTagsPage() {
+export default function MerchantTagsPage() {
   const setTitle = usePageTitle();
 
   useEffect(() => {
