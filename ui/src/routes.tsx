@@ -4,15 +4,13 @@ import {
 } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import './index.css';
-import { 
-  MainLayout,
-} from '@/layouts';
-import { AuthLayout } from '@/layouts/AuthLayout';
 import { CurrentUserProvider } from '@/providers';
 import { MainNavLinks } from './utils/urls';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
+const MainLayout = lazy(() => import('./layouts/MainLayout/MainLayout'));
+const AuthLayout = lazy(() => import('./layouts/AuthLayout/AuthLayout'));
 
 // Loading component for Suspense fallback
 const PageLoader = () => (
@@ -25,7 +23,11 @@ const PageLoader = () => (
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <MainLayout />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <MainLayout />
+      </Suspense>
+    ),
     children: MainNavLinks.map(url => ({
       path: url.path(),
       element: (
@@ -37,7 +39,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/auth',
-    element: <AuthLayout />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <AuthLayout />
+      </Suspense>
+    ),
     children: [
       {
         path: 'login',

@@ -12,7 +12,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { MainNavLinks } from '@/utils/urls';
 
-export function MainLayout() {
+export default function MainLayout() {
   const [opened, { toggle }] = useDisclosure();
   const navigate = useNavigate();
   const location = useLocation();

@@ -2,7 +2,7 @@ import { AppShell, Burger, Title } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { Outlet } from "react-router-dom";
 
-export function AuthLayout() {
+export default function AuthLayout() {
   const [opened, { toggle }] = useDisclosure();
   
   return (
