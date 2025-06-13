@@ -33,7 +33,7 @@ class TransactionSearchService < BaseService
 
   def call
     transactions = PlaidTransaction.joins(:plaid_account, :merchant)
-      .includes(:plaid_account, :merchant, :merchant_tag)
+      .includes(:plaid_account, :merchant_tag, merchant: :default_merchant_tag)
       .where(plaid_transactions: { account_id: @account_id })
       .order(date: :desc)
 
