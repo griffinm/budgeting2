@@ -4,6 +4,7 @@ class PlaidAccount < ApplicationRecord
   belongs_to :account
   belongs_to :user
   has_many :plaid_transactions, dependent: :destroy
+  belongs_to :plaid_access_token, dependent: :destroy
   
   validates :plaid_id, presence: true, uniqueness: { scope: :account_id }
 

@@ -8,6 +8,7 @@ class PlaidTransaction < ApplicationRecord
   belongs_to :merchant_tag, optional: true
   
   validates :transaction_type, presence: true, inclusion: { in: ['expense', 'income', 'transfer'] }
+  validates :plaid_id, presence: true, uniqueness: { scope: :account_id }
 
   before_create :set_default_categories
 
@@ -17,7 +18,7 @@ class PlaidTransaction < ApplicationRecord
   end
 
   def set_default_categories
-    self.is_expense = self.merchant.default_is_expense
-    self.is_transfer = self.merchant.default_is_transfer
+    self.merchant_tag_id = self.merchant.default_merchant_tag_id if self.merchant.default_merchant_tag_id.present?
+    self.transaction_type = self.merchant.default_transaction_type if self.merchant.default_transaction_type.present?
   end
 end 

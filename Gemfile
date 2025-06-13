@@ -18,6 +18,7 @@ gem "paranoia"
 gem "pagy"
 gem "acts_as_paranoid"
 gem "audited"
+gem "plaid"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

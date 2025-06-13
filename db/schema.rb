@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_12_190652) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_12_194809) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -107,7 +107,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_190652) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "plaid_access_token_id"
     t.index ["account_id"], name: "index_plaid_accounts_on_account_id"
+    t.index ["plaid_access_token_id"], name: "index_plaid_accounts_on_plaid_access_token_id"
     t.index ["user_id"], name: "index_plaid_accounts_on_user_id"
   end
 
@@ -170,6 +172,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_190652) do
   add_foreign_key "merchants_merchant_tags", "merchants"
   add_foreign_key "plaid_access_tokens", "accounts"
   add_foreign_key "plaid_accounts", "accounts"
+  add_foreign_key "plaid_accounts", "plaid_access_tokens"
   add_foreign_key "plaid_accounts", "users"
   add_foreign_key "plaid_sync_events", "accounts"
   add_foreign_key "plaid_sync_events", "plaid_access_tokens"

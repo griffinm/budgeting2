@@ -110,6 +110,14 @@ GEM
     erubi (1.13.1)
     et-orbi (1.2.11)
       tzinfo
+    faraday (2.13.1)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-multipart (1.1.0)
+      multipart-post (~> 2.0)
+    faraday-net_http (3.4.0)
+      net-http (>= 0.5.0)
     foreman (0.88.1)
     fugit (1.11.1)
       et-orbi (~> 1, >= 1.2.11)
@@ -126,6 +134,7 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
+    json (2.12.2)
     jsonapi-renderer (0.2.2)
     jwt (2.10.1)
       base64
@@ -147,6 +156,9 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.5)
     msgpack (1.8.0)
+    multipart-post (2.4.1)
+    net-http (0.6.0)
+      uri
     net-imap (0.5.8)
       date
       net-protocol
@@ -173,6 +185,9 @@ GEM
     paranoia (3.0.1)
       activerecord (>= 6, < 8.1)
     pg (1.5.9)
+    plaid (40.0.0)
+      faraday (>= 1.0.1, < 3.0)
+      faraday-multipart (>= 1.0.1, < 2.0)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -287,6 +302,7 @@ DEPENDENCIES
   pagy
   paranoia
   pg (~> 1.1)
+  plaid
   puma (>= 5.0)
   rack-cors
   rails (~> 8.0.2)
