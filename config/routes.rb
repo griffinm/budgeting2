@@ -8,6 +8,12 @@ Rails.application.routes.draw do
     resources :transactions, only: [:index, :update]
     resources :merchants, only: [:index, :update]
     resources :merchant_tags, only: [:index, :update, :create]
+    resources :data, only: [] do
+      collection do
+        get "monthly_spend", to: "data#monthly_spend"
+        get "monthly_income", to: "data#monthly_income"
+      end
+    end
 
     resources :accounts, only: [:create] do
       resources :users, only: [:create]

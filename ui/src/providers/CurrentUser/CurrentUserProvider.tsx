@@ -4,6 +4,7 @@ import { fetchCurrentUser } from '@/api';
 import { CurrentUserContext } from './CurrentUserContext';
 import { urls } from '@/utils/urls';
 import { AUTH_TOKEN_STORAGE_KEY } from '@/utils/constants';
+import { Loading } from '@/components/Loading';
 
 interface CurrentUserProviderProps {
   children: React.ReactNode;
@@ -45,7 +46,7 @@ export const CurrentUserProvider: React.FC<CurrentUserProviderProps> = ({ childr
       setToken,
     }}>
       {userLoading ? (
-        <div>Loading...</div>
+        <Loading />
       ) : (
         children
       )}

@@ -1,9 +1,17 @@
-import { useContext, useEffect } from 'react';
-import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
+import { useEffect, useState } from 'react';
 import { urls } from '@/utils/urls';
+import { MonthlySpend } from '@/components/MonthlySpend';
+import { useTransactionTrends } from './useTransactionTrends';
+
 
 export default function DashboardPage() {
-  const { user } = useContext(CurrentUserContext);
+  const {
+    currentMonthExpenses,
+    currentMonthIncome,
+    previousMonthExpenses,
+    previousMonthIncome,
+  } = useTransactionTrends();
+  const loading = currentMonthExpenses.loading || currentMonthIncome.loading || previousMonthExpenses.loading || previousMonthIncome.loading;
 
   useEffect(() => {
     document.title = urls.dashboard.title();
@@ -11,8 +19,13 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      <p>Welcome, {user?.firstName} {user?.lastName}</p>
+      <MonthlySpend
+        currentMonthExpenses={currentMonthExpenses.transactions}
+        currentMonthIncome={currentMonthIncome.transactions}
+        previousMonthExpenses={previousMonthExpenses.transactions}
+        previousMonthIncome={previousMonthIncome.transactions}
+        loading={loading}
+      />
     </div>
   );
 }

@@ -6,52 +6,36 @@ import { lazy, Suspense } from 'react';
 import './index.css';
 import { CurrentUserProvider } from '@/providers';
 import { MainNavLinks } from './utils/urls';
+import { Loading } from '@/components/Loading';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
 const MainLayout = lazy(() => import('./layouts/MainLayout/MainLayout'));
 const AuthLayout = lazy(() => import('./layouts/AuthLayout/AuthLayout'));
 
-// Loading component for Suspense fallback
-const PageLoader = () => (
-  <div className="flex justify-center items-center h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-300 border-t-blue-600" />
-  </div>
+const WithSuspense = (component: React.ReactNode) => (
+  <Suspense fallback={<Loading />}>
+    {component}
+  </Suspense>
 );
 
 // Create the router
 const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <MainLayout />
-      </Suspense>
-    ),
+    element: WithSuspense(<MainLayout />),
     children: MainNavLinks.map(url => ({
       path: url.path(),
-      element: (
-        <Suspense fallback={<PageLoader />}>
-          <url.component />
-        </Suspense>
-      ),
+      element: WithSuspense(<url.component />),
     })),
   },
   {
     path: '/auth',
-    element: (
-      <Suspense fallback={<PageLoader />}>
-        <AuthLayout />
-      </Suspense>
-    ),
+    element: WithSuspense(<AuthLayout />),
     children: [
       {
         path: 'login',
-        element: (
-          <Suspense fallback={<PageLoader />}>
-            <LoginPage />
-          </Suspense>
-        ),
+        element: WithSuspense(<LoginPage />),
       },
     ],
   }
