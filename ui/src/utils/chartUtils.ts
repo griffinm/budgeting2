@@ -85,8 +85,6 @@ export function getPercentChangeForCurrentDay({
     toDay: currentDay,
     transactionType,
   });
-  console.log("totalThisMonth", totalThisMonth);
-  console.log("totalLastMonth", totalLastMonth);
 
   const change = ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100;
   return Math.round(change * 10) / 10;

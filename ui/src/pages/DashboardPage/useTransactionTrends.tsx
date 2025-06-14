@@ -4,9 +4,22 @@ import {
   subMonths,
 } from 'date-fns';
 import {
+  averageForMonthsBack,
   getMonthlyTransactions,
 } from '@/api';
 import { Transaction, TransactionType } from '@/utils/types';
+
+interface useTransactionTrendsReturn {
+  currentMonthExpenses: MonthlyTransactions;
+  currentMonthIncome: MonthlyTransactions;
+  previousMonthExpenses: MonthlyTransactions;
+  previousMonthIncome: MonthlyTransactions;
+  averageExpense: number;
+  averageIncome: number;
+  expenseMonthsBack: number;
+  incomeMonthsBack: number;
+  setMonthsBack: ({ monthsBack, transactionType }: { monthsBack: number, transactionType: TransactionType }) => void;
+}
 
 export interface MonthlyTransactions {
   transactionType: TransactionType;
@@ -20,11 +33,15 @@ const defaultMonthlyTransactions: MonthlyTransactions = {
   loading: true,
 };
 
-export function useTransactionTrends() {
+export function useTransactionTrends(): useTransactionTrendsReturn {
   const [currentMonthExpenses, setCurrentMonthExpenses] = useState<MonthlyTransactions>(defaultMonthlyTransactions);
   const [currentMonthIncome, setCurrentMonthIncome] = useState<MonthlyTransactions>(defaultMonthlyTransactions);
   const [previousMonthExpenses, setPreviousMonthExpenses] = useState<MonthlyTransactions>(defaultMonthlyTransactions);
   const [previousMonthIncome, setPreviousMonthIncome] = useState<MonthlyTransactions>(defaultMonthlyTransactions);
+  const [averageExpense, setAverageExpense] = useState<number>(0);
+  const [averageIncome, setAverageIncome] = useState<number>(0);
+  const [expenseMonthsBack, setExpenseMonthsBack] = useState<number>(6);
+  const [incomeMonthsBack, setIncomeMonthsBack] = useState<number>(6);
 
   const date = new Date();
   const currentMonth = parseInt(formatDate(date, 'M'));
@@ -68,12 +85,37 @@ export function useTransactionTrends() {
         loading: false,
       });
     });
-    }, []);
+  }, [currentMonth, currentYear, previousMonth, previousYear]);
+
+  useEffect(() => {
+    averageForMonthsBack({ monthsBack: expenseMonthsBack, transactionType: 'expense' }).then((response) => {
+      setAverageExpense(response);
+    });
+  }, [expenseMonthsBack]);
+
+  useEffect(() => {
+    averageForMonthsBack({ monthsBack: incomeMonthsBack, transactionType: 'income' }).then((response) => {
+      setAverageIncome(response);
+    });
+  }, [incomeMonthsBack]);
+
+  const setMonthsBack = ({ monthsBack, transactionType }: { monthsBack: number, transactionType: TransactionType }) => {
+    if (transactionType === 'expense') {
+      setExpenseMonthsBack(monthsBack);
+    } else {
+      setIncomeMonthsBack(monthsBack);
+    }
+  };
 
   return {
     currentMonthExpenses,
     currentMonthIncome,
     previousMonthExpenses,
     previousMonthIncome,
+    averageExpense,
+    averageIncome,
+    expenseMonthsBack,
+    incomeMonthsBack,
+    setMonthsBack,
   };
 }

@@ -29,3 +29,16 @@ function urlForTransactionType(type: TransactionType): string {
   }
   return baseUrl;
 }
+
+export async function averageForMonthsBack({ 
+  monthsBack, 
+  transactionType 
+}: { 
+  monthsBack: number, 
+  transactionType: TransactionType 
+}): Promise<number> {
+  const url = `/data/average_${transactionType}`;
+  const params = { months_back: monthsBack };
+  const response = await baseClient.get(url, { params });
+  return response.data.average;
+}

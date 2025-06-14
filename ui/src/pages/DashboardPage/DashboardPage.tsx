@@ -13,6 +13,11 @@ export default function DashboardPage() {
     currentMonthIncome,
     previousMonthExpenses,
     previousMonthIncome,
+    averageExpense,
+    averageIncome,
+    expenseMonthsBack,
+    incomeMonthsBack,
+    setMonthsBack,
   } = useTransactionTrends();
   const loading = currentMonthExpenses.loading || currentMonthIncome.loading || previousMonthExpenses.loading || previousMonthIncome.loading;
 
@@ -41,6 +46,11 @@ export default function DashboardPage() {
         previousMonthExpenses={previousMonthExpenses.transactions}
         previousMonthIncome={previousMonthIncome.transactions}
         loading={loading}
+        averageExpense={averageExpense}
+        averageIncome={averageIncome}
+        expenseMonthsBack={expenseMonthsBack}
+        incomeMonthsBack={incomeMonthsBack}
+        setMonthsBack={setMonthsBack}
       />
     </div>
   );

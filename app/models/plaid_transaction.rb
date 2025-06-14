@@ -40,4 +40,32 @@ class PlaidTransaction < ApplicationRecord
     self.merchant_tag_id = self.merchant.default_merchant_tag_id if self.merchant.default_merchant_tag_id.present?
     self.transaction_type = self.merchant.default_transaction_type if self.merchant.default_transaction_type.present?
   end
+
+  def self.monthly_average_by_type(transaction_type, months_back = 1)
+    
+    if !TRANSACTION_TYPES.key?(transaction_type.to_sym)
+      raise "Invalid transaction type: #{transaction_type}"
+    end
+
+    monthly_averages = []
+    current_month_back = 0
+    while current_month_back < months_back
+      start_date = Date.current.beginning_of_month - current_month_back.months
+      end_date = start_date - 1.month
+      current_month_back += 1
+
+      transactions = where(transaction_type: TRANSACTION_TYPES[transaction_type.to_sym])
+        .where(account_id: account_id)
+        .where(date: start_date..end_date)
+        .not_pending
+        .pluck(:amount)
+
+      return 0 if transactions.empty?
+      
+      monthly_average = (transactions.sum / transactions.length.to_f).round(2)
+      monthly_averages << monthly_average
+    end
+
+    monthly_averages.reduce(:+) / monthly_averages.length.to_f
+  end
 end 

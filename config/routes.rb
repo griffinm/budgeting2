@@ -12,6 +12,8 @@ Rails.application.routes.draw do
       collection do
         get "monthly_spend", to: "data#monthly_spend"
         get "monthly_income", to: "data#monthly_income"
+        get "average_income", to: "data#average_income"
+        get "average_expense", to: "data#average_expense"
       end
     end
 
