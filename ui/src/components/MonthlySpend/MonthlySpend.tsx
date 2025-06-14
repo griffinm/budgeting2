@@ -23,11 +23,13 @@ export function MonthlySpend({
   return (
     <div>
       <MonthlyLineChart
+        title="Expenses MoM"
         currentMonthTransactions={currentMonthExpenses}
         previousMonthTransactions={previousMonthExpenses}
         transactionType="expense"
       />
       <MonthlyLineChart
+        title="Income MoM"
         currentMonthTransactions={currentMonthIncome}
         previousMonthTransactions={previousMonthIncome}
         transactionType="income"

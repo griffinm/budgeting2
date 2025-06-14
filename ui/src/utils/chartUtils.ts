@@ -1,5 +1,4 @@
 import { Transaction, TransactionType } from "@/utils/types";
-import { format as formatDate } from "date-fns";
 
 export interface DailyTotal {
   currentMonth: number;
@@ -62,5 +61,33 @@ function getDailyRunningTotal({
     })
     const total = t.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
 
-    return total;
+    return Math.round(total * 100) / 100;
+}
+
+export function getPercentChangeForCurrentDay({
+  transactionsThisMonth,
+  transactionsLastMonth,
+  currentDay,
+  transactionType,
+}: {
+  transactionsThisMonth: Transaction[];
+  transactionsLastMonth: Transaction[];
+  currentDay: number;
+  transactionType: TransactionType;
+}): number {
+  const totalThisMonth = getDailyRunningTotal({
+    transactions: transactionsThisMonth,
+    toDay: currentDay,
+    transactionType,
+  });
+  const totalLastMonth = getDailyRunningTotal({
+    transactions: transactionsLastMonth,
+    toDay: currentDay,
+    transactionType,
+  });
+  console.log("totalThisMonth", totalThisMonth);
+  console.log("totalLastMonth", totalLastMonth);
+
+  const change = ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100;
+  return Math.round(change * 10) / 10;
 }
