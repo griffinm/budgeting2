@@ -1,13 +1,16 @@
 import { Button, Input } from "@mantine/core";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 export function EditableLabel({
   id,
   value,
   onSave,
+  linkValue,
 }: {
   id: number;
   value: string;
+  linkValue?: string;
   onSave: (id: number, value: string) => Promise<void>;
 }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,7 +22,7 @@ export function EditableLabel({
   }
 
   return (
-    <div className="cursor-pointer hover:bg-gray-100 rounded-md p-1" onClick={() => !isEditing && setIsEditing(true)}>
+    <div className="rounded-md p-1">
       {isEditing ? (
         <form onSubmit={onSubmit} className="flex flex-row gap-2">
           <Input value={newValue} onChange={(e) => setNewValue(e.target.value)} />
@@ -27,7 +30,10 @@ export function EditableLabel({
           <Button type="submit">Save</Button>
         </form>
       ) : (
-        <span>{value}</span>
+        <div className="flex flex-row gap-2">
+          {linkValue ? <Link to={linkValue}>{value}</Link> : <span>{value}</span>}
+          <div className="text-gray-500 hover:text-gray-700 cursor-pointer" onClick={() => setIsEditing(true)}>✎</div>
+        </div>
       )}
     </div>
   );

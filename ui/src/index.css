@@ -7,3 +7,14 @@ body, html {
 #root {
   height: 100%;
 }
+
+a {
+  color: #007bff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+a:hover {
+  color: #0056b3;
+}

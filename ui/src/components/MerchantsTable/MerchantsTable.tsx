@@ -8,6 +8,7 @@ import { Search } from "./Search";
 import { TransactionType } from "@/components/TransactionType";
 import { CategoryDisplay } from "../Category/CategoryDisplay";
 import { UpdateMerchantParams } from "@/api/merchant-client";
+import { urls } from "@/utils/urls";
 
 export function MerchantsTable({
   merchants,
@@ -52,6 +53,7 @@ export function MerchantsTable({
                 <EditableLabel
                   id={merchant.id}
                   value={merchantDisplayName(merchant)}
+                  linkValue={urls.merchant.path(merchant.id)}
                   onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { customName: value } })}
                 />
               </Table.Td>

@@ -12,6 +12,13 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import { MainNavLinks } from '@/utils/urls';
 
+const isActive = (path: string, location: string) => {
+  if (path === '/') {
+    return location === path;
+  }
+  return location.startsWith(path);
+}
+
 export default function MainLayout() {
   const [opened, { toggle }] = useDisclosure();
   const navigate = useNavigate();
@@ -33,7 +40,7 @@ export default function MainLayout() {
             key={link.path()}
             label={link.label}
             onClick={() => navigate(link.path())}
-            active={location.pathname === link.path()}
+            active={isActive(link.path(), location.pathname)}
           />
         ))}
       </AppShell.Navbar>
