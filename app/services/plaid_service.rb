@@ -1,14 +1,14 @@
 class PlaidService < BaseService
-  def initialize(user_id:)
-    @user_id = user_id
+  def initialize(account_id:)
+    @account = Account.find(account_id)
   end
 
   def sync_transactions
-    access_tokens = account.plaid_access_tokens
+    access_tokens = @account.plaid_access_tokens
     
     access_tokens.each do |access_token|
       plaid_sync_event = PlaidSyncEvent.create(
-        account_id: account.id,
+        account_id: @account.id,
         plaid_access_token_id: access_token.id,
         event_type: "sync",
         started_at: Time.now,
@@ -49,12 +49,12 @@ class PlaidService < BaseService
   end
 
   private def add_transactions(transactions, plaid_sync_event)
-    Rails.logger.info("Adding #{transactions.count} transactions for account #{account.id} sync event #{plaid_sync_event.id}")
+    Rails.logger.info("Adding #{transactions.count} transactions for account #{@account.id} sync event #{plaid_sync_event.id}")
     transactions.each do |transaction|
-      plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: account.id)
+      plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: @account.id)
       
       new_transaction = PlaidTransaction.new(
-        account_id: account.id,
+        account_id: @account.id,
         plaid_sync_event_id: plaid_sync_event.id,
         plaid_account_id: plaid_account.id,
         plaid_id: transaction.transaction_id,
@@ -70,17 +70,17 @@ class PlaidService < BaseService
         payment_channel: transaction.payment_channel,
         transaction_type: "expense",
       )
-      puts "Errors: #{new_transaction.errors.full_messages}"
 
       merchant = merchant_for_transaction(transaction, transaction.merchant_entity_id)
       new_transaction.merchant_id = merchant.id
       new_transaction.save
+
       puts "Errors: #{new_transaction.errors.full_messages}"
     end
   end
 
   private def update_transactions(transactions, plaid_sync_event)
-    Rails.logger.info("Updating #{transactions.count} transactions for account #{account.id} sync event #{plaid_sync_event.id}")
+    Rails.logger.info("Updating #{transactions.count} transactions for account #{@account.id} sync event #{plaid_sync_event.id}")
     transactions.each do |transaction|
       existing_transaction = PlaidTransaction.find_by(plaid_id: transaction.transaction_id)
       existing_transaction.update(
@@ -95,7 +95,7 @@ class PlaidService < BaseService
   end
 
   private def remove_transactions(transactions, plaid_sync_event)
-    Rails.logger.info("Removing #{transactions.count} transactions for account #{account.id} sync event #{plaid_sync_event.id}")
+    Rails.logger.info("Removing #{transactions.count} transactions for account #{@account.id} sync event #{plaid_sync_event.id}")
     transactions.each do |transaction|
       plaid_transaction = PlaidTransaction.find_by(plaid_id: transaction.transaction_id)
 
@@ -107,7 +107,7 @@ class PlaidService < BaseService
 
   private def merchant_for_transaction(transaction, plaid_entity_id)
     # lookup by plaid id
-    merchant = account.merchants.where(plaid_entity_id: plaid_entity_id).where.not(plaid_entity_id: nil).first
+    merchant = @account.merchants.where(plaid_entity_id: plaid_entity_id).where.not(plaid_entity_id: nil).first
     return merchant if merchant
 
     # lookup by name
@@ -116,20 +116,12 @@ class PlaidService < BaseService
 
     # It does not exist, create it
     merchant = Merchant.create(
-      account_id: account.id,
+      account_id: @account.id,
       plaid_entity_id: plaid_entity_id,
       merchant_name: transaction.name,
     )
     puts "Errors: #{merchant.errors.full_messages}"
     return merchant
-  end
-
-  private def user
-    @user ||= User.find(@user_id)
-  end
-
-  private def account
-    @account ||= user.account
   end
 
   def api_client

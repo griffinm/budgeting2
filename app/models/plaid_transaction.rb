@@ -7,13 +7,14 @@ class PlaidTransaction < ApplicationRecord
     transfer: 'transfer'
   }
 
+
   belongs_to :account
   belongs_to :plaid_sync_event
   belongs_to :plaid_account
   belongs_to :merchant
   belongs_to :merchant_tag, optional: true
   
-  validates :transaction_type, presence: true, inclusion: { in: TRANSACTION_TYPES.keys }
+  validates :transaction_type, presence: true, inclusion: { in: TRANSACTION_TYPES.values }
   validates :plaid_id, presence: true, uniqueness: { scope: :account_id }
 
   before_create :set_default_categories
