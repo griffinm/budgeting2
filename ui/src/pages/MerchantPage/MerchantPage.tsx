@@ -10,6 +10,7 @@ import { currentMonthSpend, lastMonthSpend } from "./utils";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { BorderBox } from "@/components/BorderBox/BorderBox";
 import { urls } from "@/utils/urls";
+import { TrendChart } from "./TrendChart";
 
 export default function MerchantPage() {
   const { id } = useParams();
@@ -97,6 +98,13 @@ export default function MerchantPage() {
               loading={merchantSpendStatsLoading}
             />
           </div>
+        </BorderBox>
+
+        <BorderBox>
+          <TrendChart
+            merchantSpendStats={merchantSpendStats || undefined}
+            loading={merchantSpendStatsLoading}
+          />
         </BorderBox>
 
         <BorderBox>
