@@ -29,9 +29,13 @@ const setPageInHash = (page: number) => {
   window.location.hash = newHash;
 };
 
-export const useTransactions = () => {
+export const useTransactions = ({
+  initialSearchParams = {},
+}: {
+  initialSearchParams?: TransactionSearchParams;
+} = {}) => {
   const [state, setState] = useState<TransactionsState>({
-    searchParams: {},
+    searchParams: initialSearchParams || {},
     setSearchParams: () => {},
     transactions: [],
     isLoading: false,

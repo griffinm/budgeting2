@@ -6,7 +6,9 @@ Rails.application.routes.draw do
     get "users/current", to: "users#current"
 
     resources :transactions, only: [:index, :update]
-    resources :merchants, only: [:index, :update]
+    resources :merchants, only: [:index, :update, :show] do
+      get 'spend_stats', to: 'merchants#spend_stats'
+    end
     resources :merchant_tags, only: [:index, :update, :create]
     resources :data, only: [] do
       collection do

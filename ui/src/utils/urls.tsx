@@ -7,6 +7,7 @@ const TITLE_SUFFIX = ' | Budgeting';
 const DashboardPage = lazy(() => import('@/pages/DashboardPage/DashboardPage'));
 const TransactionsPage = lazy(() => import('@/pages/TransactionsPage/TransactionsPage'));
 const MerchantsPage = lazy(() => import('@/pages/MerchantsPage/MerchantsPage'));
+const MerchantPage = lazy(() => import('@/pages/MerchantPage/MerchantPage'));
 const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTagsPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
 
@@ -50,7 +51,7 @@ export const urls: Record<string, Url> = {
   merchant: {
     path: (id: number) => `/merchants/${id}`,
     title: () => 'Merchant' + TITLE_SUFFIX,
-    component: () => <p>Merchant</p>,
+    component: MerchantPage,
     section: 'none',
   },
   merchantTags: {

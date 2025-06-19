@@ -8,8 +8,9 @@ class MerchantsController < ApplicationController
     )
   end
 
+  # GET /api/merchants/:id
   def show
-    @merchant = current_user.account.merchants.find(params[:id])
+    @merchant = current_user.account.merchants.includes(:merchant_tags).find(params[:id])
   end
 
   # PATCH /api/merchants/:id
@@ -20,6 +21,18 @@ class MerchantsController < ApplicationController
     else
       render json: { errors: @merchant.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  # GET /api/merchants/:id/spend_stats
+  def spend_stats
+    months_back = (params[:months_back] || 6).to_i
+    merchant_id = params[:merchant_id]
+    merchant_service = MerchantSpendService.new(merchant_id: merchant_id, current_user: current_user)
+
+    render json: {
+      monthlySpend: merchant_service.monthly_spend(months_back: months_back),
+      allTimeSpend: merchant_service.all_time_spend,
+    }
   end
 
   private def update_params

@@ -100,3 +100,13 @@ export interface MantineTreeNode {
   label: string;
   children?: MantineTreeNode[];
 }
+
+export interface MerchantSpendMonth {
+  month: string;
+  amount: number;
+}
+
+export interface MerchantSpendStats {
+  monthlySpend: MerchantSpendMonth[];
+  allTimeSpend: number;
+}

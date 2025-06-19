@@ -7,6 +7,7 @@ import './index.css';
 import { CurrentUserProvider } from '@/providers';
 import { MainNavLinks } from './utils/urls';
 import { Loading } from '@/components/Loading';
+import MerchantPage from './pages/MerchantPage/MerchantPage';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
@@ -19,15 +20,27 @@ const WithSuspense = (component: React.ReactNode) => (
   </Suspense>
 );
 
+const mainNavLinks = MainNavLinks.map(url => ({
+  path: url.path(),
+  element: WithSuspense(<url.component />),
+}));
+
+const otherRoutes = [
+  {
+    path: '/merchants/:id',
+    element: WithSuspense(<MerchantPage />),
+  },
+];
+
 // Create the router
 const router = createBrowserRouter([
   {
     path: '/',
     element: WithSuspense(<MainLayout />),
-    children: MainNavLinks.map(url => ({
-      path: url.path(),
-      element: WithSuspense(<url.component />),
-    })),
+    children: [
+      ...mainNavLinks,
+      ...otherRoutes,
+    ],
   },
   {
     path: '/auth',

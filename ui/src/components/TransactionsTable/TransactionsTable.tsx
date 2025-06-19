@@ -19,6 +19,7 @@ const headers = [
   { label: 'Type', accessor: 'type' },
   { label: 'Category', accessor: 'category' },
 ]
+type ColNames = 'date' | 'amount' | 'merchant' | 'account' | 'type' | 'category';
 
 export function TransactionsTable({
   transactions,
@@ -29,6 +30,8 @@ export function TransactionsTable({
   onSetSearchParams,
   updateTransaction,
   merchantTags,
+  showCols = ['date', 'amount', 'merchant', 'account', 'type', 'category'],
+  showSearch = true,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
@@ -40,6 +43,8 @@ export function TransactionsTable({
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
+  showCols?: ColNames[];
+  showSearch?: boolean;
 }) {
   return (
     <div>
@@ -47,12 +52,14 @@ export function TransactionsTable({
         <div className="flex justify-baseline items-baseline text-sm text-gray-500 self-end">
           {isLoading ? 'Loading...' : `Found ${page.totalCount.toLocaleString()} transactions`}
         </div>
-        <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
+        {showSearch && (
+          <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
+        )}
       </div>
       <Table>
         <Table.Thead>
           <Table.Tr>
-            {headers.map((header) => (
+            {headers.filter(header => showCols.includes(header.accessor as ColNames)).map((header) => (
               <Table.Th key={header.accessor}>{header.label}</Table.Th>
             ))}
           </Table.Tr>
@@ -60,38 +67,50 @@ export function TransactionsTable({
         <Table.Tbody>
           {transactions.map((transaction) => (
             <Table.Tr key={transaction.id}>
-              <Table.Td>
-                {formatDate(transaction.date, 'M/d/yy')}
-              </Table.Td>
+              {showCols.includes('date') && (
+                <Table.Td>
+                  {formatDate(transaction.date, 'M/d/yy')}
+                </Table.Td>
+              )}
               
-              <Table.Td>
-                <TransactionAmount amount={transaction.amount} />
-              </Table.Td>
+              {showCols.includes('amount') && (
+                <Table.Td>
+                  <TransactionAmount amount={transaction.amount} />
+                </Table.Td>
+              )}
 
-              <Table.Td>
-                <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
-                  {merchantDisplayName(transaction.merchant)}
-                </Link>
-              </Table.Td>
+              {showCols.includes('merchant') && (
+                <Table.Td>
+                  <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
+                    {merchantDisplayName(transaction.merchant)}
+                  </Link>
+                </Table.Td>
+              )}
 
-              <Table.Td>
-                {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
-              </Table.Td>
+              {showCols.includes('account') && (
+                <Table.Td>
+                  {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
+                </Table.Td>
+              )}
 
-              <Table.Td w={150}>
-                <TransactionType
-                  transaction={transaction}
-                  onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
-                />
-              </Table.Td>
+              {showCols.includes('type') && (
+                <Table.Td w={150}>
+                  <TransactionType
+                    transaction={transaction}
+                    onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
+                  />
+                </Table.Td>
+              )}
 
-              <Table.Td>
-                <CategoryDisplay
-                  category={transaction.merchantTag}
-                  onSave={newTagId => updateTransaction(transaction.id, { merchantTagId: newTagId })}
-                  allCategories={merchantTags}
-                />
-              </Table.Td>
+              {showCols.includes('category') && (
+                <Table.Td>
+                  <CategoryDisplay
+                    category={transaction.merchantTag}
+                    onSave={newTagId => updateTransaction(transaction.id, { merchantTagId: newTagId })}
+                    allCategories={merchantTags}
+                  />
+                </Table.Td>
+              )}
 
             </Table.Tr>
           ))}
