@@ -1,7 +1,7 @@
 import { MerchantSearchParams } from "@/api";
 import { MerchantTag, Page, TransactionType as TransactionTypeType } from "@/utils/types";
 import { Merchant } from "@/utils/types";
-import { Pagination, Table } from "@mantine/core";
+import { Pagination } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { EditableLabel } from "@/components/EditableLabel";
 import { Search } from "./Search";
@@ -9,6 +9,7 @@ import { TransactionType } from "@/components/TransactionType";
 import { CategoryDisplay } from "../Category/CategoryDisplay";
 import { UpdateMerchantParams } from "@/api/merchant-client";
 import { urls } from "@/utils/urls";
+import { useMediaQuery } from "@mantine/hooks";
 
 export function MerchantsTable({
   merchants,
@@ -29,6 +30,7 @@ export function MerchantsTable({
   onUpdateMerchant: (params: UpdateMerchantParams) => void;
   allMerchantTags: MerchantTag[];
 }) {
+  const isMobile = useMediaQuery('(max-width: 600px)');
 
   return (
     <div>
@@ -38,55 +40,58 @@ export function MerchantsTable({
         </div>
         <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
       </div>
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th>Default Type</Table.Th>
-            <Table.Th>Default Category</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {merchants.map(merchant => (
-            <Table.Tr key={merchant.id}>
-              <Table.Td>
-                <EditableLabel
-                  id={merchant.id}
-                  value={merchantDisplayName(merchant)}
-                  linkValue={urls.merchant.path(merchant.id)}
-                  onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { customName: value } })}
-                />
-              </Table.Td>
-              <Table.Td>
-                <TransactionType
-                  merchant={merchant}
-                  onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { defaultTransactionType: value as TransactionTypeType } })}
-                />
-              </Table.Td>
-              <Table.Td>
-                <CategoryDisplay
-                  category={merchant.defaultMerchantTag}
-                  onSave={id => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
-                  allCategories={allMerchantTags}
-                />
-              </Table.Td>
-            </Table.Tr>
-          ))}
-        </Table.Tbody>
-        <Table.Tfoot>
-          <Table.Tr>
-            <Table.Td>
-              <Pagination
-                total={page.totalPages}
-                value={page.currentPage}
-                onChange={setPage}
-                withEdges
-                withControls
+
+      <div className="flex flex-row justify-center my-3">
+        <Pagination
+          size={isMobile ? 'xs' : 'md'}
+          total={page.totalPages}
+          value={page.currentPage}
+          onChange={setPage}
+          withEdges
+          withControls
+        />
+      </div>
+
+      <div className="flex w-full gap-3 flex-col">
+        {merchants.map(merchant => (
+          <div key={merchant.id} className="flex flex-col border border-gray-200 p-3 rounded-md gap-2 md:flex-row md:justify-between hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200">
+            <div className="w-full md:w-1/3">
+              <EditableLabel
+                id={merchant.id}
+                value={merchantDisplayName(merchant)}
+                linkValue={urls.merchant.path(merchant.id)}
+                onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { customName: value } })}
               />
-            </Table.Td>
-          </Table.Tr>
-        </Table.Tfoot>
-      </Table>
+            </div>
+            
+            <div className="w-full md:w-1/3">
+              <TransactionType
+                merchant={merchant}
+                onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { defaultTransactionType: value as TransactionTypeType } })}
+              />
+            </div>
+            
+            <div className="w-full md:w-1/3">
+              <CategoryDisplay
+                category={merchant.defaultMerchantTag}
+                onSave={id => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
+                allCategories={allMerchantTags}
+              />
+            </div>
+          </div>
+        ))}
+
+        <div className="flex flex-row justify-center my-3">
+          <Pagination
+            size={isMobile ? 'xs' : 'md'}
+            total={page.totalPages}
+            value={page.currentPage}
+            onChange={setPage}
+            withEdges
+            withControls
+          />
+        </div>
+      </div>
     </div>
   );
 }
