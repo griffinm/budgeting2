@@ -50,43 +50,45 @@ export function TransactionsTable({
           <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
         )}
       </div>
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            {headers.filter(header => showCols.includes(header.accessor as ColNames)).map((header) => (
-              <Table.Th key={header.accessor}>{header.label}</Table.Th>
+      <Table.ScrollContainer minWidth={100}>
+        <Table highlightOnHover>
+          <Table.Thead>
+            <Table.Tr>
+              {headers.filter(header => showCols.includes(header.accessor as ColNames)).map((header) => (
+                <Table.Th key={header.accessor}>{header.label}</Table.Th>
+              ))}
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {transactions.map((transaction) => (
+              <TableRow
+                key={transaction.id}
+                transaction={transaction}
+                showCols={showCols}
+                updateTransaction={updateTransaction}
+                merchantTags={merchantTags}
+              />
             ))}
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {transactions.map((transaction) => (
-            <TableRow
-              key={transaction.id}
-              transaction={transaction}
-              showCols={showCols}
-              updateTransaction={updateTransaction}
-              merchantTags={merchantTags}
-            />
-          ))}
-        </Table.Tbody>
-        <Table.Tfoot>
-          <Table.Tr>
-            <Table.Td colSpan={headers.length}>
-              {page && (
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <Pagination
-                    total={page.totalPages}
-                    value={page.currentPage}
-                    onChange={setPage}
-                    withEdges
-                    withControls
-                  />
-                </div>
-              )}
-            </Table.Td>
-          </Table.Tr>
-        </Table.Tfoot>
-      </Table>
+          </Table.Tbody>
+          <Table.Tfoot>
+            <Table.Tr>
+              <Table.Td colSpan={headers.length}>
+                {page && (
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <Pagination
+                      total={page.totalPages}
+                      value={page.currentPage}
+                      onChange={setPage}
+                      withEdges
+                      withControls
+                    />
+                  </div>
+                )}
+              </Table.Td>
+            </Table.Tr>
+          </Table.Tfoot>
+        </Table>
+      </Table.ScrollContainer>
 
     </div>
   );
