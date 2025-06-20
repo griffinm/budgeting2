@@ -27,3 +27,11 @@ export const updateMerchantTag = async ({
   const response = await baseClient.put(`/merchant_tags/${id}`, data);
   return response.data;
 };
+
+export const deleteMerchantTag = async ({
+  id,
+}: {
+  id: number;
+}): Promise<void> => {
+  await baseClient.delete(`/merchant_tags/${id}`);
+};

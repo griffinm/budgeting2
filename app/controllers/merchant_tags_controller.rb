@@ -25,6 +25,16 @@ class MerchantTagsController < ApplicationController
     end
   end
 
+  # DELETE /api/merchant_tags/:id
+  def destroy
+    @merchant_tag = current_user.account.merchant_tags.find(params[:id])
+    if @merchant_tag.destroy
+      render json: { message: 'Merchant tag deleted' }, status: :ok
+    else
+      render json: { errors: @merchant_tag.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def update_params

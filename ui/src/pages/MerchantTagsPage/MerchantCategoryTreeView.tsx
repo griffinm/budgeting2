@@ -5,14 +5,23 @@ import {
    createMerchantTag as createMerchantTagApi,
    fetchMerchantTags,
    CreateMerchantTagRequest,
+   deleteMerchantTag,
 } from "@/api";
 import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
+import { Confirm, ConfirmParams } from "@/components/Confirm/Confirm";
 
 export const MerchantCategoryTreeView = () => {
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
   const organizedMerchantTags = useMemo(() => {
     return formatMerchantTagsAsTree({ merchantTags });
   }, [merchantTags]);
+  const [confirm, setConfirm] = useState<ConfirmParams>({
+    opened: false,
+    label: '',
+    onConfirm: () => {},
+    onCancel: () => {},
+    title: 'Delete Merchant Tag',
+  });
 
   useEffect(() => {
     fetchMerchantTags()
@@ -26,15 +35,51 @@ export const MerchantCategoryTreeView = () => {
       })
   }
 
+  const handleDeleteMerchantTag = (id: number) => {
+    deleteMerchantTag({ id })
+      .then(() => {
+        setMerchantTags(merchantTags.filter((merchantTag) => merchantTag.id !== id));
+      })
+  }
+  const onDeleteMerchantTag = (merchantTag: MerchantTag) => {
+    setConfirm({
+      opened: true,
+      label: `Are you sure you want to delete ${merchantTag.name}?`,
+      title: 'Delete Merchant Tag',
+      onConfirm: () => {
+        handleDeleteMerchantTag(merchantTag.id);
+        setConfirm({
+          opened: false,
+          label: '',
+          title: 'Delete Merchant Tag',
+          onConfirm: () => {},
+          onCancel: () => {}
+        })
+      },
+      onCancel: () => setConfirm({
+        opened: false,
+        label: '',
+        title: 'Delete Merchant Tag',
+        onConfirm: () => {},
+        onCancel: () => {}
+      })
+    })
+  }
+
   return (
     <div>
+      <Confirm confirm={confirm} />
       <NewMerchantTagForm
         onCancel={() => {}}
         saveMerchantTag={handleCreateMerchantTag}
       />
       {organizedMerchantTags.map((merchantTag) => (
         <div className="mb-2" key={merchantTag.id}>
-          <TreeItem merchantTag={merchantTag} handleCreateMerchantTag={handleCreateMerchantTag} />
+          <TreeItem
+            merchantTag={merchantTag}
+            handleCreateMerchantTag={handleCreateMerchantTag}
+            onDeleteMerchantTag={onDeleteMerchantTag}
+          />
         </div>
       ))}
     </div>
@@ -45,10 +90,12 @@ export const TreeItem = ({
   merchantTag,
   handleCreateMerchantTag,
   depth = 1,
+  onDeleteMerchantTag,
 }: {
   merchantTag: MerchantTag;
   handleCreateMerchantTag: (params: CreateMerchantTagRequest) => void;
   depth?: number;
+  onDeleteMerchantTag: (merchantTag: MerchantTag) => void;
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -71,7 +118,7 @@ export const TreeItem = ({
             <>
               <Button variant="outline" size="xs">✎ Edit</Button>
               <Button variant="outline" size="xs" onClick={() => setShowForm(true)}>✎ Add Child</Button>
-              <Button variant="outline" size="xs" color="red">🗑️ Delete</Button>
+              <Button variant="outline" size="xs" color="red" onClick={() => onDeleteMerchantTag(merchantTag)}>🗑️ Delete</Button>
               <Button variant="outline" size="xs" onClick={() => setShowOptions(false)}>✕ Cancel</Button>
             </>
           )}
@@ -97,7 +144,7 @@ export const TreeItem = ({
           {merchantTag.children.map((child) => (
             <div key={child.id} className="border-l-2 border-gray-200" style={{ paddingLeft: `${paddingLeft}px` }}>
               <TreeItem
-                
+                onDeleteMerchantTag={onDeleteMerchantTag}
                 merchantTag={child}
                 handleCreateMerchantTag={(params) => {
                   handleCreateMerchantTag({
