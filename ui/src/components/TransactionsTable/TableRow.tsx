@@ -24,47 +24,6 @@ export function TableRow({
   merchantTags: MerchantTag[];
   showNote?: boolean;
 }) {
-  const [isEditingNote, setIsEditingNote] = useState(false);
-  const [note, setNote] = useState(transaction.note || '');
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    updateTransaction(transaction.id, { note });
-    setIsEditingNote(false);
-  };
-
-  const renderNote = () => {
-    if (!showNote) return null;
-    // if (isEditingNote) {
-    //   return (
-    //     <Table.Tr style={{ borderTop: 'none' }}>
-    //       <Table.Td colSpan={showCols.length}>
-    //         <form onSubmit={handleSubmit} className="flex flex-row gap-2">
-    //           <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
-    //           <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
-    //           <Button type="submit">Save</Button>
-    //         </form>
-    //       </Table.Td>
-    //     </Table.Tr>
-    //   )
-    // }
-
-    // // Not editing note
-    // return (
-    //   <Table.Tr style={{ borderTop: 'none' }}>
-    //     <Table.Td colSpan={showCols.length}>
-    //       {
-    //         transaction.note ? (
-    //           <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
-    //         ) : (
-    //           <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>Add Note</span>
-    //         )
-    //       }
-    //     </Table.Td>
-    //   </Table.Tr>
-    // )
-  }
-
   return (
     <div className="flex flex-row border border-gray-200 p-3 rounded-md shadow-sm">
       {condensed ? (
