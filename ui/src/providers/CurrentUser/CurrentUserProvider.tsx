@@ -30,6 +30,10 @@ export const CurrentUserProvider: React.FC<CurrentUserProviderProps> = ({ childr
     });
   }, []);
 
+  const deleteToken = () => {
+    localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+  }
+
   const setToken = (token: string) => {
     if (!token) {
       return
@@ -44,6 +48,7 @@ export const CurrentUserProvider: React.FC<CurrentUserProviderProps> = ({ childr
       userLoading,
       setUser,
       setToken,
+      deleteToken,
     }}>
       {userLoading ? (
         <Loading />

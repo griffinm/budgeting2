@@ -6,6 +6,7 @@ interface CurrentUserContextType {
   userLoading: boolean;
   setUser: (user: User) => void;
   setToken: (token: string) => void;
+  deleteToken: () => void;
 }
 
 export const CurrentUserContext = createContext<CurrentUserContextType>({
@@ -13,4 +14,5 @@ export const CurrentUserContext = createContext<CurrentUserContextType>({
   userLoading: true,
   setUser: () => {},
   setToken: () => {},
+  deleteToken: () => {},
 });

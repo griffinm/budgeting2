@@ -1,4 +1,3 @@
-
 import { 
   Outlet, 
   useNavigate, 
@@ -7,10 +6,13 @@ import {
 import { 
   AppShell, 
   Burger, 
+  Button, 
   NavLink,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { MainNavLinks } from '@/utils/urls';
+import { MainNavLinks, urls } from '@/utils/urls';
+import { useContext } from 'react';
+import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
 
 const isActive = (path: string, location: string) => {
   if (path === '/') {
@@ -23,6 +25,20 @@ export default function MainLayout() {
   const [opened, { toggle }] = useDisclosure();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, deleteToken } = useContext(CurrentUserContext);
+
+  const handleLogout = () => {
+    deleteToken();
+    navigate(urls.login.path());
+  }
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
+    // Close mobile menu after navigation
+    if (opened) {
+      toggle();
+    }
+  }
 
   return (
     <AppShell
@@ -31,7 +47,22 @@ export default function MainLayout() {
       padding="md"
     >
       <AppShell.Header>
-        <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+        <div className="visible md:hidden flex flex-row justify-between items-center w-full px-5 h-full">
+          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+        </div>
+        <div className="flex-row justify-between items-center w-full hidden sm:flex align-middle h-full px-5">
+          <div>
+            
+          </div>
+          <div className="text-2xl font-bold">
+            Budgeting
+          </div>
+          <div>
+            {user?.email}
+            <Button variant="subtle" size="xs" color="red" onClick={handleLogout}>Logout</Button>
+          </div>
+        </div>
+        
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
@@ -39,7 +70,7 @@ export default function MainLayout() {
           <NavLink
             key={link.path()}
             label={link.label}
-            onClick={() => navigate(link.path())}
+            onClick={() => handleNavigation(link.path())}
             active={isActive(link.path(), location.pathname)}
           />
         ))}
@@ -51,3 +82,4 @@ export default function MainLayout() {
     </AppShell>
   );
 }
+
