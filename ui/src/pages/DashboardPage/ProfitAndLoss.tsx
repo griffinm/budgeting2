@@ -32,8 +32,8 @@ export function ProfitAndLoss({
 
   const renderData = () => {
     return (
-      <div className="flex flex-row gap-4">
-        <div className="w-1/2">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="w-full md:w-1/2">
           <BarChart
             title={`Profit and Loss for ${monthsBack} months`}
             h={350}
@@ -66,7 +66,7 @@ export function ProfitAndLoss({
             ]}
           />
         </div>
-        <div className="w-1/2">
+        <div className="w-full md:w-1/2">
           <Table>
             <Table.Thead>
               <Table.Tr>
@@ -85,6 +85,7 @@ export function ProfitAndLoss({
                       amount={item.expense}
                       applyColor={false}
                       useBold={false}
+                      showCents={false}
                     />
                   </Table.Td>
                   <Table.Td>
@@ -92,6 +93,7 @@ export function ProfitAndLoss({
                       amount={item.income}
                       applyColor={false}
                       useBold={false}
+                      showCents={false}
                     />
                   </Table.Td>
                   <Table.Td>
@@ -99,6 +101,7 @@ export function ProfitAndLoss({
                       amount={item.profit}
                       applyColor={true}
                       useBold={true}
+                      showCents={false}
                     />
                   </Table.Td>
                 </Table.Tr>
@@ -112,6 +115,7 @@ export function ProfitAndLoss({
                     amount={sortedProfitAndLoss.reduce((acc, item) => acc + item.expense, 0)}
                     applyColor={false}
                     useBold
+                    showCents={false}
                   />
                 </Table.Td>
                 <Table.Td>
@@ -119,6 +123,7 @@ export function ProfitAndLoss({
                     amount={sortedProfitAndLoss.reduce((acc, item) => acc + item.income, 0)}
                     applyColor={false}
                     useBold
+                    showCents={false}
                   />
                 </Table.Td>
                 <Table.Td>
@@ -126,6 +131,7 @@ export function ProfitAndLoss({
                     amount={sortedProfitAndLoss.reduce((acc, item) => acc + item.profit, 0)}
                     applyColor={true}
                     useBold={true}
+                    showCents={false}
                   />
                 </Table.Td>
               </Table.Tr>
@@ -138,6 +144,7 @@ export function ProfitAndLoss({
                     amount={averageExpense}
                     applyColor={false}
                     useBold={false}
+                    showCents={false}
                   />
                 </Table.Td>
                 <Table.Td>
@@ -145,6 +152,7 @@ export function ProfitAndLoss({
                     amount={averageIncome}
                     applyColor={false}
                     useBold={false}
+                    showCents={false}
                   />
                 </Table.Td>
                 <Table.Td>
@@ -152,6 +160,7 @@ export function ProfitAndLoss({
                     amount={averageProfit}
                     applyColor={true}
                     useBold={true}
+                    showCents={false}
                   />
                 </Table.Td>
               </Table.Tr>
@@ -169,6 +178,7 @@ export function ProfitAndLoss({
           Profit and Loss
         </h2>
         <Select
+          size="xs"
           data={[
             { value: '3', label: 'Show 3 Months' },
             { value: '6', label: 'Show 6 Months' },

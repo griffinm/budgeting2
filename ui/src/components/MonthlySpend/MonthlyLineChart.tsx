@@ -54,16 +54,17 @@ export function MonthlyLineChart({
         <h2 className="text-2xl">
           {title}
         </h2>
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 items-center">
           <Select
-            size="sm"
+            size="xs"
+            label="Show average as"
             data={[
-              { value:  '1', label: '1 Month Back' },
-              { value:  '3', label: '3 Months Back' },
-              { value:  '6', label: '6 Months Back' },
+              { value:  '1', label: '1 Month' },
+              { value:  '3', label: '3 Months' },
+              { value:  '6', label: '6 Months' },
+              { value:  '12', label: '12 Months' },
             ]}
             value={monthsBack.toString()}
-            label="Show average as"
             onChange={(value) => handleMonthsBackChange(value)}
           />
         </div>

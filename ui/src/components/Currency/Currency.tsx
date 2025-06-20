@@ -4,10 +4,12 @@ export function Currency({
   amount,
   applyColor = true,
   useBold = true,
+  showCents = true,
 }: {
   amount: number;
   applyColor?: boolean;
   useBold?: boolean;
+  showCents?: boolean;
 }) {
   const isNegative = amount < 0;
   const classes = classNames({
@@ -18,7 +20,7 @@ export function Currency({
 
   return (
     <span className={classes}>
-      ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      ${amount.toLocaleString('en-US', { minimumFractionDigits: showCents ? 2 : 0, maximumFractionDigits: showCents ? 2 : 0 })}
     </span>
   )
 }
