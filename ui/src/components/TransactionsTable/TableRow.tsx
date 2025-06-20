@@ -13,13 +13,13 @@ import { useState } from "react";
 
 export function TableRow({
   transaction,
-  showCols,
+  condensed,
   updateTransaction,
   merchantTags,
   showNote = true,
 }: {
   transaction: Transaction;
-  showCols: ColNames[];
+  condensed?: boolean;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
   showNote?: boolean;
@@ -35,86 +35,171 @@ export function TableRow({
 
   const renderNote = () => {
     if (!showNote) return null;
-    if (isEditingNote) {
-      return (
-        <Table.Tr style={{ borderTop: 'none' }}>
-          <Table.Td colSpan={showCols.length}>
-            <form onSubmit={handleSubmit} className="flex flex-row gap-2">
-              <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
-              <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </form>
-          </Table.Td>
-        </Table.Tr>
-      )
-    }
+    // if (isEditingNote) {
+    //   return (
+    //     <Table.Tr style={{ borderTop: 'none' }}>
+    //       <Table.Td colSpan={showCols.length}>
+    //         <form onSubmit={handleSubmit} className="flex flex-row gap-2">
+    //           <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
+    //           <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
+    //           <Button type="submit">Save</Button>
+    //         </form>
+    //       </Table.Td>
+    //     </Table.Tr>
+    //   )
+    // }
 
-    // Not editing note
+    // // Not editing note
+    // return (
+    //   <Table.Tr style={{ borderTop: 'none' }}>
+    //     <Table.Td colSpan={showCols.length}>
+    //       {
+    //         transaction.note ? (
+    //           <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
+    //         ) : (
+    //           <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>Add Note</span>
+    //         )
+    //       }
+    //     </Table.Td>
+    //   </Table.Tr>
+    // )
+  }
+
+  return (
+    <div className="flex flex-row border border-gray-200 p-3 rounded-md shadow-sm">
+      {condensed ? (
+        <CondensedTableRow
+          transaction={transaction}
+          updateTransaction={updateTransaction}
+        />
+      ) : (
+        <FullTableRow
+          transaction={transaction}
+          updateTransaction={updateTransaction}
+          merchantTags={merchantTags}
+        />
+      )}
+    </div>
+  )
+}
+
+function CondensedTableRow({
+  transaction,
+  updateTransaction,
+}: {
+  transaction: Transaction;
+  updateTransaction: (id: number, params: TransactionUpdateParams) => void;
+}) {
+  return (
+    <div className="flex flex-col w-full gap-2">
+      <div className="flex flex-row flex-1">
+        <div className="flex flex-col w-1/3">
+          <span className="text-lg">
+            <TransactionAmount amount={transaction.amount} />
+          </span>
+        </div>
+        <div className="flex flex-col w-1/3">
+          <span className="text-sm text-gray-500">
+            {formatDate(transaction.date, 'M/d/yy')}
+          </span>
+        </div>
+        <div className="flex flex-col w-1/3">
+          <span className="text-sm text-gray-500">
+            {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
+          </span>
+        </div>
+      </div>
+
+      <Note transaction={transaction} updateTransaction={updateTransaction} />
+    </div>
+  );
+}
+
+function FullTableRow({
+  transaction,
+  updateTransaction,
+  merchantTags,
+}: {
+  transaction: Transaction;
+  updateTransaction: (id: number, params: TransactionUpdateParams) => void;
+  merchantTags: MerchantTag[];
+}) {
+  return (
+    <div className="flex flex-row w-full">      
+      <div className="flex flex-col w-1/3">
+        <span className="text-lg">
+          <TransactionAmount amount={transaction.amount} />
+        </span>
+
+        <span className="text-sm text-gray-500">
+          {formatDate(transaction.date, 'M/d/yy')}
+        </span>
+
+        <span className="text-sm text-gray-500">
+          {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2 w-1/3">
+        <div>
+          <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
+            {merchantDisplayName(transaction.merchant)}
+          </Link>
+        </div>
+        <div>
+          <TransactionType
+            transaction={transaction}
+            onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
+          />
+        </div>
+      </div>
+
+      <div className="w-1/3">
+        <CategoryDisplay
+          category={transaction.merchantTag}
+          onSave={newTagId => updateTransaction(transaction.id, { merchantTagId: newTagId })}
+          allCategories={merchantTags}
+        />
+      </div>
+    </div>
+  )
+}
+
+function Note({
+  transaction,
+  updateTransaction,
+}: {
+  transaction: Transaction;
+  updateTransaction: (id: number, params: TransactionUpdateParams) => void;
+}) {
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [note, setNote] = useState(transaction.note || '');
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    updateTransaction(transaction.id, { note });
+    setIsEditingNote(false);
+  };
+
+  if (isEditingNote) {
     return (
-      <Table.Tr style={{ borderTop: 'none' }}>
-        <Table.Td colSpan={showCols.length}>
-          {
-            transaction.note ? (
-              <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
-            ) : (
-              <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>Add Note</span>
-            )
-          }
-        </Table.Td>
-      </Table.Tr>
+      <form onSubmit={handleSubmit} className="flex flex-row gap-2">
+        <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
+        <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
+        <Button type="submit">Save</Button>
+      </form>
     )
   }
 
   return (
-    <>
-      <Table.Tr style={{ borderBottom: showNote ? 'none' : '1px solid #e0e0e0' }}>
-        {showCols.includes('date') && (
-          <Table.Td>
-            {formatDate(transaction.date, 'M/d/yy')}
-          </Table.Td>
-        )}
-        
-        {showCols.includes('amount') && (
-          <Table.Td>
-            <TransactionAmount amount={transaction.amount} />
-          </Table.Td>
-        )}
-
-        {showCols.includes('merchant') && (
-          <Table.Td>
-            <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
-              {merchantDisplayName(transaction.merchant)}
-            </Link>
-          </Table.Td>
-        )}
-
-        {showCols.includes('account') && (
-          <Table.Td>
-            {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
-          </Table.Td>
-        )}
-
-        {showCols.includes('type') && (
-          <Table.Td w={150}>
-            <TransactionType
-              transaction={transaction}
-              onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
-            />
-          </Table.Td>
-        )}
-
-        {showCols.includes('category') && (
-          <Table.Td>
-            <CategoryDisplay
-              category={transaction.merchantTag}
-              onSave={newTagId => updateTransaction(transaction.id, { merchantTagId: newTagId })}
-              allCategories={merchantTags}
-            />
-          </Table.Td>
-        )}
-      </Table.Tr>
-
-      {renderNote()}
-    </>
-  );
+    <div>
+      {
+        transaction.note ? (
+          <span className="text-sm text-gray-500 cursor-pointer" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
+        ) : (
+          <span className="text-sm text-gray-500 cursor-pointer" onClick={() => setIsEditingNote(true)}>Add Note</span>
+        )
+      }
+    </div>
+  )
 }

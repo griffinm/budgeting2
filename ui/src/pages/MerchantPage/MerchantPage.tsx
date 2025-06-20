@@ -140,7 +140,7 @@ export default function MerchantPage() {
             updateTransaction={updateMerchantTransaction}
             merchantTags={[]}
             error={merchantTransactionsError}
-            showCols={['date', 'amount', 'account']}
+            condensed={true}
             showSearch={false}
           />
         </BorderBox>

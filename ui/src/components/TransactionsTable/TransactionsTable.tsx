@@ -1,19 +1,11 @@
 // import { TransactionSearchParams } from "@/api/transaction-client";
 import { Transaction, Page, MerchantTag } from "@/utils/types";
-import { Pagination, Table } from "@mantine/core";
+import { Pagination } from "@mantine/core";
 import { Search } from "./Search";
 import { TransactionSearchParams, TransactionUpdateParams } from "@/api/transaction-client";
 import { TableRow } from "./TableRow";
-
-const headers = [
-  { label: 'Date', accessor: 'date' },
-  { label: 'Amount', accessor: 'amount' },
-  { label: 'Merchant', accessor: 'merchant' },
-  { label: 'Account', accessor: 'account' },
-  { label: 'Type', accessor: 'type' },
-  { label: 'Category', accessor: 'category' },
-]
-export type ColNames = 'date' | 'amount' | 'merchant' | 'account' | 'type' | 'category';
+import { Loading } from "../Loading";
+import { useMediaQuery } from '@mantine/hooks';
 
 export function TransactionsTable({
   transactions,
@@ -24,7 +16,7 @@ export function TransactionsTable({
   onSetSearchParams,
   updateTransaction,
   merchantTags,
-  showCols = ['date', 'amount', 'merchant', 'account', 'type', 'category'],
+  condensed = false,
   showSearch = true,
 }: {
   transactions: Transaction[];
@@ -37,9 +29,11 @@ export function TransactionsTable({
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
-  showCols?: ColNames[];
+  condensed?: boolean;
   showSearch?: boolean;
 }) {
+  const isMobile = useMediaQuery('(max-width: 600px)');
+
   return (
     <div>
       <div className="flex flex-row justify-between mb-3">
@@ -50,46 +44,48 @@ export function TransactionsTable({
           <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
         )}
       </div>
-      <Table.ScrollContainer minWidth={100}>
-        <Table highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              {headers.filter(header => showCols.includes(header.accessor as ColNames)).map((header) => (
-                <Table.Th key={header.accessor}>{header.label}</Table.Th>
-              ))}
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
+
+      <div className="flex flex-row justify-center my-3">
+        <Pagination
+          size={isMobile ? 'xs' : 'md'}
+          total={page.totalPages}
+          value={page.currentPage}
+          onChange={setPage}
+          withEdges
+          withControls
+        />
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {isLoading ? (
+          <div className="flex flex-row justify-center my-3">
+            <Loading fullHeight={false} />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
             {transactions.map((transaction) => (
               <TableRow
                 key={transaction.id}
                 transaction={transaction}
-                showCols={showCols}
+                condensed={condensed}
                 updateTransaction={updateTransaction}
                 merchantTags={merchantTags}
               />
             ))}
-          </Table.Tbody>
-          <Table.Tfoot>
-            <Table.Tr>
-              <Table.Td colSpan={headers.length}>
-                {page && (
-                  <div style={{ display: 'flex', justifyContent: 'center' }}>
-                    <Pagination
-                      total={page.totalPages}
-                      value={page.currentPage}
-                      onChange={setPage}
-                      withEdges
-                      withControls
-                    />
-                  </div>
-                )}
-              </Table.Td>
-            </Table.Tr>
-          </Table.Tfoot>
-        </Table>
-      </Table.ScrollContainer>
+          </div>
+        )}
+      </div>
 
+      <div className="flex flex-row justify-center my-3">
+      <Pagination
+          size={isMobile ? 'xs' : 'md'}
+          total={page.totalPages}
+          value={page.currentPage}
+          onChange={setPage}
+          withEdges
+          withControls
+        />
+      </div>
     </div>
-  );
+  )
 }
