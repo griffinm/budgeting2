@@ -16,11 +16,13 @@ export function TableRow({
   showCols,
   updateTransaction,
   merchantTags,
+  showNote = true,
 }: {
   transaction: Transaction;
   showCols: ColNames[];
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
+  showNote?: boolean;
 }) {
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [note, setNote] = useState(transaction.note || '');
@@ -31,9 +33,41 @@ export function TableRow({
     setIsEditingNote(false);
   };
 
+  const renderNote = () => {
+    if (!showNote) return null;
+    if (isEditingNote) {
+      return (
+        <Table.Tr style={{ borderTop: 'none' }}>
+          <Table.Td colSpan={showCols.length}>
+            <form onSubmit={handleSubmit} className="flex flex-row gap-2">
+              <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
+              <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
+              <Button type="submit">Save</Button>
+            </form>
+          </Table.Td>
+        </Table.Tr>
+      )
+    }
+
+    // Not editing note
+    return (
+      <Table.Tr style={{ borderTop: 'none' }}>
+        <Table.Td colSpan={showCols.length}>
+          {
+            transaction.note ? (
+              <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
+            ) : (
+              <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>Add Note</span>
+            )
+          }
+        </Table.Td>
+      </Table.Tr>
+    )
+  }
+
   return (
     <>
-      <Table.Tr style={{ borderBottom: 'none' }}>
+      <Table.Tr style={{ borderBottom: showNote ? 'none' : '1px solid #e0e0e0' }}>
         {showCols.includes('date') && (
           <Table.Td>
             {formatDate(transaction.date, 'M/d/yy')}
@@ -80,29 +114,7 @@ export function TableRow({
         )}
       </Table.Tr>
 
-      {isEditingNote ? (
-        <Table.Tr style={{ borderTop: 'none' }}>
-          <Table.Td colSpan={showCols.length}>
-            <form onSubmit={handleSubmit} className="flex flex-row gap-2">
-              <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
-              <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
-              <Button type="submit">Save</Button>
-            </form>
-          </Table.Td>
-        </Table.Tr>
-      ) : (
-        <Table.Tr style={{ borderTop: 'none' }}>
-          <Table.Td colSpan={showCols.length}>
-            {
-              transaction.note ? (
-                <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
-              ) : (
-                <span className="text-gray-500 cursor-pointer text-sm" onClick={() => setIsEditingNote(true)}>Add Note</span>
-              )
-            }
-          </Table.Td>
-        </Table.Tr>
-      )}
+      {renderNote()}
     </>
   );
 }
