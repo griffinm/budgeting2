@@ -17,7 +17,11 @@ class TransactionsController < ApplicationController
           check_number: search_params[:check_number],
           currency_code: search_params[:currency_code],
           pending: search_params[:pending],
-          search_term: search_params[:search_term]
+          search_term: search_params[:search_term],
+          amount_greater_than: search_params[:amount_greater_than],
+          amount_less_than: search_params[:amount_less_than],
+          amount_equal_to: search_params[:amount_equal_to],
+          has_no_category: search_params[:has_no_category],
         ).call
       )
   end
@@ -46,6 +50,10 @@ class TransactionsController < ApplicationController
       :currency_code,
       :pending,
       :search_term,
+      :amount_greater_than,
+      :amount_less_than,
+      :amount_equal_to,
+      :has_no_category,
     )
   end
 

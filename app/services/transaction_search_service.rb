@@ -13,7 +13,11 @@ class TransactionSearchService < BaseService
     check_number: nil,
     currency_code: nil,
     pending: nil,
-    search_term: nil
+    search_term: nil,
+    amount_greater_than: nil,
+    amount_less_than: nil,
+    amount_equal_to: nil,
+    has_no_category: nil
   )
     @account_id = account_id
     @user_id = user_id
@@ -29,6 +33,10 @@ class TransactionSearchService < BaseService
     @currency_code = currency_code
     @pending = pending
     @search_term = search_term
+    @amount_greater_than = amount_greater_than
+    @amount_less_than = amount_less_than
+    @amount_equal_to = amount_equal_to
+    @has_no_category = has_no_category
   end
 
   def call
@@ -36,6 +44,26 @@ class TransactionSearchService < BaseService
       .includes(:plaid_account, :merchant_tag, merchant: :default_merchant_tag)
       .where(plaid_transactions: { account_id: @account_id })
       .order(date: :desc)
+
+    if @has_no_category.present?
+      transactions = transactions.where(merchant_tag_id: nil)
+    end
+
+    if @amount_greater_than.present?
+      transactions = transactions.where("amount > ?", @amount_greater_than)
+    end
+
+    if @amount_equal_to.present?
+      transactions = transactions.where("amount = ?", @amount_equal_to)
+    end
+
+    if @amount_less_than.present?
+      transactions = transactions.where("amount < ?", @amount_less_than)
+    end
+
+    if @amount_less_than.present?
+      transactions = transactions.where("amount < ?", @amount_less_than)
+    end
 
     if @user_id.present?
       transactions = transactions.where(plaid_accounts: { user_id: @user_id })
