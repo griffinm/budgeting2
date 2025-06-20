@@ -1,15 +1,9 @@
 // import { TransactionSearchParams } from "@/api/transaction-client";
 import { Transaction, Page, MerchantTag } from "@/utils/types";
 import { Pagination, Table } from "@mantine/core";
-import { format as formatDate } from "date-fns";
 import { Search } from "./Search";
 import { TransactionSearchParams, TransactionUpdateParams } from "@/api/transaction-client";
-import { TransactionAmount } from "../TransactionAmount/TransactionAmount";
-import { merchantDisplayName } from "@/utils/merchantsUtils";
-import { TransactionType } from "@/components/TransactionType";
-import { Link } from "react-router-dom";
-import { urls } from "@/utils/urls";
-import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
+import { TableRow } from "./TableRow";
 
 const headers = [
   { label: 'Date', accessor: 'date' },
@@ -19,7 +13,7 @@ const headers = [
   { label: 'Type', accessor: 'type' },
   { label: 'Category', accessor: 'category' },
 ]
-type ColNames = 'date' | 'amount' | 'merchant' | 'account' | 'type' | 'category';
+export type ColNames = 'date' | 'amount' | 'merchant' | 'account' | 'type' | 'category';
 
 export function TransactionsTable({
   transactions,
@@ -66,53 +60,13 @@ export function TransactionsTable({
         </Table.Thead>
         <Table.Tbody>
           {transactions.map((transaction) => (
-            <Table.Tr key={transaction.id}>
-              {showCols.includes('date') && (
-                <Table.Td>
-                  {formatDate(transaction.date, 'M/d/yy')}
-                </Table.Td>
-              )}
-              
-              {showCols.includes('amount') && (
-                <Table.Td>
-                  <TransactionAmount amount={transaction.amount} />
-                </Table.Td>
-              )}
-
-              {showCols.includes('merchant') && (
-                <Table.Td>
-                  <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
-                    {merchantDisplayName(transaction.merchant)}
-                  </Link>
-                </Table.Td>
-              )}
-
-              {showCols.includes('account') && (
-                <Table.Td>
-                  {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
-                </Table.Td>
-              )}
-
-              {showCols.includes('type') && (
-                <Table.Td w={150}>
-                  <TransactionType
-                    transaction={transaction}
-                    onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
-                  />
-                </Table.Td>
-              )}
-
-              {showCols.includes('category') && (
-                <Table.Td>
-                  <CategoryDisplay
-                    category={transaction.merchantTag}
-                    onSave={newTagId => updateTransaction(transaction.id, { merchantTagId: newTagId })}
-                    allCategories={merchantTags}
-                  />
-                </Table.Td>
-              )}
-
-            </Table.Tr>
+            <TableRow
+              key={transaction.id}
+              transaction={transaction}
+              showCols={showCols}
+              updateTransaction={updateTransaction}
+              merchantTags={merchantTags}
+            />
           ))}
         </Table.Tbody>
         <Table.Tfoot>

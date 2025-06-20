@@ -83,6 +83,7 @@ export interface Transaction {
   plaidAccount: PlaidAccount;
   merchantTag?: MerchantTag | null;
   hasDefaultMerchantTag?: boolean;
+  note?: string | null;
 }
 
 export interface MerchantTag {

@@ -38,7 +38,7 @@ export function TrendChart({
           h={350}
           data={merchantSpendStats.monthlySpend.map((month) => ({
             month: month.month,
-            amount: month.amount,
+            amount: Math.abs(month.amount || 0),
           }))}
           dataKey="month"
           series={[
@@ -52,9 +52,7 @@ export function TrendChart({
             strokeWidth: 2,
             strokeDasharray: '3 3',
           }] : []}
-          valueFormatter={(value: number) => {
-            return `$${value.toLocaleString()}`;
-          }}
+          valueFormatter={(value: number) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`}
         />
       </div>
     </div>

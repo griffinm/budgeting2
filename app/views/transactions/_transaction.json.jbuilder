@@ -12,6 +12,7 @@ json.transactionType transaction.transaction_type
 json.checkNumber transaction.check_number
 json.currencyCode transaction.currency_code
 json.hasDefaultMerchantTag transaction.has_default_merchant_tag?
+json.note transaction.note
 
 json.merchant do
   json.partial! "merchants/merchant", merchant: transaction.merchant

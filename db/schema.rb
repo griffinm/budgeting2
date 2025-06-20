@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_12_194809) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_20_023124) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -145,6 +145,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_12_194809) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "merchant_tag_id"
+    t.text "note"
     t.index ["account_id"], name: "index_plaid_transactions_on_account_id"
     t.index ["merchant_id"], name: "index_plaid_transactions_on_merchant_id"
     t.index ["merchant_tag_id"], name: "index_plaid_transactions_on_merchant_tag_id"

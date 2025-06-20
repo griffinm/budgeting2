@@ -62,7 +62,15 @@ export default function MerchantPage() {
     if (merchant) {
       setMerchantSpendStatsLoading(true);
       fetchMerchantSpendStats({ id: Number(id), monthsBack: chartMonthsBack })
-        .then(setMerchantSpendStats)
+        .then((data) => {
+          setMerchantSpendStats({
+            monthlySpend: data.monthlySpend.map((month) => ({
+              month: month.month,
+              amount: Math.abs(month.amount || 0),
+            })),
+            allTimeSpend: data.allTimeSpend,
+          });
+        })
         .finally(() => setMerchantSpendStatsLoading(false));
     }
   }, [merchant, chartMonthsBack]);
