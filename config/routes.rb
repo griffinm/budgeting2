@@ -16,6 +16,7 @@ Rails.application.routes.draw do
         get "monthly_income", to: "data#monthly_income"
         get "average_income", to: "data#average_income"
         get "average_expense", to: "data#average_expense"
+        get "profit_and_loss", to: "data#profit_and_loss"
       end
     end
 

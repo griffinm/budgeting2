@@ -3,8 +3,17 @@ import { urls } from '@/utils/urls';
 import { MonthlySpend } from '@/components/MonthlySpend';
 import { useTransactionTrends } from './useTransactionTrends';
 import { DashboardCard } from './DashboardCard';
+import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
+import { ProfitAndLoss } from './ProfitAndLoss';
 
 export default function DashboardPage() {
+  const { 
+    profitAndLoss,
+    profitAndLossLoading,
+    monthsBack,
+    setMonthsBack: setProfitAndLossMonthsBack,
+  } = useProfitAndLoss();
+
   const {
     currentMonthExpenses,
     currentMonthIncome,
@@ -38,6 +47,13 @@ export default function DashboardPage() {
           loading={loading}
         />
       </div>
+      
+      <ProfitAndLoss
+        profitAndLoss={profitAndLoss}
+        monthsBack={monthsBack}
+        setMonthsBack={setProfitAndLossMonthsBack}
+        loading={profitAndLossLoading}
+      />
 
       <MonthlySpend
         currentMonthExpenses={currentMonthExpenses.transactions}

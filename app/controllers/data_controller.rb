@@ -45,6 +45,14 @@ class DataController < ApplicationController
     render json: { average: @average_expense }
   end
 
+  # GET /api/data/profit_and_loss
+  def profit_and_loss
+    months_back = params[:months_back] || 12
+    @profit_and_loss = ProfitAndLossService.new(account_id: current_user.account.id)
+      .profit_and_loss(months_back: months_back)
+    render json: @profit_and_loss
+  end
+
   private def format_params
     begin
       params[:month] = params[:month].to_i || Date.today.month

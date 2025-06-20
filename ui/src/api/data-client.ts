@@ -1,5 +1,5 @@
 import { baseClient } from '@/api/base-client';
-import { Transaction, TransactionType } from '@/utils/types';
+import { ProfitAndLossItem, Transaction, TransactionType } from '@/utils/types';
 
 export interface MonthlySpendParams {
   month?: number;
@@ -41,4 +41,15 @@ export async function averageForMonthsBack({
   const params = { months_back: monthsBack };
   const response = await baseClient.get(url, { params });
   return response.data.average;
+}
+
+export async function getProfitAndLoss({
+  monthsBack = 12,
+}: {
+  monthsBack: number;
+}): Promise<ProfitAndLossItem[]> {
+  const url = '/data/profit_and_loss';
+  const params = { months_back: monthsBack };
+  const response = await baseClient.get(url, { params });
+  return response.data;
 }

@@ -111,3 +111,11 @@ export interface MerchantSpendStats {
   monthlySpend: MerchantSpendMonth[];
   allTimeSpend: number;
 }
+
+export interface ProfitAndLossItem {
+  date: Date;
+  expense: number;
+  income: number;
+  profit: number;
+  profitPercentage: number;
+}
