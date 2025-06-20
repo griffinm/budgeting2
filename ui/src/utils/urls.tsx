@@ -59,7 +59,7 @@ export const urls: Record<string, Url> = {
     label: 'Categories',
     title: (name: string) => `${name} | Categories` + TITLE_SUFFIX,
     component: MerchantTagsPage,
-    section: 'none',
+    section: 'main',
   },
 }
 

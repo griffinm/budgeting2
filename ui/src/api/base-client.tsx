@@ -2,7 +2,7 @@ import axios from 'axios';
 import { urls } from '@/utils/urls';
 import { AUTH_TOKEN_STORAGE_KEY, AUTH_TOKEN_HEADER_KEY } from '@/utils/constants';
 
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 const baseClient = axios.create({
   baseURL: apiUrl,
