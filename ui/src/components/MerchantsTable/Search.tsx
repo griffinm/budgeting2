@@ -1,7 +1,6 @@
 import { MerchantSearchParams } from "@/api";
 import { TextInput } from "@mantine/core";
 import { useRef, useState } from "react";
-import { DatePicker } from '@mantine/dates';
 
 export function Search({
   searchParams,
