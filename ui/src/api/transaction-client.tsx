@@ -15,6 +15,10 @@ export interface TransactionSearchParams {
   currency_code?: string;
   pending?: boolean;
   search_term?: string;
+  amount_greater_than?: string;
+  amount_less_than?: string;
+  amount_equal_to?: string;
+  has_no_category?: boolean;
 }
 
 export interface TransactionUpdateParams {

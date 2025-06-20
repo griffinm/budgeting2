@@ -1,6 +1,7 @@
 import { MerchantSearchParams } from "@/api";
 import { TextInput } from "@mantine/core";
 import { useRef, useState } from "react";
+import { DatePicker } from '@mantine/dates';
 
 export function Search({
   searchParams,
@@ -37,7 +38,9 @@ export function Search({
       </div>
       {showAdvanced && (
         <div className="mt-2">
-          Advanced Search
+          <form>
+
+          </form>
         </div>
       )}
     </div>

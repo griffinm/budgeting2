@@ -51,9 +51,6 @@ export default function MainLayout() {
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
         </div>
         <div className="flex-row justify-between items-center w-full hidden sm:flex align-middle h-full px-5">
-          <div>
-            
-          </div>
           <div className="text-2xl font-bold">
             Budgeting
           </div>
