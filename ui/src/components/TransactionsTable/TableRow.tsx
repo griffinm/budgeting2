@@ -1,6 +1,5 @@
 import { MerchantTag, Transaction } from "@/utils/types";
-import { ColNames } from "./TransactionsTable";
-import { Button, Input, Table } from "@mantine/core";
+import { Button, Input } from "@mantine/core";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { format as formatDate } from "date-fns";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
@@ -16,13 +15,11 @@ export function TableRow({
   condensed,
   updateTransaction,
   merchantTags,
-  showNote = true,
 }: {
   transaction: Transaction;
   condensed?: boolean;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
-  showNote?: boolean;
 }) {
   return (
     <div className="flex flex-row border border-gray-200 p-3 rounded-md shadow-sm">
