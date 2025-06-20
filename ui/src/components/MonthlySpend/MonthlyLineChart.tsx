@@ -81,7 +81,6 @@ export function MonthlyLineChart({
         yAxisLabel={transactionType === 'expense' ? 'Expenses' : 'Income'}
         xAxisLabel="Day of Month"
         tooltipAnimationDuration={200}
-
         referenceLines={[
           { 
             y: average, 
@@ -91,7 +90,7 @@ export function MonthlyLineChart({
             strokeDasharray: '3 3',
           },
         ]}
-        valueFormatter={(value) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
+        valueFormatter={(value: number) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
         series={[
           { name: 'currentMonth', color: lineColor, label: 'This Month' },
           { name: 'previousMonth', color: 'gray', label: 'Last Month' },

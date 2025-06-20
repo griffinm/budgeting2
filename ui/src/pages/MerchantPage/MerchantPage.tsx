@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchMerchant, fetchMerchantSpendStats } from "@/api";
 import { Merchant, MerchantSpendStats } from "@/utils/types";
@@ -34,6 +34,15 @@ export default function MerchantPage() {
       merchant_id: Number(id),
     },
   });
+  const [chartMonthsBack, setChartMonthsBack] = useState(6);
+  const averageSpendForChart = useMemo(() => {
+    if (!merchantSpendStats) {
+      return undefined;
+    }
+    return merchantSpendStats.monthlySpend.reduce((acc, curr) => acc + curr.amount, 0) / chartMonthsBack;
+  }, [merchantSpendStats]);
+
+  
 
   // Fetch the merchant
   useEffect(() => {
@@ -52,11 +61,11 @@ export default function MerchantPage() {
   useEffect(() => {
     if (merchant) {
       setMerchantSpendStatsLoading(true);
-      fetchMerchantSpendStats({ id: Number(id) })
+      fetchMerchantSpendStats({ id: Number(id), monthsBack: chartMonthsBack })
         .then(setMerchantSpendStats)
         .finally(() => setMerchantSpendStatsLoading(false));
     }
-  }, [merchant]);
+  }, [merchant, chartMonthsBack]);
 
   if (merchantLoading || !merchant) {
     return <Loading />
@@ -87,7 +96,7 @@ export default function MerchantPage() {
             />
 
             <SpendSummaryCard
-              title="Last 6 Months"
+              title={`Last ${chartMonthsBack} Months`}
               value={merchantSpendStats?.monthlySpend.reduce((acc, curr) => acc + curr.amount, 0) || 0}
               loading={merchantSpendStatsLoading}
             />
@@ -104,6 +113,9 @@ export default function MerchantPage() {
           <TrendChart
             merchantSpendStats={merchantSpendStats || undefined}
             loading={merchantSpendStatsLoading}
+            monthsBack={chartMonthsBack}
+            onChangeMonthsBack={setChartMonthsBack}
+            averageSpendForChart={averageSpendForChart}
           />
         </BorderBox>
 
