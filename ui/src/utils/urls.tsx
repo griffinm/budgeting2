@@ -10,6 +10,7 @@ const MerchantsPage = lazy(() => import('@/pages/MerchantsPage/MerchantsPage'));
 const MerchantPage = lazy(() => import('@/pages/MerchantPage/MerchantPage'));
 const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTagsPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage/ProfilePage'));
 
 interface Url {
   path: (...args: any[]) => string;
@@ -59,6 +60,13 @@ export const urls: Record<string, Url> = {
     label: 'Categories',
     title: (name: string) => `${name} | Categories` + TITLE_SUFFIX,
     component: MerchantTagsPage,
+    section: 'main',
+  },
+  profile: {
+    path: () =>'/profile',
+    label: 'Profile',
+    title: () => 'Profile' + TITLE_SUFFIX,
+    component: ProfilePage,
     section: 'main',
   },
 }

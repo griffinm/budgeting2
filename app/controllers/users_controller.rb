@@ -22,6 +22,18 @@ class UsersController < ApplicationController
     render json: { user: user }, status: :created
   end
 
+  # PATCH /users/current
+  def update
+    if current_user.update(user_params)
+      # Create a new token for the user
+      token = AuthService.generate_token_for_user(user: current_user)
+
+      render json: { user: current_user.as_json, token: token }, status: :ok
+    else
+      render json: { errors: current_user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   private def user_params
     params.require(:user).permit(:email, :first_name, :last_name, :password)
   end

@@ -15,6 +15,15 @@ class AuthService < BaseService
     end
   end
 
+  def self.generate_token_for_user(user:)
+    payload = {
+      user_id: user.id,
+      account_id: user.account_id,
+      exp: Time.now.to_i + (30 * 24 * 60 * 60) # 30 days from now
+    }
+    return JWT.encode(payload, self.verification_key, 'HS256')
+  end
+
   def self.generate_token(email:, password:)
     begin
       user = User.find_by(email: email)

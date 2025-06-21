@@ -4,7 +4,7 @@ export function usePageTitle() {
   const [currentTitle, setCurrentTitle] = useState('');
   
   useEffect(() => {
-    const fullTitle = currentTitle ? `${currentTitle} | Budgeting` : 'Budgeting';
+    const fullTitle = currentTitle ? currentTitle : 'Budgeting';
     document.title = fullTitle;
   }, [currentTitle]);
 
