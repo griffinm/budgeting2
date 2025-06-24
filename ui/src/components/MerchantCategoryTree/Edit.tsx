@@ -10,7 +10,7 @@ import {
 import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
 import { Confirm, ConfirmParams } from "@/components/Confirm/Confirm";
 
-export const MerchantCategoryTreeView = () => {
+export const Edit = () => {
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
   const organizedMerchantTags = useMemo(() => {
     return formatMerchantTagsAsTree({ merchantTags });
