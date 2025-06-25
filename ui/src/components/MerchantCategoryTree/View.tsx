@@ -2,29 +2,53 @@ import { useEffect, useState } from "react";
 import { MerchantTag } from "@/utils/types";
 import { fetchMerchantTagSpendStats } from "@/api";
 import { Loading } from "../Loading";
-import { Table } from "@mantine/core";
+import { Button, Table } from "@mantine/core";
 import { TransactionAmount } from "../TransactionAmount";
 import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
 import classNames from "classnames";
+import { 
+  endOfMonth,
+  startOfMonth,
+  subMonths,
+} from "date-fns";
+import { DateInput } from "@mantine/dates";
+
+const defaultStartDate = startOfMonth(new Date());
+const defaultEndDate = endOfMonth(new Date());
+
+const quickOptions = [
+  { label: "This Month", monthsBack: 0 },
+  { label: "Last Month", monthsBack: 1 },
+  { label: "Last 3 Months", monthsBack: 3 },
+  { label: "Last 6 Months", monthsBack: 6 },
+  { label: "Last 12 Months", monthsBack: 12 },
+]
 
 export const View = () => {
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
   const [loading, setLoading] = useState(false);
+  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
+  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
 
   useEffect(() => {
     setLoading(true);
-    fetchMerchantTagSpendStats({}).then((merchantTags) => {
+    fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
+    .then((merchantTags) => {
       setMerchantTags(formatMerchantTagsAsTree({ merchantTags }));
       setLoading(false);
     });
-  }, []);
+  }, [startDate, endDate]);
 
-  if (loading) {
-    return <Loading />;
+  const startDateValue = startDate ? new Date(startDate) : new Date(defaultStartDate);
+  const endDateValue = endDate ? new Date(endDate) : new Date(defaultEndDate);
+
+  const setDates = (monthsBack: number) => {
+    setStartDate(startOfMonth(subMonths(new Date(), monthsBack)));
+    setEndDate(defaultEndDate);
   }
 
-  return (
-    <div>
+  const renderTable = () => {
+    return (
       <Table highlightOnHover>
         <Table.Thead>
           <Table.Tr>
@@ -38,6 +62,33 @@ export const View = () => {
           ))}
         </Table.Tbody>
       </Table>
+    )
+  }
+
+  return (
+    <div>
+      <div className="flex flex-col sm:flex-row gap-2 mb-5 items-end">
+        <DateInput
+          size="xs"
+          value={startDateValue}
+          onChange={(date) => setStartDate(date ? new Date(date) : null)}
+          label="Start Date"
+        />
+        <DateInput
+          size="xs"
+          value={endDateValue}
+          onChange={(date) => setEndDate(date ? new Date(date) : null)}
+          label="End Date"
+        />
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          {quickOptions.map((option) => (
+            <Button size="xs" variant="outline" key={option.label} onClick={() => setDates(option.monthsBack)}>
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+      {loading ? <Loading /> : renderTable()}
     </div>
   );
 };
