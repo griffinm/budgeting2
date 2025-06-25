@@ -93,6 +93,7 @@ export interface MerchantTag {
   color: string;
   createdAt: string;
   updatedAt: string;
+  totalTransactionAmount?: number;
   children: MerchantTag[];
 }
 
