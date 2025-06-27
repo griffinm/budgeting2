@@ -67,19 +67,21 @@ export const View = () => {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row gap-2 mb-5 items-end">
-        <DateInput
-          size="xs"
-          value={startDateValue}
-          onChange={(date) => setStartDate(date ? new Date(date) : null)}
-          label="Start Date"
-        />
-        <DateInput
-          size="xs"
-          value={endDateValue}
-          onChange={(date) => setEndDate(date ? new Date(date) : null)}
-          label="End Date"
-        />
+      <div className="flex flex-col sm:flex-row gap-2 mb-5 sm:items-end">
+        <div className="flex flex-row gap-2 w-full sm:w-auto">
+          <DateInput
+            size="xs"
+            value={startDateValue}
+            onChange={(date) => setStartDate(date ? new Date(date) : null)}
+            label="Start Date"
+          />
+          <DateInput
+            size="xs"
+            value={endDateValue}
+            onChange={(date) => setEndDate(date ? new Date(date) : null)}
+            label="End Date"
+          />
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
           {quickOptions.map((option) => (
             <Button size="xs" variant="outline" key={option.label} onClick={() => setDates(option.monthsBack)}>
