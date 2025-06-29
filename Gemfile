@@ -5,9 +5,9 @@ gem "pg", "~> 1.1"
 gem "puma", ">= 5.0"
 gem "jbuilder"
 gem "bcrypt", "~> 3.1.7"
-gem "solid_cache"
-gem "solid_queue"
-gem "solid_cable"
+# gem "solid_cache"
+# gem "solid_queue"
+# gem "solid_cable"
 gem "bootsnap", require: false
 gem "rack-cors"
 gem "dotenv-rails"
@@ -27,3 +27,5 @@ group :development, :test do
   gem "foreman"
 end
 
+
+gem "redis", "~> 5.4"
