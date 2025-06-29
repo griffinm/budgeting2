@@ -42,8 +42,6 @@ export default function MerchantPage() {
     return merchantSpendStats.monthlySpend.reduce((acc, curr) => acc + curr.amount, 0) / chartMonthsBack;
   }, [merchantSpendStats]);
 
-  
-
   // Fetch the merchant
   useEffect(() => {
     setMerchantLoading(true);

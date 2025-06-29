@@ -120,3 +120,14 @@ export interface ProfitAndLossItem {
   profit: number;
   profitPercentage: number;
 }
+
+export interface PlaidAccount {
+  id: number;
+  plaidOfficialName: string;
+  plaidType: string;
+  plaidSubtype: string;
+  plaidMask: string;
+  nickname: string;
+  createdAt: string;
+  updatedAt: string;
+}

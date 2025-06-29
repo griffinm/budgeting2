@@ -15,6 +15,7 @@ Rails.application.routes.draw do
         get 'spend_stats', to: 'merchant_tags#spend_stats'
       end
     end
+    resources :plaid_accounts, only: [:index]
     resources :data, only: [] do
       collection do
         get "monthly_spend", to: "data#monthly_spend"
