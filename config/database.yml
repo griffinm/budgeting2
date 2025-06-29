@@ -19,15 +19,3 @@ production:
   primary: &primary_production
     <<: *default
     database: budgeting2_production
-  cache:
-    <<: *primary_production
-    database: budgeting2_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    database: budgeting2_production_queue
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    database: budgeting2_production_cable
-    migrations_paths: db/cable_migrate
