@@ -7,13 +7,15 @@ class PlaidService < BaseService
     access_tokens = @account.plaid_access_tokens
     
     access_tokens.each do |access_token|
-      plaid_sync_event = PlaidSyncEvent.create(
+      plaid_sync_event = PlaidSyncEvent.create!(
         account_id: @account.id,
         plaid_access_token_id: access_token.id,
-        event_type: "sync",
+        event_type: "STARTED",
         started_at: Time.now,
+        cursor: access_token.next_cursor,
       )
       
+      puts "Current cursor: #{access_token.next_cursor}"
       sync_request = Plaid::TransactionsSyncRequest.new(
         access_token: access_token.token,
         cursor: access_token.next_cursor,
@@ -29,6 +31,9 @@ class PlaidService < BaseService
       update_transactions(modified_transactions, plaid_sync_event)
       remove_transactions(removed_transactions, plaid_sync_event)
 
+      plaid_sync_event.update(cursor: sync_response.next_cursor)
+      access_token.update(next_cursor: sync_response.next_cursor)
+
       while sync_response.has_more
         cursor = sync_response.next_cursor
         access_token.update(next_cursor: cursor)
@@ -43,8 +48,12 @@ class PlaidService < BaseService
         add_transactions(added_transactions, plaid_sync_event)
         update_transactions(modified_transactions, plaid_sync_event)
         remove_transactions(removed_transactions, plaid_sync_event)
+
+        plaid_sync_event.update(cursor: sync_response.next_cursor)
+        access_token.update(next_cursor: sync_response.next_cursor)
       end
 
+      plaid_sync_event.update(event_type: "COMPLETED")
     end
   end
 
@@ -75,7 +84,7 @@ class PlaidService < BaseService
       new_transaction.merchant_id = merchant.id
       new_transaction.save
 
-      puts "Errors: #{new_transaction.errors.full_messages}"
+      puts "Errors: #{new_transaction.errors.full_messages}" if new_transaction.errors.any?
     end
   end
 

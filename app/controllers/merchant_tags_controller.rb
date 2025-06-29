@@ -35,6 +35,25 @@ class MerchantTagsController < ApplicationController
     end
   end
 
+  # /api/merchant_tags/spend_stats
+  def spend_stats
+    start_date = params[:start_date] || 6.months.ago.to_date
+    end_date = params[:end_date] || Date.today
+    merchant_tag_service = MerchantTagService.new(account_id: current_user.account_id)
+    @data = []
+
+    if params[:id].present?
+      @data = merchant_tag_service
+        .spend_stats_for_tag(tag_id: params[:id], start_date: start_date, end_date: end_date)
+    else
+      @data = merchant_tag_service
+        .spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+    end
+  
+    @all_tags = current_user.account.merchant_tags.order(name: :asc)
+  end
+  
+
   private
 
   def update_params
