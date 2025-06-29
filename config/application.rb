@@ -5,7 +5,7 @@ require "active_record/railtie"
 require "action_controller/railtie" 
 #require "action_view/railtie"
 #require "action_mailer/railtie"
-#require "active_job/railtie"
+require "active_job/railtie"
 require "action_cable/engine"
 #require "action_mailbox/engine"
 #require "action_text/engine"
@@ -26,6 +26,15 @@ module Budgeting2
     config.active_record.yaml_column_permitted_classes = [Symbol, Date, Time, ActiveSupport::TimeWithZone, ActiveSupport::TimeZone]
 
     config.middleware.use CamelToSnakeMiddleware
+
+    # This also configures session_options for use below
+    config.session_store :cookie_store, key: "_your_app_session"
+
+    # Required for all session management (regardless of session_store)
+    config.middleware.use ActionDispatch::Cookies
+
+    config.middleware.use config.session_store, config.session_options
+
 
   end
 end

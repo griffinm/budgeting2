@@ -19,9 +19,11 @@ gem "pagy"
 gem "acts_as_paranoid"
 gem "audited"
 gem "plaid"
+gem "sidekiq", "~> 8.0"
 
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "brakeman", require: false
   gem "foreman"
 end
+

@@ -15,7 +15,6 @@ class PlaidService < BaseService
         cursor: access_token.next_cursor,
       )
       
-      puts "Current cursor: #{access_token.next_cursor}"
       sync_request = Plaid::TransactionsSyncRequest.new(
         access_token: access_token.token,
         cursor: access_token.next_cursor,
