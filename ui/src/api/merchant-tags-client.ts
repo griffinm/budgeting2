@@ -1,5 +1,5 @@
 import { baseClient } from "@/api/base-client";
-import { MerchantTag, MerchantTagSpendStats } from "@/utils/types";
+import { MerchantTag } from "@/utils/types";
 
 export type CreateMerchantTagRequest = Omit<Partial<MerchantTag>, 'id' | 'createdAt' | 'updatedAt' | 'children'>;
 

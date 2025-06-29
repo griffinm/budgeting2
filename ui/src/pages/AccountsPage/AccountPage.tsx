@@ -6,7 +6,7 @@ import { Loading } from "@/components/Loading";
 import { AccountTable } from "@/components/AccountTable";
 
 export default function AccountsPage() {
-  const { plaidAccounts, isLoading, error } = usePlaidAccount();
+  const { plaidAccounts, isLoading } = usePlaidAccount();
   const setTitle = usePageTitle();
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function AccountsPage() {
     <div>
       <h1 className="text-2xl font-bold mb-5">Accounts</h1>
       <div className="mt-4 border border-gray-200 rounded-md shadow-sm">
-        <AccountTable plaidAccounts={plaidAccounts} />
+        <AccountTable plaidAccounts={plaidAccounts} onUpdateAccount={() => {}} />
       </div>
     </div>
   );
