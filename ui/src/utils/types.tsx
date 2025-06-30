@@ -131,3 +131,9 @@ export interface PlaidAccount {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface SyncEvent {
+  id: number;
+  startedAt: string;
+  completedAt: string | null;
+}

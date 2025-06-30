@@ -4,6 +4,8 @@ import { urls } from '@/utils/urls';
 import { TransactionsTable } from '@/components/TransactionsTable';
 import { MerchantTag } from '@/utils/types';
 import { fetchMerchantTags } from '@/api';
+import { useSyncEvent } from '@/hooks/useSyncEvent';
+import { format as formatDate } from 'date-fns';
 
 export default function TransactionsPage() {
   const { 
@@ -17,6 +19,10 @@ export default function TransactionsPage() {
     setSearchParams,
     updateTransaction,
   } = useTransactions();
+  const { 
+    latestSyncEvent,
+    isLoading: isSyncEventLoading,
+  } = useSyncEvent();
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
   const setTitle = usePageTitle();
   
@@ -32,6 +38,13 @@ export default function TransactionsPage() {
 
   return (
     <div>
+      <div className="text-sm text-gray-500">
+        {isSyncEventLoading ? <div>Loading...</div> : latestSyncEvent ? (
+          <>Last synced at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy hh:mm a')}</strong></>
+        ) : (
+          <em>Transactions not yet synced</em>
+        )}
+      </div>
       <TransactionsTable
         transactions={transactions}
         isLoading={isLoading}

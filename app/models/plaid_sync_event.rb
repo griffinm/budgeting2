@@ -10,4 +10,7 @@ class PlaidSyncEvent < ApplicationRecord
   validates :started_at, presence: true
   validates :account_id, presence: true
   validates :plaid_access_token_id, presence: true
+
+  scope :completed, -> { where(event_type: "COMPLETED") }
+  scope :latest, -> { order(started_at: :desc).first }
 end 

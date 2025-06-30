@@ -19,6 +19,11 @@ Rails.application.routes.draw do
       end
     end
     resources :plaid_accounts, only: [:index]
+    resources :sync_events, only: [] do
+      collection do
+        get 'latest', to: 'sync_events#latest'
+      end
+    end
     resources :data, only: [] do
       collection do
         get "monthly_spend", to: "data#monthly_spend"

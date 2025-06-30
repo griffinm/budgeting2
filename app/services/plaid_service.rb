@@ -52,7 +52,7 @@ class PlaidService < BaseService
         access_token.update(next_cursor: sync_response.next_cursor)
       end
 
-      plaid_sync_event.update(event_type: "COMPLETED")
+      plaid_sync_event.update(event_type: "COMPLETED", completed_at: Time.now)
     end
   end
 
