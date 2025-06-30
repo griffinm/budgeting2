@@ -105,7 +105,7 @@ function FullTableRow({
         <div>
           <TransactionType
             transaction={transaction}
-            onSave={(id, transactionType) => updateTransaction(id, { transactionType })}
+            onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
           />
         </div>
       </div>
@@ -113,7 +113,9 @@ function FullTableRow({
       <div className="w-1/3">
         <CategoryDisplay
           category={transaction.merchantTag}
-          onSave={newTagId => updateTransaction(transaction.id, { merchantTagId: newTagId })}
+          onSave={({ id, useDefaultCategory }) => {
+            updateTransaction(transaction.id, { merchantTagId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
+          }}
           allCategories={merchantTags}
         />
       </div>

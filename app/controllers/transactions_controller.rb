@@ -29,7 +29,28 @@ class TransactionsController < ApplicationController
   # PATCH /transactions/:id
   def update
     @transaction = current_user.account.plaid_transactions.find(params[:id])
+    update_all_transactions = update_transaction_meta_params[:use_as_default]
+    merchant_id = update_transaction_meta_params[:merchant_id]
+
+    if update_all_transactions && merchant_id.nil?
+      render json: { errors: 'Merchant ID is required when updating all transactions' }, status: :unprocessable_entity
+      return
+    end
+
     if @transaction.update(transaction_params)
+      # If the transaction is being updated to use the default category, 
+      # update all transactions for the merchant to have the same category
+      # and update the merchant's default category to the new category
+      if update_all_transactions
+        @transaction.account.plaid_transactions
+          .where(merchant_id: merchant_id)
+          .update_all(merchant_tag_id: @transaction.merchant_tag_id)
+
+        current_user.account.merchants
+          .find_by(id: merchant_id)
+          .update(default_merchant_tag_id: @transaction.merchant_tag_id)
+      end
+
       render :show
     else
       render json: { errors: @transaction.errors.full_messages }, status: :unprocessable_entity
@@ -55,6 +76,10 @@ class TransactionsController < ApplicationController
       :amount_equal_to,
       :has_no_category,
     )
+  end
+
+  private def update_transaction_meta_params
+    params.permit(:merchant_id, :use_as_default)
   end
 
   private def transaction_params

@@ -9,7 +9,7 @@ export function CategoryDisplay({
   allCategories,
 }: {
   category?: MerchantTag | null;
-  onSave: (id: number) => void;
+  onSave: ({ id, useDefaultCategory }: { id: number; useDefaultCategory: boolean }) => void;
   allCategories: MerchantTag[];
 }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,8 +19,8 @@ export function CategoryDisplay({
         <CategoryEdit 
           currentValue={category} 
           onCancel={() => setIsEditing(false)} 
-          onSave={id => {
-            onSave(id);
+          onSave={({ id, useDefaultCategory }) => {
+            onSave({ id, useDefaultCategory });
             setIsEditing(false);
           }} 
           allCategories={allCategories} 

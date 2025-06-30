@@ -1,5 +1,5 @@
 import { MerchantTag } from "@/utils/types";
-import { Button, Input } from "@mantine/core";
+import { Button, Checkbox, Input } from "@mantine/core";
 import { useState, useRef, useEffect } from "react";
 import { fullyQualifiedTagName } from "@/utils/merchantTagUtils";
 import classNames from "classnames";
@@ -12,12 +12,13 @@ export function CategoryEdit({
 }: {
   currentValue?: MerchantTag | null;
   onCancel: () => void;
-  onSave: (id: number) => void;
+  onSave: ({ id, useDefaultCategory }: { id: number; useDefaultCategory: boolean }) => void;
   allCategories: MerchantTag[];
 }) {
   const [newValue, setNewValue] = useState<MerchantTag | null>(currentValue || null);
   const [filter, setFilter] = useState('');
   const divRef = useRef<HTMLDivElement>(null);
+  const [useDefaultCategory, setUseDefaultCategory] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -36,7 +37,7 @@ export function CategoryEdit({
     e.preventDefault();
 
     if (newValue) {
-      onSave(newValue.id);
+      onSave({ id: newValue.id, useDefaultCategory });
     }
   }
 
@@ -72,6 +73,13 @@ export function CategoryEdit({
                   />
                 ))}
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                label="Make default for merchant"
+                checked={useDefaultCategory}
+                onChange={e => setUseDefaultCategory(e.target.checked)}
+              />
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" size="xs" color="gray" onClick={onCancel}>
