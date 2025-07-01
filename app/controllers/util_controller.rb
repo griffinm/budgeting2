@@ -1,5 +1,6 @@
 class UtilController < ApplicationController
   before_action :check_token!
+  skip_before_action :require_authenticated_user!
 
   def update_all
     Rails.logger.info("Updating all accounts information from Plaid")
