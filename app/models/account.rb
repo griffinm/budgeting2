@@ -6,4 +6,5 @@ class Account < ApplicationRecord
   has_many :plaid_transactions, dependent: :destroy
   has_many :merchants, dependent: :destroy
   has_many :merchant_tags, dependent: :destroy
+  has_many :account_balances, through: :plaid_accounts
 end

@@ -74,7 +74,7 @@ export function MerchantsTable({
             <div className="w-full md:w-1/3">
               <CategoryDisplay
                 category={merchant.defaultMerchantTag}
-                onSave={id => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
+                onSave={({ id, }) => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
                 allCategories={allMerchantTags}
               />
             </div>

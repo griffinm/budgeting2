@@ -5,6 +5,8 @@ import { useTransactionTrends } from './useTransactionTrends';
 import { DashboardCard } from './DashboardCard';
 import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
+import { useAccountBalances } from '@/hooks/useAccountBalance';
+import { AccountBalances } from './AccountBalances';
 
 export default function DashboardPage() {
   const { 
@@ -25,6 +27,9 @@ export default function DashboardPage() {
     incomeMonthsBack,
     setMonthsBack,
   } = useTransactionTrends();
+
+  const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
+
   const loading = currentMonthExpenses.loading || currentMonthIncome.loading || previousMonthExpenses.loading || previousMonthIncome.loading;
 
   useEffect(() => {
@@ -33,40 +38,50 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row gap-4">
-        <DashboardCard
-          currentMonthTransactions={currentMonthExpenses.transactions}
-          previousMonthTransactions={previousMonthExpenses.transactions}
-          transactionType="expense"
-          loading={loading}
-        />
-        <DashboardCard
-          currentMonthTransactions={currentMonthIncome.transactions}
-          previousMonthTransactions={previousMonthIncome.transactions}
-          transactionType="income"
-          loading={loading}
-        />
+      <div className="mb-4">
+        <AccountBalances accountBalances={accountBalances} loading={accountBalancesLoading} />
+      </div>
+      <div className="border border-gray-200 rounded-md p-4 shadow-md mb-4">
+        <h2 className="text-2xl mb-4">Transaction Trends</h2>
+        <div className="flex flex-row gap-4">
+          <DashboardCard
+            currentMonthTransactions={currentMonthExpenses.transactions}
+            previousMonthTransactions={previousMonthExpenses.transactions}
+            transactionType="expense"
+            loading={loading}
+          />
+          <DashboardCard
+            currentMonthTransactions={currentMonthIncome.transactions}
+            previousMonthTransactions={previousMonthIncome.transactions}
+            transactionType="income"
+            loading={loading}
+          />
+        </div>
       </div>
       
-      <ProfitAndLoss
-        profitAndLoss={profitAndLoss}
-        monthsBack={monthsBack}
-        setMonthsBack={setProfitAndLossMonthsBack}
-        loading={profitAndLossLoading}
-      />
+      <div className="mb-4">
+        <ProfitAndLoss
+          profitAndLoss={profitAndLoss}
+          monthsBack={monthsBack}
+          setMonthsBack={setProfitAndLossMonthsBack}
+          loading={profitAndLossLoading}
+        />
+      </div>
 
-      <MonthlySpend
-        currentMonthExpenses={currentMonthExpenses.transactions}
-        currentMonthIncome={currentMonthIncome.transactions}
-        previousMonthExpenses={previousMonthExpenses.transactions}
-        previousMonthIncome={previousMonthIncome.transactions}
-        loading={loading}
-        averageExpense={averageExpense}
-        averageIncome={averageIncome}
-        expenseMonthsBack={expenseMonthsBack}
-        incomeMonthsBack={incomeMonthsBack}
-        setMonthsBack={setMonthsBack}
-      />
+      <div className="mb-4">
+        <MonthlySpend
+          currentMonthExpenses={currentMonthExpenses.transactions}
+          currentMonthIncome={currentMonthIncome.transactions}
+          previousMonthExpenses={previousMonthExpenses.transactions}
+          previousMonthIncome={previousMonthIncome.transactions}
+          loading={loading}
+          averageExpense={averageExpense}
+          averageIncome={averageIncome}
+          expenseMonthsBack={expenseMonthsBack}
+          incomeMonthsBack={incomeMonthsBack}
+          setMonthsBack={setMonthsBack}
+        />
+      </div>
     </div>
   );
 }

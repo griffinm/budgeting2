@@ -4,6 +4,7 @@ Rails.application.routes.draw do
 
   scope path: 'api' do
     get "health", to: "health#index"
+    get "update_all", to: "util#update_all"
 
     post "users/login", to: "users#login"
     get "users/current", to: "users#current"
@@ -18,7 +19,11 @@ Rails.application.routes.draw do
         get 'spend_stats', to: 'merchant_tags#spend_stats'
       end
     end
-    resources :plaid_accounts, only: [:index]
+    resources :plaid_accounts, only: [:index] do
+      collection do
+        get 'account_balance', to: 'account_balances#index'
+      end
+    end
     resources :sync_events, only: [] do
       collection do
         get 'latest', to: 'sync_events#latest'

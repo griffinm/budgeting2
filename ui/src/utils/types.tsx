@@ -35,12 +35,14 @@ export interface LoginResponse {
   token: string;
 }
 
+export type PlaidAccountType = 'checking' | 'savings' | 'credit' | 'loan' | 'other';
+
 export interface PlaidAccount {
   id: number;
   userId: number;
   plaidMask: string;
   plaidOfficialName: string;
-  plaidType: string;
+  plaidType: PlaidAccountType;
   plaidSubtype: string;
   nickname: string;
 }
@@ -124,7 +126,7 @@ export interface ProfitAndLossItem {
 export interface PlaidAccount {
   id: number;
   plaidOfficialName: string;
-  plaidType: string;
+  plaidType: PlaidAccountType;
   plaidSubtype: string;
   plaidMask: string;
   nickname: string;
@@ -136,4 +138,13 @@ export interface SyncEvent {
   id: number;
   startedAt: string;
   completedAt: string | null;
+}
+
+export interface AccountBalance {
+  id: number;
+  plaidAccountId: number;
+  currentBalance: number;
+  availableBalance: number;
+  limit: number;
+  plaidAccount: PlaidAccount;
 }

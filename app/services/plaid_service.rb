@@ -19,7 +19,7 @@ class PlaidService < BaseService
         access_token: access_token.token,
         cursor: access_token.next_cursor,
       )
-
+      
       sync_response = api_client.transactions_sync(sync_request)
       added_transactions = sync_response.added
 
@@ -54,6 +54,31 @@ class PlaidService < BaseService
 
       plaid_sync_event.update(event_type: "COMPLETED", completed_at: Time.now)
     end
+  end
+
+  def update_account_balances
+    Rails.logger.info("Updating account balance for account #{@account.id}")
+    access_tokens = @account.plaid_access_tokens.all
+
+    access_tokens.each do |access_token|
+      request = Plaid::AccountsBalanceGetRequest.new(
+        access_token: access_token.token,
+      )
+      resp = api_client.accounts_balance_get(request)
+      resp.accounts.each do |plaid_api_account|
+        plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
+        current = plaid_api_account.balances.current&.to_f
+        available = plaid_api_account.balances.available&.to_f
+        limit = plaid_api_account.balances.limit&.to_f
+        plaid_account.account_balances.create(
+          current_balance: current,
+          available_balance: available,
+          limit: limit,
+        )
+      end
+    end
+
+    Rails.logger.info("Account balance updated for account #{@account.id}")
   end
 
   private def add_transactions(transactions, plaid_sync_event)
