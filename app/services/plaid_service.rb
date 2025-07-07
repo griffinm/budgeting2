@@ -1,6 +1,7 @@
 class PlaidService < BaseService
-  def initialize(account_id:)
+  def initialize(account_id:, plaid_access_tokens: nil)
     @account = Account.find(account_id)
+    @plaid_access_tokens = plaid_access_tokens
   end
 
   def sync_transactions
@@ -58,8 +59,10 @@ class PlaidService < BaseService
 
   def update_account_balances
     Rails.logger.info("Updating account balance for account #{@account.id}")
-    access_tokens = @account.plaid_access_tokens.all
-
+    tokens = @plaid_access_tokens || @account.plaid_access_tokens
+    return if tokens.blank?
+    access_tokens = tokens.to_a
+    return if access_tokens.blank?
     access_tokens.each do |access_token|
       request = Plaid::AccountsBalanceGetRequest.new(
         access_token: access_token.token,
@@ -67,6 +70,7 @@ class PlaidService < BaseService
       resp = api_client.accounts_balance_get(request)
       resp.accounts.each do |plaid_api_account|
         plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
+        next unless plaid_account
         current = plaid_api_account.balances.current&.to_f
         available = plaid_api_account.balances.available&.to_f
         limit = plaid_api_account.balances.limit&.to_f
@@ -77,7 +81,6 @@ class PlaidService < BaseService
         )
       end
     end
-
     Rails.logger.info("Account balance updated for account #{@account.id}")
   end
 
@@ -116,9 +119,10 @@ class PlaidService < BaseService
     Rails.logger.info("Updating #{transactions.count} transactions for account #{@account.id} sync event #{plaid_sync_event.id}")
     transactions.each do |transaction|
       existing_transaction = PlaidTransaction.find_by(plaid_id: transaction.transaction_id)
+      plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: @account.id)
       existing_transaction.update(
         plaid_sync_event_id: plaid_sync_event.id,
-        plaid_account_id: transaction.account_id,
+        plaid_account_id: plaid_account&.id,
         plaid_id: transaction.transaction_id,
         amount: transaction.amount,
         name: transaction.name,

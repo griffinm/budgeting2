@@ -32,3 +32,4 @@
 /config/master.key
 
 /ui/.env
+/ui/ui.tar.gz
