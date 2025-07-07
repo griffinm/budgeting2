@@ -38,7 +38,7 @@ class ProfitAndLossService
         expense: expense_abs,
         income: income_abs,
         profit: (income_abs - expense_abs).round(2),
-        profit_percentage: ((income_abs - expense_abs) / expense_abs * 100).round(2),
+        profitPercentage: ((income_abs - expense_abs) / expense_abs * 100).round(2),
       }
     end
 

@@ -3,7 +3,10 @@ import { Loading } from "@/components/Loading";
 import { ProfitAndLossItem } from "@/utils/types";
 import { BarChart } from "@mantine/charts";
 import { Select, Table } from "@mantine/core";
-import { format as formatDate } from 'date-fns';
+import { 
+  format as formatDate,
+  addDays,
+} from 'date-fns';
 import { useMemo } from "react";
 
 export function ProfitAndLoss({
@@ -79,7 +82,7 @@ export function ProfitAndLoss({
             <Table.Tbody>
               {sortedProfitAndLoss.map((item) => (
                 <Table.Tr key={item.date.toString()}>
-                  <Table.Td>{formatDate(new Date(item.date), 'MMM yyyy')}</Table.Td>
+                  <Table.Td>{formatDate(addDays(new Date(item.date), 1), 'MMM yyyy')}</Table.Td>
                   <Table.Td>
                     <Currency
                       amount={item.expense}
@@ -97,12 +100,17 @@ export function ProfitAndLoss({
                     />
                   </Table.Td>
                   <Table.Td>
-                    <Currency
-                      amount={item.profit}
-                      applyColor={true}
-                      useBold={true}
-                      showCents={false}
-                    />
+                    <div className="flex flex-row justify-between">
+                      <Currency
+                        amount={item.profit}
+                        applyColor={true}
+                        useBold={true}
+                        showCents={false}
+                      />
+                      <div className="text-xs text-gray-500">
+                        {item.profitPercentage > 0 ? '+' : ''}{item.profitPercentage.toFixed(1)}%
+                      </div>
+                    </div>
                   </Table.Td>
                 </Table.Tr>
               ))}
