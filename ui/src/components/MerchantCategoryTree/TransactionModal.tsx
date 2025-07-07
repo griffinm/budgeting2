@@ -1,7 +1,7 @@
 import { useTransactions } from "@/hooks/useTransactions";
 import { MerchantTag } from "@/utils/types";
-import { Modal, Button } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { Modal } from "@mantine/core";
+import { useEffect } from "react";
 import { TransactionsTable } from "../TransactionsTable";
 import { useMerchantTags } from "@/hooks/useMerchantTags";
 

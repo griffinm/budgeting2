@@ -40,7 +40,7 @@ export default function MerchantPage() {
       return undefined;
     }
     return merchantSpendStats.monthlySpend.reduce((acc, curr) => acc + curr.amount, 0) / chartMonthsBack;
-  }, [merchantSpendStats]);
+  }, [merchantSpendStats, chartMonthsBack]);
 
   // Fetch the merchant
   useEffect(() => {
@@ -71,7 +71,7 @@ export default function MerchantPage() {
         })
         .finally(() => setMerchantSpendStatsLoading(false));
     }
-  }, [merchant, chartMonthsBack]);
+  }, [merchant, chartMonthsBack, setMerchantSpendStatsLoading, id]);
 
   if (merchantLoading || !merchant) {
     return <Loading />

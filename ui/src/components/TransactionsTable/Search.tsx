@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useRef, useState, useEffect } from "react";
 import { Checkbox, Input, Select, TextInput } from "@mantine/core";
 import { TransactionSearchParams } from "@/api/transaction-client";

@@ -2,14 +2,11 @@ import { PlaidAccount } from "@/utils/types";
 import { Table } from "@mantine/core";
 import "./styles.css";
 
-interface AccountTableProps {
-  plaidAccounts: PlaidAccount[];
-  onUpdateAccount: (account: PlaidAccount) => void;
-}
-
-export const AccountTable = ({ 
+export function AccountTable({
   plaidAccounts,
-}: AccountTableProps) => {
+}: {
+  plaidAccounts: PlaidAccount[];
+}) {
   return (
     <div className="w-full">
       <Table className="account-table">
