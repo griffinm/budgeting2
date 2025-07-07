@@ -12,6 +12,7 @@ import {
   subMonths,
 } from "date-fns";
 import { DateInput } from "@mantine/dates";
+import { TransactionModal } from "./TransactionModal";
 
 const defaultStartDate = startOfMonth(new Date());
 const defaultEndDate = endOfMonth(new Date());
@@ -29,6 +30,8 @@ export const View = () => {
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [selectedMerchantTag, setSelectedMerchantTag] = useState<MerchantTag | undefined>();
 
   useEffect(() => {
     setLoading(true);
@@ -47,6 +50,11 @@ export const View = () => {
     setEndDate(defaultEndDate);
   }
 
+  const onViewTransactions = (merchantTag: MerchantTag) => {
+    setSelectedMerchantTag(merchantTag);
+    setIsTransactionModalOpen(true);
+  }
+
   const renderTable = () => {
     return (
       <Table highlightOnHover>
@@ -54,11 +62,16 @@ export const View = () => {
           <Table.Tr>
             <Table.Th>Name</Table.Th>
             <Table.Th>Total Transaction Amount</Table.Th>
+            <Table.Th></Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
           {merchantTags.map((tag) => (
-            <MerchantTagRow key={tag.id} tag={tag} />
+            <MerchantTagRow
+              key={tag.id}
+              tag={tag}
+              onViewTransactions={onViewTransactions}
+            />
           ))}
         </Table.Tbody>
       </Table>
@@ -91,11 +104,24 @@ export const View = () => {
         </div>
       </div>
       {loading ? <Loading /> : renderTable()}
+      <TransactionModal
+        merchantTag={selectedMerchantTag}
+        onClose={() => setIsTransactionModalOpen(false)}
+        isOpen={isTransactionModalOpen}
+      />
     </div>
   );
 };
 
-function MerchantTagRow({ tag, expandedLevel = 0 }: { tag: MerchantTag, expandedLevel?: number }) {
+function MerchantTagRow({ 
+  tag, 
+  expandedLevel = 0,
+  onViewTransactions,
+}: { 
+  tag: MerchantTag; 
+  expandedLevel?: number; 
+  onViewTransactions: (merchantTag: MerchantTag) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
   const hasChildren = tag.children && tag.children.length > 0;
   const rowClasses = classNames('mr-2', {
@@ -137,17 +163,29 @@ function MerchantTagRow({ tag, expandedLevel = 0 }: { tag: MerchantTag, expanded
                 }}
               >
               </div>
-              <span>{tag.name}</span>
+              <div>
+                {tag.name}
+              </div>
           </div>
         </Table.Td>
         <Table.Td>
           <TransactionAmount amount={tag.totalTransactionAmount || 0} />
         </Table.Td>
+        <Table.Td>
+          <Button size="xs" variant="transparent" onClick={() => onViewTransactions(tag)}>
+            View Transactions
+          </Button>
+        </Table.Td>
       </Table.Tr>
       {expanded && (
         <>
           {tag.children?.map((child) => (
-            <MerchantTagRow key={child.id} tag={child} expandedLevel={expandedLevel + 1} />
+            <MerchantTagRow
+              key={child.id}
+              tag={child}
+              expandedLevel={expandedLevel + 1}
+              onViewTransactions={(merchantTag) => onViewTransactions(merchantTag)}
+            />
           ))}
         </>
       )}

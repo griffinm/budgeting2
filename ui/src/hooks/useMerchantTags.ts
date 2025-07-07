@@ -18,6 +18,7 @@ export type MerchantTags = {
   createMerchantTag: (params: CreateMerchantTagRequest) => Promise<void>;
   updateMerchantTag: (params: UpdateMerchantTagRequest) => Promise<void>;
   deleteMerchantTag: (params: DeleteMerchantTagRequest) => Promise<void>;
+  rawMerchantTags: MerchantTag[];
 };
 
 export function useMerchantTags(): MerchantTags {
@@ -70,5 +71,6 @@ export function useMerchantTags(): MerchantTags {
     merchantTags,
     saving,
     updateMerchantTag,
+    rawMerchantTags: merchantTagsRaw,
   };
 }

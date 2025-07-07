@@ -17,7 +17,8 @@ class TransactionSearchService < BaseService
     amount_greater_than: nil,
     amount_less_than: nil,
     amount_equal_to: nil,
-    has_no_category: nil
+    has_no_category: nil,
+    merchant_tag_id: nil
   )
     @account_id = account_id
     @user_id = user_id
@@ -37,13 +38,20 @@ class TransactionSearchService < BaseService
     @amount_less_than = amount_less_than
     @amount_equal_to = amount_equal_to
     @has_no_category = has_no_category
+    @merchant_tag_id = merchant_tag_id
   end
 
   def call
-    transactions = PlaidTransaction.joins(:plaid_account, :merchant)
+    transactions = PlaidTransaction.joins(:plaid_account, :merchant, :merchant_tag)
       .includes(:plaid_account, :merchant_tag, merchant: :default_merchant_tag)
       .where(plaid_transactions: { account_id: @account_id })
       .order(date: :desc)
+
+    if @merchant_tag_id.present?
+      tag = MerchantTag.find(@merchant_tag_id)
+      child_ids = tag.child_ids + [tag.id]
+      transactions = transactions.where(merchant_tag_id: child_ids)
+    end
 
     if @has_no_category.present?
       transactions = transactions.where(merchant_tag_id: nil)

@@ -19,6 +19,7 @@ export interface TransactionSearchParams {
   amount_less_than?: string;
   amount_equal_to?: string;
   has_no_category?: boolean;
+  merchant_tag_id?: number;
 }
 
 export interface TransactionUpdateParams {

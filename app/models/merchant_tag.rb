@@ -15,4 +15,25 @@ class MerchantTag < ApplicationRecord
   def initialize_color
     self.color = SecureRandom.hex(3)
   end
+
+  def parent_ids
+    parent_ids = []
+    current_tag = self
+    while current_tag.parent_merchant_tag_id.present?
+      parent_ids << current_tag.parent_merchant_tag_id
+      current_tag = current_tag.parent_merchant_tag
+    end
+    parent_ids
+  end
+
+  def child_ids
+    child_ids = [id]
+    child_tags.each do |tag|
+      child_ids.concat(tag.child_ids)
+      if tag.child_tags.present?
+        child_ids.concat(tag.child_tags.pluck(:id))
+      end
+    end
+    child_ids.uniq
+  end
 end 

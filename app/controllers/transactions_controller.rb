@@ -22,6 +22,7 @@ class TransactionsController < ApplicationController
           amount_less_than: search_params[:amount_less_than],
           amount_equal_to: search_params[:amount_equal_to],
           has_no_category: search_params[:has_no_category],
+          merchant_tag_id: search_params[:merchant_tag_id],
         ).call
       )
   end
@@ -75,6 +76,7 @@ class TransactionsController < ApplicationController
       :amount_less_than,
       :amount_equal_to,
       :has_no_category,
+      :merchant_tag_id,
     )
   end
 
