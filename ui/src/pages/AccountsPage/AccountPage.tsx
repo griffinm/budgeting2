@@ -21,7 +21,7 @@ export default function AccountsPage() {
     <div>
       <h1 className="text-2xl font-bold mb-5">Accounts</h1>
       <div className="mt-4 border border-gray-200 rounded-md shadow-sm">
-        <AccountTable plaidAccounts={plaidAccounts} onUpdateAccount={() => {}} />
+        <AccountTable plaidAccounts={plaidAccounts} />
       </div>
     </div>
   );
