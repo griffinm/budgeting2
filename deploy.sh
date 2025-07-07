@@ -69,6 +69,9 @@ run_local_command "(cd ui && npm install)"
 print_info "Running RSpec tests"
 run_local_command "bundle exec rspec spec/"
 
+print_info "Running UI linting"
+run_local_command "npm run lint"
+
 print_section "SERVER CHECKS"
 print_info "Checking if server is reachable"
 if ping -c 1 $1 &> /dev/null; then
