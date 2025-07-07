@@ -9,10 +9,10 @@ class AccountBalance < ApplicationRecord
 
   def self.current_for_account(account_id)
     sql = <<-SQL
-      WITH most_recent_balances AS (
+    WITH most_recent_balances AS (
         SELECT
-            ab.plaid_account_id AS id,
-            MAX(ab.created_at)
+            ab.plaid_account_id AS plaid_account_id,
+            MAX(ab.created_at) AS balance_date
           FROM
             account_balances ab INNER JOIN plaid_accounts pa ON ab.plaid_account_id = pa.id
           WHERE
@@ -21,11 +21,12 @@ class AccountBalance < ApplicationRecord
             ab.plaid_account_id
       )
       SELECT
-          ab.*,
-          pa.plaid_type
-        FROM
-          account_balances ab INNER JOIN most_recent_balances mrb ON ab.id = mrb.id
-          INNER JOIN plaid_accounts pa ON pa.id = ab.plaid_account_id
+            ab.*,
+            pa.plaid_type
+          FROM
+            account_balances ab INNER JOIN most_recent_balances mrb ON ab.created_at = mrb.balance_date
+          AND ab.plaid_account_id = mrb.plaid_account_id
+            INNER JOIN plaid_accounts pa ON pa.id = ab.plaid_account_id
       SQL
 
      AccountBalance.find_by_sql([sql, account_id: account_id])
