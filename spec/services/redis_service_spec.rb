@@ -40,7 +40,7 @@ RSpec.describe RedisService do
       service = described_class.new(user: user)
       is_updating_key = "budgeting:user:#{user.id}:is_updating"
       expect(mock_redis).to receive(:get).with(is_updating_key).and_return('true')
-      expect(service.get_is_updating_transactions?).to eq('true')
+      expect(service.get_is_updating_transactions?).to eq(true)
     end
   end
 
