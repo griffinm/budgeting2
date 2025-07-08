@@ -1,7 +1,6 @@
 FactoryBot.define do
   factory :plaid_account do
     association :account
-    association :user
     association :plaid_access_token
     plaid_id { "plaid_account_#{SecureRandom.hex(8)}" }
     plaid_mask { "1234" }

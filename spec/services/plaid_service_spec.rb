@@ -4,7 +4,8 @@ RSpec.describe PlaidService do
   let(:account) { create(:account) }
   let(:user) { create(:user, account: account) }
   let(:plaid_access_token) { create(:plaid_access_token, account: account) }
-  let(:plaid_account) { create(:plaid_account, account: account, user: user, plaid_access_token: plaid_access_token) }
+  let(:plaid_account) { create(:plaid_account, account: account, plaid_access_token: plaid_access_token) }
+  let(:plaid_account_user) { create(:plaid_accounts_user, user: user, plaid_account: plaid_account) }
   let(:service) { described_class.new(account_id: account.id) }
 
   before do
@@ -286,10 +287,11 @@ RSpec.describe PlaidService do
 
       context 'when account has multiple access tokens' do
         let(:plaid_access_token2) { create(:plaid_access_token, account: account) }
-        let(:plaid_account2) { create(:plaid_account, account: account, user: user, plaid_access_token: plaid_access_token2) }
+        let(:plaid_account2) { create(:plaid_account, account: account, plaid_access_token: plaid_access_token2) }
+        let(:plaid_account_user2) { create(:plaid_accounts_user, user: user, plaid_account: plaid_account2) }
 
         before do
-          plaid_account2 # Create second account
+          plaid_account_user2 # Create second account user association
         end
 
         it 'creates balances for all accounts' do
