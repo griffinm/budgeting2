@@ -110,8 +110,6 @@ class PlaidService < BaseService
       merchant = merchant_for_transaction(transaction, transaction.merchant_entity_id)
       new_transaction.merchant_id = merchant.id
       new_transaction.save
-
-      puts "Errors: #{new_transaction.errors.full_messages}" if new_transaction.errors.any?
     end
   end
 
@@ -157,7 +155,7 @@ class PlaidService < BaseService
       plaid_entity_id: plaid_entity_id,
       merchant_name: transaction.name,
     )
-    puts "Errors: #{merchant.errors.full_messages}"
+
     return merchant
   end
 
