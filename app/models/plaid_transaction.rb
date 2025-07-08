@@ -15,8 +15,9 @@ class PlaidTransaction < ApplicationRecord
   belongs_to :merchant_tag, optional: true
   
   validates :transaction_type, presence: true, inclusion: { in: TRANSACTION_TYPES.values }
-  validates :plaid_id, presence: true, uniqueness: { scope: :account_id }
-
+  validates :plaid_id,
+    presence: true,
+    uniqueness: { scope: :account_id, message: "Transaction already exists" }
   before_create :set_default_categories
 
   scope :not_pending, -> { where(pending: false) }

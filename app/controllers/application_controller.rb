@@ -3,6 +3,7 @@ include Pagy::Backend
 class ApplicationController < ActionController::API
   before_action :require_authenticated_user!
   before_action :set_pagination_params
+  before_action :check_transaction_updates
 
   def pagination_params
     {
@@ -31,6 +32,23 @@ class ApplicationController < ActionController::API
     request.params.delete(:perPage)
     request.params[:page] = @page
     request.params[:per_page] = @per_page
+  end
+
+  def check_transaction_updates
+    redis_service = RedisService.new(user: current_user)
+    last_sync_time = redis_service.get_last_sync_time
+    is_updating = redis_service.get_is_updating_transactions?
+
+    if is_updating
+      return
+    end
+
+    if last_sync_time.blank? || last_sync_time < Constants::TransactionUpdates::FREQUENCY.ago
+      redis_service.set_is_updating_transactions(true)
+      redis_service.set_last_sync_time(Time.now)
+      Transactions::SyncForAccountJob.perform_async(account_id: current_user.account_id)
+      redis_service.set_is_updating_transactions(false)
+    end
   end
 
   def get_user
