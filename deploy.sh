@@ -92,7 +92,7 @@ print_info "Migrating database"
 run_remote_command $1 "cd $DEPLOY_DIR && bundle exec rails db:migrate"
 
 print_info "Building UI"
-run_local_command "npm run build"
+run_local_command "VITE_API_URL=https://budgeting2.scriptmasterg.com/api npm run build"
 
 print_info "Tarring UI"
 run_local_command "tar -czf ui/ui.tar.gz ui/dist"

@@ -39,7 +39,6 @@ export type PlaidAccountType = 'checking' | 'savings' | 'credit' | 'loan' | 'oth
 
 export interface PlaidAccount {
   id: number;
-  userId: number;
   plaidMask: string;
   plaidOfficialName: string;
   plaidType: PlaidAccountType;

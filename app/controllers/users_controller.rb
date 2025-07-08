@@ -1,7 +1,9 @@
 class UsersController < ApplicationController
 
   skip_before_action :require_authenticated_user!, only: [:login, :create]
+  skip_before_action :check_transaction_updates, only: [:login, :create]
 
+  # POST /users/login
   def login
     token = AuthService.generate_token(email: params[:email], password: params[:password])
 

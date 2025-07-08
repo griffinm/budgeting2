@@ -2,7 +2,8 @@ class PlaidAccount < ApplicationRecord
   acts_as_paranoid
 
   belongs_to :account
-  belongs_to :user
+  has_many :plaid_accounts_users, dependent: :destroy
+  has_many :users, through: :plaid_accounts_users
   has_many :plaid_transactions, dependent: :destroy
   belongs_to :plaid_access_token, dependent: :destroy
   has_many :account_balances, dependent: :destroy

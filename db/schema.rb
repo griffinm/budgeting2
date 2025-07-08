@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_30_233026) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_08_160008) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -106,7 +106,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_30_233026) do
   create_table "plaid_accounts", force: :cascade do |t|
     t.string "plaid_id", null: false
     t.bigint "account_id", null: false
-    t.bigint "user_id", null: false
     t.string "plaid_mask"
     t.string "plaid_name"
     t.string "plaid_official_name"
@@ -120,7 +119,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_30_233026) do
     t.bigint "plaid_access_token_id"
     t.index ["account_id"], name: "index_plaid_accounts_on_account_id"
     t.index ["plaid_access_token_id"], name: "index_plaid_accounts_on_plaid_access_token_id"
-    t.index ["user_id"], name: "index_plaid_accounts_on_user_id"
+  end
+
+  create_table "plaid_accounts_users", force: :cascade do |t|
+    t.bigint "plaid_account_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plaid_account_id"], name: "index_plaid_accounts_users_on_plaid_account_id"
+    t.index ["user_id"], name: "index_plaid_accounts_users_on_user_id"
   end
 
   create_table "plaid_sync_events", force: :cascade do |t|
@@ -186,7 +193,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_30_233026) do
   add_foreign_key "plaid_access_tokens", "accounts"
   add_foreign_key "plaid_accounts", "accounts"
   add_foreign_key "plaid_accounts", "plaid_access_tokens"
-  add_foreign_key "plaid_accounts", "users"
+  add_foreign_key "plaid_accounts_users", "plaid_accounts"
+  add_foreign_key "plaid_accounts_users", "users"
   add_foreign_key "plaid_sync_events", "accounts"
   add_foreign_key "plaid_sync_events", "plaid_access_tokens"
   add_foreign_key "plaid_transactions", "accounts"

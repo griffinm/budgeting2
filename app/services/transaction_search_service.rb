@@ -39,12 +39,14 @@ class TransactionSearchService < BaseService
     @amount_equal_to = amount_equal_to
     @has_no_category = has_no_category
     @merchant_tag_id = merchant_tag_id
+
+    @user = User.find(@user_id)
+    @account = Account.find(@account_id)
   end
 
   def call
-    transactions = PlaidTransaction.joins(:plaid_account, :merchant, :merchant_tag)
-      .includes(:plaid_account, :merchant_tag, merchant: :default_merchant_tag)
-      .where(plaid_transactions: { account_id: @account_id })
+    transactions = @user.plaid_transactions.joins(:plaid_account, :merchant)
+      .includes(:plaid_account, :merchant, merchant: :default_merchant_tag)
       .order(date: :desc)
 
     if @merchant_tag_id.present?
@@ -71,10 +73,6 @@ class TransactionSearchService < BaseService
 
     if @amount_less_than.present?
       transactions = transactions.where("amount < ?", @amount_less_than)
-    end
-
-    if @user_id.present?
-      transactions = transactions.where(plaid_accounts: { user_id: @user_id })
     end
 
     if @start_date.present?

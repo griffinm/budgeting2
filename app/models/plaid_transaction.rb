@@ -7,7 +7,6 @@ class PlaidTransaction < ApplicationRecord
     transfer: 'transfer'
   }
 
-
   belongs_to :account
   belongs_to :plaid_sync_event
   belongs_to :plaid_account
