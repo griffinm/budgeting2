@@ -22,35 +22,37 @@ print_section() {
     echo -e "===============================${RESET}"
 }
 print_success() {
-    echo -e "\t${GREEN}[$(timestamp)] ✔ $1${RESET}"
+    echo -e "${GREEN}[$(timestamp)] ✔ $1${RESET}"
 }
 print_error() {
-    echo -e "\t${RED}[$(timestamp)] ✖ $1${RESET}"
+    echo -e "${RED}[$(timestamp)] ✖ $1${RESET}"
 }
 print_info() {
-    echo -e "\t${YELLOW}[$(timestamp)] ➜ $1${RESET}"
+    local indent_level=${2:-0}
+    local indent=$(printf '\t%.0s' $(seq 1 $indent_level))
+    echo -e "${YELLOW}[$(timestamp)] ➜ ${indent}$1${RESET}"
 }
 
 # Function to run a command on the remote server
 run_remote_command() {
     local server_ip=$1
     local command=$2
-    print_info "Running remote: $command"
+    print_info "\tRunning on remote server: $command"
     if ! ssh "$server_ip" "bash -l -c \"$command\"" &>/dev/null; then
-        print_error "Failed: $command"
+        print_error "\tFailed: $command"
         exit 1
     fi
-    print_success "Remote command succeeded"
+    print_success "\tRemote command succeeded"
 }
 
 run_local_command() {
     local command=$1
-    print_info "Running local: $command"
+    print_info "\tRunning locally: $command"
     if ! eval "$command" &>/dev/null; then
-        print_error "Failed: $command"
+        print_error "\tFailed: $command"
         exit 1
     fi
-    print_success "Local command succeeded"
+    print_success "\tLocal command succeeded"
 }
 
 # Check if the correct number of arguments are provided
@@ -105,8 +107,11 @@ run_remote_command $1 "tar -xzf $DEPLOY_DIR/ui/ui.tar.gz -C $DEPLOY_DIR/ui/dist"
 run_remote_command $1 "mv $DEPLOY_DIR/ui/dist/ui/dist/* $DEPLOY_DIR/ui/dist"
 run_remote_command $1 "rm -rf $DEPLOY_DIR/ui/dist/ui"
 
-print_info "Restarting server"
+print_info "Restarting API"
 run_remote_command $1 "sudo systemctl restart budgeting2-api.service"
+
+print_info "Restarting worker"
+run_remote_command $1 "sudo systemctl restart budgeting2-worker.service"
 
 print_section "${GREEN}DEPLOYMENT COMPLETE${RESET}"
 print_success "All steps finished successfully!"

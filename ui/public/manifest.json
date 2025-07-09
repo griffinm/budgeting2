@@ -1,7 +1,7 @@
 {
-  "name": "Budgeting App",
-  "short_name": "Budgeting",
-  "description": "A modern budgeting application to help you manage your finances",
+  "name": "Bear Budget",
+  "short_name": "Bear Budget",
+  "description": "A budgeting and finance app for bears.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
