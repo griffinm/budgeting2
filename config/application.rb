@@ -4,7 +4,7 @@ require "rails/rack"
 require "active_record/railtie"
 require "action_controller/railtie" 
 #require "action_view/railtie"
-#require "action_mailer/railtie"
+require "action_mailer/railtie"
 require "active_job/railtie"
 # require "action_cable/engine"
 #require "action_mailbox/engine"
@@ -34,7 +34,5 @@ module Budgeting2
     config.middleware.use ActionDispatch::Cookies
 
     config.middleware.use config.session_store, config.session_options
-
-
   end
 end

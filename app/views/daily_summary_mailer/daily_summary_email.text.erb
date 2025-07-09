@@ -1,0 +1,50 @@
+Daily Summary - <%= @yesterday.strftime('%A, %B %d, %Y') %>
+==================================================
+
+Hello <%= @user.first_name %>,
+
+Here's your daily summary for <%= @yesterday.strftime('%A, %B %d, %Y') %>:
+
+SUMMARY STATISTICS
+------------------
+Total Transactions: <%= @transaction_count %>
+Total Expenses: $<%= number_with_precision(@total_expenses, precision: 2) %>
+Total Income: $<%= number_with_precision(@total_income, precision: 2) %>
+
+<% if @yesterday_transactions.any? %>
+YESTERDAY'S TRANSACTIONS
+------------------------
+<% @yesterday_transactions.each do |transaction| %>
+<%= transaction.merchant.merchant_name %> (<%= transaction.merchant_tag&.name || 'Uncategorized' %>)
+<%= transaction.plaid_account.nickname || transaction.plaid_account.plaid_official_name || transaction.plaid_account.plaid_name %>
+<%= transaction.transaction_type == 'expense' ? '-' : '+' %>$<%= number_with_precision(transaction.amount, precision: 2) %>
+
+<% end %>
+<% else %>
+YESTERDAY'S TRANSACTIONS
+------------------------
+No transactions recorded yesterday.
+<% end %>
+
+<% if @top_categories.any? %>
+TOP SPENDING CATEGORIES
+-----------------------
+<% @top_categories.each do |category, amount| %>
+<%= category %>: $<%= number_with_precision(amount, precision: 2) %>
+<% end %>
+<% end %>
+
+<% if @account_balances.any? %>
+ACCOUNT BALANCES
+----------------
+<% @account_balances.each do |account| %>
+<% balance = account.account_balances.find_by(date: @yesterday) %>
+<% if balance %>
+<%= account.name %>: $<%= number_with_precision(balance.balance, precision: 2) %>
+<% end %>
+<% end %>
+<% end %>
+
+---
+This is an automated daily summary from your budgeting application.
+Generated on <%= Time.current.strftime('%B %d, %Y at %I:%M %p') %> 

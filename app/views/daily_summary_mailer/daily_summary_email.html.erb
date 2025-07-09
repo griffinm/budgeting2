@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Summary</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #007bff;
+      padding-bottom: 20px;
+    }
+    .header h1 {
+      color: #007bff;
+      margin: 0;
+      font-size: 24px;
+    }
+    .summary-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      text-align: center;
+      flex: 1;
+      margin: 5px;
+      min-width: 120px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #6c757d;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .section h2 {
+      color: #495057;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .transaction {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+    .transaction:last-child {
+      border-bottom: none;
+    }
+    .transaction-details {
+      flex: 1;
+    }
+    .transaction-merchant {
+      font-weight: 600;
+      color: #212529;
+    }
+    .transaction-category {
+      font-size: 12px;
+      color: #6c757d;
+    }
+    .transaction-amount {
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .amount-expense {
+      color: #dc3545;
+    }
+    .amount-income {
+      color: #28a745;
+    }
+    .category-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f3f4;
+    }
+    .category-item:last-child {
+      border-bottom: none;
+    }
+    .balance-item {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .balance-account {
+      font-weight: 600;
+      color: #495057;
+    }
+    .balance-amount {
+      font-size: 18px;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #dee2e6;
+      color: #6c757d;
+      font-size: 12px;
+    }
+    .no-data {
+      text-align: center;
+      color: #6c757d;
+      font-style: italic;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Daily Summary</h1>
+      <p><%= @yesterday.strftime('%A, %B %d, %Y') %></p>
+    </div>
+
+    <div class="summary-stats">
+      <div class="stat-box">
+        <div class="stat-value"><%= @transaction_count %></div>
+        <div class="stat-label">Transactions</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value amount-expense">$<%= number_with_precision(@total_expenses, precision: 2) %></div>
+        <div class="stat-label">Total Expenses</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value amount-income">$<%= number_with_precision(@total_income, precision: 2) %></div>
+        <div class="stat-label">Total Income</div>
+      </div>
+    </div>
+
+    <% if @yesterday_transactions.any? %>
+      <div class="section">
+        <h2>Yesterday's Transactions</h2>
+        <% @yesterday_transactions.each do |transaction| %>
+          <div class="transaction">
+            <div class="transaction-details">
+              <div class="transaction-merchant"><%= transaction.merchant.merchant_name %></div>
+              <div class="transaction-category">
+                <%= transaction.merchant_tag&.name || 'Uncategorized' %>
+                • <%= transaction.plaid_account.nickname || transaction.plaid_account.plaid_official_name || transaction.plaid_account.plaid_name %>
+              </div>
+            </div>
+            <div class="transaction-amount <%= transaction.transaction_type == 'expense' ? 'amount-expense' : 'amount-income' %>">
+              <%= transaction.transaction_type == 'expense' ? '-' : '+' %>$<%= number_with_precision(transaction.amount, precision: 2) %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="section">
+        <h2>Yesterday's Transactions</h2>
+        <div class="no-data">No transactions recorded yesterday.</div>
+      </div>
+    <% end %>
+
+    <% if @top_categories.any? %>
+      <div class="section">
+        <h2>Top Spending Categories</h2>
+        <% @top_categories.each do |category, amount| %>
+          <div class="category-item">
+            <span><%= category %></span>
+            <span class="amount-expense">$<%= number_with_precision(amount, precision: 2) %></span>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @account_balances.any? %>
+      <div class="section">
+        <h2>Account Balances</h2>
+        <% @account_balances.each do |account| %>
+          <% balance = account.account_balances.find_by(date: @yesterday) %>
+          <% if balance %>
+            <div class="balance-item">
+              <div class="balance-account"><%= account.name %></div>
+              <div class="balance-amount">$<%= number_with_precision(balance.balance, precision: 2) %></div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="footer">
+      <p>This is an automated daily summary from your budgeting application.</p>
+      <p>Generated on <%= Time.current.strftime('%B %d, %Y at %I:%M %p') %></p>
+    </div>
+  </div>
+</body>
+</html> 
