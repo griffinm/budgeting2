@@ -25,7 +25,8 @@ Rails.application.routes.draw do
     resources :merchants, only: [:index, :update, :show] do
       get 'spend_stats', to: 'merchants#spend_stats'
     end
-    resources :merchant_tags, only: [:index, :update, :create, :destroy] do
+    resources :merchant_tags, only: [:index, :update, :create, :destroy, :show] do
+      resources :transactions, only: [:index]
       collection do
         get 'spend_stats', to: 'merchant_tags#spend_stats'
       end

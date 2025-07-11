@@ -4,6 +4,11 @@ class MerchantTagsController < ApplicationController
     @merchant_tags = current_user.account.merchant_tags.order(name: :asc)
   end
 
+  # GET /api/merchant_tags/:id
+  def show
+    @merchant_tag = current_user.account.merchant_tags.find(params[:id])
+  end
+
   # POST /api/merchant_tags
   def create
     @merchant_tag = current_user.account.merchant_tags.new(create_params)

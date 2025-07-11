@@ -1,7 +1,17 @@
 class TransactionsController < ApplicationController
 
   # GET /transactions
+  # GET /transactions/merchant_tags/:merchant_tag_id
   def index
+    if params[:merchant_tag_id].present?
+      @page, @transactions = pagy(
+        TransactionSearchService.new(
+          account_id: current_user.account_id,
+          user_id: current_user.id,
+          merchant_tag_id: params[:merchant_tag_id],
+        ).call
+      )
+    else
       @page, @transactions = pagy(
         TransactionSearchService.new(
           account_id: current_user.account_id,
@@ -21,6 +31,7 @@ class TransactionsController < ApplicationController
           merchant_tag_id: search_params[:merchant_tag_id],
         ).call
       )
+    end
   end
 
   # PATCH /transactions/:id

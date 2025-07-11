@@ -13,6 +13,8 @@ import {
 } from "date-fns";
 import { DateInput } from "@mantine/dates";
 import { TransactionModal } from "./TransactionModal";
+import { useNavigate } from "react-router-dom";
+import { urls } from "@/utils/urls";
 
 const defaultStartDate = startOfMonth(new Date());
 const defaultEndDate = endOfMonth(new Date());
@@ -62,7 +64,7 @@ export const View = () => {
           <Table.Tr>
             <Table.Th>Name</Table.Th>
             <Table.Th>Total Transaction Amount</Table.Th>
-            <Table.Th></Table.Th>
+            <Table.Th>More Information</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -122,6 +124,7 @@ function MerchantTagRow({
   expandedLevel?: number; 
   onViewTransactions: (merchantTag: MerchantTag) => void;
 }) {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const hasChildren = tag.children && tag.children.length > 0;
   const rowClasses = classNames('mr-2', {
@@ -172,8 +175,11 @@ function MerchantTagRow({
           <TransactionAmount amount={tag.totalTransactionAmount || 0} />
         </Table.Td>
         <Table.Td>
+          <Button size="xs" variant="transparent" onClick={() => navigate(urls.merchantTag.path(tag.id))}>
+            Details
+          </Button>
           <Button size="xs" variant="transparent" onClick={() => onViewTransactions(tag)}>
-            View Transactions
+            Transactions
           </Button>
         </Table.Td>
       </Table.Tr>

@@ -7,13 +7,14 @@ import './index.css';
 import { CurrentUserProvider } from '@/providers';
 import { MainNavLinks } from './utils/urls';
 import { Loading } from '@/components/Loading';
-import MerchantPage from './pages/MerchantPage/MerchantPage';
 import { Notifications } from '@mantine/notifications';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
 const MainLayout = lazy(() => import('./layouts/MainLayout/MainLayout'));
 const AuthLayout = lazy(() => import('./layouts/AuthLayout/AuthLayout'));
+const MerchantTagPage = lazy(() => import('./pages/MerchantTagPage/MerchantTagPage'));
+const MerchantPage = lazy(() => import('./pages/MerchantPage/MerchantPage'))
 
 const WithSuspense = (component: React.ReactNode) => (
   <Suspense fallback={<Loading />}>
@@ -30,6 +31,10 @@ const otherRoutes = [
   {
     path: '/merchants/:id',
     element: WithSuspense(<MerchantPage />),
+  },
+  {
+    path: '/categories/:id',
+    element: WithSuspense(<MerchantTagPage />),
   },
 ];
 

@@ -15,6 +15,7 @@ const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTag
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage/ProfilePage'));
 const PlaidAccountsPage = lazy(() => import('@/pages/AccountsPage/AccountPage'));
+const MerchantTagPage = lazy(() => import('@/pages/MerchantTagPage/MerchantTagPage'));
 
 interface Url {
   path: (...args: any[]) => string;
@@ -65,6 +66,12 @@ export const urls: Record<string, Url> = {
     title: () => 'Categories' + TITLE_SUFFIX,
     component: MerchantTagsPage,
     section: 'main',
+  },
+  merchantTag: {
+    path: (id: number) => `/categories/${id}`,
+    title: () => 'Category' + TITLE_SUFFIX,
+    component: MerchantTagPage,
+    section: 'none',
   },
   profile: {
     path: () =>'/profile',

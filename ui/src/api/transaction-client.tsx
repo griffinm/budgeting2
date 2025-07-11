@@ -53,3 +53,12 @@ export const updateTransaction = async ({
   });
   return response.data;
 };
+
+export const getTransactionsForMerchantTag = async ({
+  merchantTagId,
+}: {
+  merchantTagId: number;
+}): Promise<PageResponse<Transaction>> => {
+  const response = await baseClient.get(`/merchant_tags/${merchantTagId}/transactions`);
+  return response.data;
+};

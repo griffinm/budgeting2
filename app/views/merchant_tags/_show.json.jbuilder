@@ -1,0 +1,1 @@
+render partial: 'merchant_tag', locals: { merchant_tag: @merchant_tag }

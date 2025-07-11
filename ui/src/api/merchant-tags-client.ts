@@ -28,6 +28,11 @@ export const fetchMerchantTags = async (): Promise<MerchantTag[]> => {
   return response.data;
 };
 
+export const fetchMerchantTag = async (id: number): Promise<MerchantTag> => {
+  const response = await baseClient.get(`/merchant_tags/${id}`);
+  return response.data;
+};
+
 export const createMerchantTag = async ({
   data,
 }: {
