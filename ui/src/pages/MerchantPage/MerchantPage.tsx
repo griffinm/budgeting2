@@ -5,10 +5,9 @@ import { Merchant, MerchantSpendStats } from "@/utils/types";
 import { useTransactions } from "@/hooks";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading } from "@/components/Loading";
-import { Blockquote, Breadcrumbs } from "@mantine/core";
+import { Blockquote, Breadcrumbs, Card } from "@mantine/core";
 import { currentMonthSpend, lastMonthSpend } from "./utils";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
-import { BorderBox } from "@/components/BorderBox/BorderBox";
 import { urls } from "@/utils/urls";
 import { TrendChart } from "./TrendChart";
 
@@ -29,6 +28,7 @@ export default function MerchantPage() {
     searchParams: merchantTransactionsSearchParams,
     updateTransaction: updateMerchantTransaction,
     error: merchantTransactionsError,
+    clearSearchParams,
   } = useTransactions({
     initialSearchParams: {
       merchant_id: Number(id),
@@ -86,7 +86,7 @@ export default function MerchantPage() {
       <div className="flex flex-col gap-4">
         <h1 className="text-3xl font-bold">{merchantDisplayName(merchant)}</h1>
 
-        <BorderBox>
+        <Card>
           <h2 className="text-xl font-bold mb-4">Spend Summary</h2>
           <div className="flex flex-col md:flex-row gap-4 md:gap-20">
             <SpendSummaryCard
@@ -113,9 +113,9 @@ export default function MerchantPage() {
               loading={merchantSpendStatsLoading}
             />
           </div>
-        </BorderBox>
+        </Card>
 
-        <BorderBox>
+        <Card>
           <TrendChart
             merchantSpendStats={merchantSpendStats || undefined}
             loading={merchantSpendStatsLoading}
@@ -123,9 +123,9 @@ export default function MerchantPage() {
             onChangeMonthsBack={setChartMonthsBack}
             averageSpendForChart={averageSpendForChart}
           />
-        </BorderBox>
+        </Card>
 
-        <BorderBox>
+        <Card>
           <h2 className="text-xl font-bold mb-4">Transactions</h2>
           <TransactionsTable
             transactions={transactions}
@@ -140,8 +140,9 @@ export default function MerchantPage() {
             error={merchantTransactionsError}
             condensed={true}
             showSearch={false}
+            clearSearchParams={clearSearchParams}
           />
-        </BorderBox>
+        </Card>
 
       </div>
     </div>

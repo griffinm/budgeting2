@@ -5,6 +5,11 @@ class PlaidService < BaseService
   end
 
   def sync_transactions
+    if ENV["DISABLE_SYNC"] == "true"
+      Rails.logger.info "Transaction sync is disabled"
+      return
+    end
+
     access_tokens = @account.plaid_access_tokens
     
     access_tokens.each do |access_token|

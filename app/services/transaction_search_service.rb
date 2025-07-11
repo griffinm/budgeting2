@@ -37,8 +37,13 @@ class TransactionSearchService < BaseService
   end
 
   def call
+    errors = check_params
+    if errors.any?
+      return { errors: errors }
+    end
+
     transactions = @user.plaid_transactions.joins(:plaid_account, :merchant)
-      .includes(:plaid_account, :merchant, merchant: :default_merchant_tag)
+      .includes(:plaid_account, :merchant, :merchant_tag, merchant: :default_merchant_tag)
       .order(date: :desc)
 
     if @merchant_tag_id.present?
@@ -47,7 +52,7 @@ class TransactionSearchService < BaseService
       transactions = transactions.where(merchant_tag_id: child_ids)
     end
 
-    if @has_no_category.present?
+    if @has_no_category.present? && @has_no_category == "true"
       transactions = transactions.where(merchant_tag_id: nil)
     end
 
@@ -100,5 +105,22 @@ class TransactionSearchService < BaseService
     end
 
     transactions
+  end
+
+  private def check_params
+    errors = []
+    if @start_date.present? && @end_date.present? && @start_date > @end_date
+      errors << "Start date must be before end date"
+    end
+
+    if @amount_greater_than.present? && @amount_less_than.present? && @amount_greater_than > @amount_less_than
+      errors << "Amount greater than must be less than amount less than"
+    end
+
+    if @transaction_type.present? && !PlaidTransaction::TRANSACTION_TYPES.value?(@transaction_type)
+      errors << "Invalid transaction type"
+    end
+
+    errors
   end
 end

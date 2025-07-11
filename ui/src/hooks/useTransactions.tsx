@@ -7,6 +7,27 @@ import {
 } from '@/api/transaction-client';
 import { Page, Transaction } from '@/utils/types';
 
+const SEARCH_PARAMS_KEY = "transactionSearch";
+
+function localStorageBaseKey() {
+  const url = window.location.pathname;
+  const urlKey = url.split('/').join('-');
+  return `${urlKey}-${SEARCH_PARAMS_KEY}`;
+}
+
+function saveSearchToLocalStorage(search: TransactionSearchParams) {
+  localStorage.setItem(localStorageBaseKey(), JSON.stringify(search));
+}
+
+function getSearchFromLocalStorage(): TransactionSearchParams | null {
+  const search = localStorage.getItem(localStorageBaseKey());
+  return search ? JSON.parse(search) : null;
+}
+
+function clearSearchFromLocalStorage() {
+  localStorage.removeItem(localStorageBaseKey());
+}
+
 interface TransactionsState {
   transactions: Transaction[];
   isLoading: boolean;
@@ -17,32 +38,20 @@ interface TransactionsState {
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
 }
 
-const getPageFromHash = (): number => {
-  const hash = window.location.hash;
-  const match = hash.match(/page=(\d+)/);
-  return match ? parseInt(match[1], 10) : 1;
-};
-
-const setPageInHash = (page: number) => {
-  const hash = window.location.hash.replace(/page=\d+/, '').replace(/^#/, '');
-  const newHash = hash ? `${hash}&page=${page}` : `page=${page}`;
-  window.location.hash = newHash;
-};
-
 export const useTransactions = ({
   initialSearchParams = {},
 }: {
   initialSearchParams?: TransactionSearchParams;
 } = {}) => {
   const [state, setState] = useState<TransactionsState>({
-    searchParams: initialSearchParams || {},
+    searchParams: getSearchFromLocalStorage() || initialSearchParams || {},
     setSearchParams: () => {},
     transactions: [],
     isLoading: false,
     error: null,
     updateTransaction: () => {},
     page: {
-      currentPage: getPageFromHash(),
+      currentPage: getSearchFromLocalStorage()?.page || 1,
       totalPages: 1,
       totalCount: 0,
     },
@@ -51,11 +60,12 @@ export const useTransactions = ({
   const fetchTransactions = useCallback(async () => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-    const currentPage = getPageFromHash();
     const apiParams = {
       ...state.searchParams,
-      page: currentPage,
+      page: state.page.currentPage,
     };
+
+    saveSearchToLocalStorage(apiParams);
 
     try {
       const response = await getTransactions({
@@ -67,7 +77,7 @@ export const useTransactions = ({
         isLoading: false,
         error: null,
         page: {
-          currentPage: response.page?.currentPage ?? currentPage,
+          currentPage: response.page?.currentPage ?? prev.page.currentPage,
           totalPages: response.page?.totalPages ?? 1,
           totalCount: response.page?.totalCount ?? 0,
         },
@@ -79,20 +89,29 @@ export const useTransactions = ({
         error: error instanceof Error ? error : new Error('Failed to fetch transactions'),
       }));
     }
-  }, [state.searchParams]);
+  }, [state.searchParams, state.page.currentPage]);
 
   const setSearchParams = useCallback((newParams: TransactionSearchParams) => {
-    setState(prev => ({ ...prev, searchParams: { ...prev.searchParams, ...newParams } }));
-    setPageInHash(1); // Reset to first page when search params change
+    setState(prev => ({ 
+      ...prev, 
+      searchParams: { ...prev.searchParams, ...newParams },
+      page: { ...prev.page, currentPage: 1 } // Reset to first page when search params change
+    }));
   }, []);
 
   const setPage = useCallback((page: number) => {
-    setPageInHash(page);
+    setState(prev => ({ 
+      ...prev, 
+      page: { ...prev.page, currentPage: page } 
+    }));
   }, []);
 
   const setPerPage = useCallback((per_page: number) => {
-    setState(prev => ({ ...prev, per_page }));
-    setPageInHash(1); // Reset to first page when per_page changes
+    setState(prev => ({ 
+      ...prev, 
+      per_page,
+      page: { ...prev.page, currentPage: 1 } // Reset to first page when per_page changes
+    }));
   }, []);
 
   const updateTransaction = useCallback((id: number, params: TransactionUpdateParams) => {
@@ -104,15 +123,14 @@ export const useTransactions = ({
     });
   }, []);
 
-  // Listen for hash changes
-  useEffect(() => {
-    const handleHashChange = () => {
-      fetchTransactions();
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [fetchTransactions]);
+  const clearSearchParams = () => {
+    clearSearchFromLocalStorage();
+    setState(prev => ({ 
+      ...prev, 
+      searchParams: {},
+      page: { ...prev.page, currentPage: 1 } // Reset to first page when clearing search
+    }));
+  }
 
   // Initial fetch
   useEffect(() => {
@@ -126,5 +144,6 @@ export const useTransactions = ({
     setPerPage,
     setSearchParams,
     updateTransaction,
+    clearSearchParams,
   };
 }; 

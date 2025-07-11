@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useRef, useState, useEffect } from "react";
-import { Checkbox, Input, Select, TextInput } from "@mantine/core";
+import { Button, Card, Checkbox, Input, Select, TextInput } from "@mantine/core";
 import { TransactionSearchParams } from "@/api/transaction-client";
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
@@ -10,9 +10,11 @@ import { TransactionType } from "@/utils/types";
 export function Search({
   searchParams,
   onSetSearchParams,
+  clearSearchParams,
 }: {
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
+  clearSearchParams: () => void;
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [search, setSearch] = useState('');
@@ -60,58 +62,63 @@ export function Search({
         {showAdvanced ? '- Hide Advanced Search' : '+ Show Advanced Search'}
       </div>
       {showAdvanced && (
-        <div className="mt-2 w-full">
+        <div className="mt-2">
           <form>
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-5 border-1 border-gray-200 rounded-md p-2">
-              <DatePickerInput
-                label="Start Date"
-                value={localParams.start_date}
-                onChange={(date) => updateLocalParam('start_date', date)}
-              />
-              <DatePickerInput
-                label="End Date"
-                value={localParams.end_date}
-                onChange={(date) => updateLocalParam('end_date', date)}
-              />
-
-              <TextInput
-                label="Amount Greater Than"
-                type="number"
-                value={localParams.amount_greater_than || ''}
-                onChange={(e) => updateLocalParam('amount_greater_than', e.target.value)}
-              />
-              <TextInput
-                label="Amount Less Than"
-                type="number"
-                value={localParams.amount_less_than || ''}
-                onChange={(e) => updateLocalParam('amount_less_than', e.target.value)}
-              />
-              <TextInput
-                label="Amount Equal To"
-                type="number"
-                value={localParams.amount_equal_to || ''}
-                onChange={(e) => updateLocalParam('amount_equal_to', e.target.value)}
-              />
-              <Select
-                label="Transaction Type"
-                value={localParams.transaction_type}
-                onChange={(value) => updateLocalParam('transaction_type', value as TransactionType)}
-                data={[
-                  { value: '', label: 'All' },
-                  { value: 'expense', label: 'Expense' },
-                  { value: 'income', label: 'Income' },
-                  { value: 'transfer', label: 'Transfer' },
-                ]}
-              />
-              <div className="flex flex-row items-center pt-5">
-                <Checkbox
-                  label="Has No Category"
-                  checked={localParams.has_no_category}
-                  onChange={(e) => updateLocalParam('has_no_category', e.target.checked)}
+            <Card withBorder className="p-2" shadow="xs" radius="md" style={{ maxWidth: '850px' }}>
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
+                <DatePickerInput
+                  label="Start Date"
+                  value={localParams.start_date}
+                  onChange={(date) => updateLocalParam('start_date', date)}
                 />
-              </div>
+                <DatePickerInput
+                  label="End Date"
+                  value={localParams.end_date}
+                  onChange={(date) => updateLocalParam('end_date', date)}
+                />
 
-            </div>
+                <TextInput
+                  label="Amount Greater Than"
+                  type="number"
+                  value={localParams.amount_greater_than || ''}
+                  onChange={(e) => updateLocalParam('amount_greater_than', e.target.value)}
+                />
+                <TextInput
+                  label="Amount Less Than"
+                  type="number"
+                  value={localParams.amount_less_than || ''}
+                  onChange={(e) => updateLocalParam('amount_less_than', e.target.value)}
+                />
+                <TextInput
+                  label="Amount Equal To"
+                  type="number"
+                  value={localParams.amount_equal_to || ''}
+                  onChange={(e) => updateLocalParam('amount_equal_to', e.target.value)}
+                />
+                <Select
+                  label="Transaction Type"
+                  value={localParams.transaction_type}
+                  onChange={(value) => updateLocalParam('transaction_type', value as TransactionType)}
+                  data={[
+                    { value: '', label: 'All' },
+                    { value: 'expense', label: 'Expense' },
+                    { value: 'income', label: 'Income' },
+                    { value: 'transfer', label: 'Transfer' },
+                  ]}
+                />
+                <div className="flex flex-row items-center pt-5">
+                  <Checkbox
+                    label="Has No Category"
+                    checked={localParams.has_no_category}
+                    onChange={(e) => updateLocalParam('has_no_category', e.target.checked)}
+                  />
+                </div>
+
+              </div>
+              <div className="flex flex-row justify-end">
+                <Button variant="subtle" size="xs" color="gray" onClick={() => clearSearchParams()}>Clear Search</Button>
+              </div>
+            </Card>
           </form>
         </div>
       )}

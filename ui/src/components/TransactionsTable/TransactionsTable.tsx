@@ -18,6 +18,7 @@ export function TransactionsTable({
   merchantTags,
   condensed = false,
   showSearch = true,
+  clearSearchParams,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
@@ -31,6 +32,7 @@ export function TransactionsTable({
   merchantTags: MerchantTag[];
   condensed?: boolean;
   showSearch?: boolean;
+  clearSearchParams: () => void;
 }) {
   const isMobile = useMediaQuery('(max-width: 600px)');
 
@@ -41,7 +43,7 @@ export function TransactionsTable({
           {isLoading ? 'Loading...' : `Found ${page.totalCount.toLocaleString()} transactions`}
         </div>
         {showSearch && (
-          <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} />
+          <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} clearSearchParams={clearSearchParams} />
         )}
       </div>
 

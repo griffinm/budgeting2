@@ -23,6 +23,7 @@ export default function TransactionsPage() {
     searchParams,
     setSearchParams,
     updateTransaction,
+    clearSearchParams,
   } = useTransactions();
   const { 
     latestSyncEvent,
@@ -95,6 +96,7 @@ export default function TransactionsPage() {
           onSetSearchParams={setSearchParams}
           updateTransaction={updateTransaction}
           merchantTags={merchantTags}
+          clearSearchParams={clearSearchParams}
         />
 
       </Card>

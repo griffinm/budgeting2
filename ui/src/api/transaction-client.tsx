@@ -16,6 +16,7 @@ export interface TransactionSearchParams {
   amount_equal_to?: string;
   has_no_category?: boolean;
   merchant_tag_id?: number;
+  page?: number;
 }
 
 export interface TransactionUpdateParams {
