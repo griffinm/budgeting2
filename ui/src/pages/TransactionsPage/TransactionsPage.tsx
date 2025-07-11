@@ -6,6 +6,7 @@ import { MerchantTag } from '@/utils/types';
 import { fetchMerchantTags } from '@/api';
 import { useSyncEvent } from '@/hooks/useSyncEvent';
 import { format as formatDate } from 'date-fns';
+import { Card } from '@mantine/core';
 
 export default function TransactionsPage() {
   const { 
@@ -38,25 +39,31 @@ export default function TransactionsPage() {
 
   return (
     <div>
-      <div className="text-sm text-gray-500">
-        {isSyncEventLoading ? <div>Loading...</div> : latestSyncEvent ? (
-          <>Last synced at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy hh:mm a')}</strong></>
-        ) : (
-          <em>Transactions not yet synced</em>
-        )}
+      <div className="flex flex-col md:flex-row justify-between mb-3">
+        <h1 className="text-2xl font-bold mb-4">Transactions</h1>
+        <div className="text-sm text-gray-500">
+          {isSyncEventLoading ? <div>Loading...</div> : latestSyncEvent ? (
+            <>Last synced at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy hh:mm a')}</strong></>
+          ) : (
+            <em>Transactions not yet synced</em>
+          )}
+        </div>
       </div>
-      <TransactionsTable
-        transactions={transactions}
-        isLoading={isLoading}
-        error={error}
-        page={page}
-        setPage={setPage}
-        setPerPage={setPerPage}
-        searchParams={searchParams}
-        onSetSearchParams={setSearchParams}
-        updateTransaction={updateTransaction}
-        merchantTags={merchantTags}
-      />
+      <Card>
+        <TransactionsTable
+          transactions={transactions}
+          isLoading={isLoading}
+          error={error}
+          page={page}
+          setPage={setPage}
+          setPerPage={setPerPage}
+          searchParams={searchParams}
+          onSetSearchParams={setSearchParams}
+          updateTransaction={updateTransaction}
+          merchantTags={merchantTags}
+        />
+
+      </Card>
     </div>
   );
 }

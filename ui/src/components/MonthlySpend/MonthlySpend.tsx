@@ -1,6 +1,7 @@
 import { Transaction, TransactionType } from "@/utils/types";
 import { Loading } from "@/components/Loading";
 import { MonthlyLineChart } from "./MonthlyLineChart";
+import { Card } from "@mantine/core";
 
 export function MonthlySpend({
   currentMonthExpenses,
@@ -31,25 +32,29 @@ export function MonthlySpend({
   }
 
   return (
-    <div>
-      <MonthlyLineChart
-        title="Expenses MoM"
-        currentMonthTransactions={currentMonthExpenses}
-        previousMonthTransactions={previousMonthExpenses}
-        transactionType="expense"
-        average={averageExpense}
-        monthsBack={expenseMonthsBack}
-        onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'expense' })}
-      />
-      <MonthlyLineChart
-        title="Income MoM"
-        currentMonthTransactions={currentMonthIncome}
-        previousMonthTransactions={previousMonthIncome}
-        transactionType="income"
-        average={averageIncome}
-        monthsBack={incomeMonthsBack}
-        onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'income' })}
-      />
-    </div>
+    <>
+      <Card className="mb-4">
+        <MonthlyLineChart
+          title="Expenses MoM"
+          currentMonthTransactions={currentMonthExpenses}
+          previousMonthTransactions={previousMonthExpenses}
+          transactionType="expense"
+          average={averageExpense}
+          monthsBack={expenseMonthsBack}
+          onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'expense' })}
+        />
+      </Card>
+      <Card className="mb-4">
+        <MonthlyLineChart
+          title="Income MoM"
+          currentMonthTransactions={currentMonthIncome}
+          previousMonthTransactions={previousMonthIncome}
+          transactionType="income"
+          average={averageIncome}
+          monthsBack={incomeMonthsBack}
+          onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'income' })}
+        />
+      </Card>
+    </>
   );
 }

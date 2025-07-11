@@ -7,6 +7,7 @@ import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
 import { AccountBalances } from './AccountBalances';
+import { Card } from '@mantine/core';
 
 export default function DashboardPage() {
   const { 
@@ -41,7 +42,7 @@ export default function DashboardPage() {
       <div className="mb-4">
         <AccountBalances accountBalances={accountBalances} loading={accountBalancesLoading} />
       </div>
-      <div className="border border-gray-200 rounded-md p-4 shadow-md mb-4">
+      <Card className="border border-gray-200 rounded-md p-4 shadow-md mb-4">
         <h2 className="text-2xl mb-4">Transaction Trends</h2>
         <div className="flex flex-row gap-4">
           <DashboardCard
@@ -57,18 +58,18 @@ export default function DashboardPage() {
             loading={loading}
           />
         </div>
-      </div>
+      </Card>
       
-      <div className="mb-4">
+      <Card className="mb-4">
         <ProfitAndLoss
           profitAndLoss={profitAndLoss}
           monthsBack={monthsBack}
           setMonthsBack={setProfitAndLossMonthsBack}
           loading={profitAndLossLoading}
         />
-      </div>
+      </Card>
 
-      <div className="mb-4">
+      <div>
         <MonthlySpend
           currentMonthExpenses={currentMonthExpenses.transactions}
           currentMonthIncome={currentMonthIncome.transactions}

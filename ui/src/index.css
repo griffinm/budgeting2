@@ -2,6 +2,7 @@
 
 body, html {
   height: 100%;  
+  background-color: var(--mantine-color-gray-0);
 }
 
 #root {
@@ -17,4 +18,26 @@ a {
 
 a:hover {
   color: #0056b3;
+}
+
+.hover-bounce {
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.header {
+  border-bottom: 1px solid var(--mantine-color-grey-2);
+}
+
+.sidebar {
+  border-right: 1px solid var(--mantine-color-gray-2);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.no-padding {
+  padding: 0 !important;
 }

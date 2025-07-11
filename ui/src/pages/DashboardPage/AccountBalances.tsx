@@ -1,6 +1,7 @@
 import { AccountBalance } from "@/utils/types";
 import { Loading } from "@/components/Loading";
 import { getCurrentBalance } from "./accountBalanceUtils";
+import { Card } from "@mantine/core";
 
 export const AccountBalances = ({
   accountBalances,
@@ -11,14 +12,14 @@ export const AccountBalances = ({
 }) => {
 
   return (
-    <div className="border border-gray-200 rounded-md p-4 shadow-md">
+    <Card>
       <h2 className="text-2xl mb-4">Account Balances</h2>
       {loading ? (
         <Loading />
       ) : (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {accountBalances.map((accountBalance) => (
-          <div className="bg-blue-100 p-4 rounded-md text-center">
+          <div className="bg-blue-100 p-4 rounded-md text-center hover-bounce">
             <div className="text-3xl font-bold mb-2">
               {
                 new Intl.NumberFormat('en-US', { 
@@ -35,6 +36,6 @@ export const AccountBalances = ({
           ))}
       </div>
       )}
-    </div>
+    </Card>
   );
 };

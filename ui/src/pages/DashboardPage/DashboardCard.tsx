@@ -19,7 +19,7 @@ export function DashboardCard({
 
   return (
     <div className="max-w-xs">
-    <Blockquote className="bg-gray-100 p-4 rounded-lg" color={cardColor}>
+    <Blockquote className="bg-gray-100 p-4 rounded-lg hover-bounce" color={cardColor}>
       <h3 className="text-md mb-2">
         {transactionType === 'expense' ? 'Expenses' : 'Income'} Performance MoM
       </h3>

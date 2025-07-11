@@ -1,7 +1,7 @@
 import { MerchantSearchParams } from "@/api";
 import { MerchantTag, Page, TransactionType as TransactionTypeType } from "@/utils/types";
 import { Merchant } from "@/utils/types";
-import { Pagination } from "@mantine/core";
+import { Card, Pagination } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { EditableLabel } from "@/components/EditableLabel";
 import { Search } from "./Search";
@@ -54,31 +54,33 @@ export function MerchantsTable({
 
       <div className="flex w-full gap-3 flex-col">
         {merchants.map(merchant => (
-          <div key={merchant.id} className="flex flex-col border border-gray-200 p-3 rounded-md gap-2 md:flex-row md:justify-between hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200">
-            <div className="w-full md:w-1/3">
-              <EditableLabel
-                id={merchant.id}
-                value={merchantDisplayName(merchant)}
-                linkValue={urls.merchant.path(merchant.id)}
-                onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { customName: value } })}
-              />
+          <Card key={merchant.id} p="xs">
+            <div className="flex flex-row gap-2">
+              <div className="w-full md:w-1/3">
+                <EditableLabel
+                  id={merchant.id}
+                  value={merchantDisplayName(merchant)}
+                  linkValue={urls.merchant.path(merchant.id)}
+                  onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { customName: value } })}
+                />
+              </div>
+              
+              <div className="w-full md:w-1/3">
+                <TransactionType
+                  merchant={merchant}
+                  onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { defaultTransactionType: value as TransactionTypeType } })}
+                />
+              </div>
+              
+              <div className="w-full md:w-1/3">
+                <CategoryDisplay
+                  category={merchant.defaultMerchantTag}
+                  onSave={({ id, }) => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
+                  allCategories={allMerchantTags}
+                />
+              </div>
             </div>
-            
-            <div className="w-full md:w-1/3">
-              <TransactionType
-                merchant={merchant}
-                onSave={async (id: number, value: string) => onUpdateMerchant({ id, value: { defaultTransactionType: value as TransactionTypeType } })}
-              />
-            </div>
-            
-            <div className="w-full md:w-1/3">
-              <CategoryDisplay
-                category={merchant.defaultMerchantTag}
-                onSave={({ id, }) => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
-                allCategories={allMerchantTags}
-              />
-            </div>
-          </div>
+          </Card>
         ))}
 
         <div className="flex flex-row justify-center my-3">

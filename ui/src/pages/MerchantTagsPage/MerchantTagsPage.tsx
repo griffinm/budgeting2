@@ -2,7 +2,7 @@ import { usePageTitle } from "@/hooks";
 import { urls } from "@/utils/urls";
 import { useEffect, useState } from "react";
 import { MerchantCategoryTree } from "@/components/MerchantCategoryTree";
-import { Button } from "@mantine/core";
+import { Button, Card } from "@mantine/core";
 
 export default function MerchantTagsPage() {
   const setTitle = usePageTitle();
@@ -51,13 +51,13 @@ export default function MerchantTagsPage() {
         </div>
       </div>
       
-      <div>
+      <Card>
         {isShowingEditView ? (
           <MerchantCategoryTree.Edit />
         ) : (
           <MerchantCategoryTree.View />
         )}
-      </div>
+      </Card>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Loading } from "@/components/Loading";
 import { AccountTable } from "@/components/AccountTable";
 import { useAccount, usePlaidAccount } from "@/hooks";
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
+import { Card } from "@mantine/core";
 
 export default function AccountsPage() {
   const { plaidAccounts, isLoading } = usePlaidAccount();
@@ -33,8 +34,8 @@ export default function AccountsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-5">Accounts</h1>
-      <div className="mt-4 border border-gray-200 rounded-md shadow-sm">
+      <h1 className="text-2xl font-bold mb-5">Connected Bank Accounts</h1>
+      <Card className="no-padding">
         <AccountTable
           plaidAccounts={plaidAccounts}
           accountUsers={accountUsers}
@@ -42,7 +43,7 @@ export default function AccountsPage() {
           currentUser={user!}
           onAccountAccessChange={updateAccountAccess}
         />
-      </div>
+      </Card>
     </div>
   );
 }

@@ -49,7 +49,7 @@ export function MonthlyLineChart({
 
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200 mb-4 flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-2 justify-between mb-2">
         <h2 className="text-2xl">
           {title}

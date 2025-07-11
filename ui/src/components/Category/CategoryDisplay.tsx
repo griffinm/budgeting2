@@ -15,23 +15,22 @@ export function CategoryDisplay({
   const [isEditing, setIsEditing] = useState(false);
   return (
     <div>
-      {isEditing ? (
-        <CategoryEdit 
-          currentValue={category} 
-          onCancel={() => setIsEditing(false)} 
-          onSave={({ id, useDefaultCategory }) => {
-            onSave({ id, useDefaultCategory });
-            setIsEditing(false);
-          }} 
-          allCategories={allCategories} 
-        />
-      ) : (
-        <Display
-          tag={category}
-          onEdit={() => setIsEditing(true)}
-          allCategories={allCategories}
-        />
-      )}
+      <CategoryEdit
+        currentValue={category}
+        onCancel={() => setIsEditing(false)}
+        onSave={({ id, useDefaultCategory }) => {
+          onSave({ id, useDefaultCategory });
+          setIsEditing(false);
+        }}
+        allCategories={allCategories}
+        opened={isEditing}
+        onClose={() => setIsEditing(false)}
+      />
+      <Display
+        tag={category}
+        onEdit={() => setIsEditing(true)}
+        allCategories={allCategories}
+      />
     </div>
   )
 }

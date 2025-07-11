@@ -35,7 +35,7 @@ export function AccountTable({
               <Table.Td>****{account.plaidMask}</Table.Td>
               <Table.Td>{account.plaidType}</Table.Td>
               <Table.Td>
-                <div className="flex flex-col gap-2 md:flex-row">
+                <div className="flex flex-col gap-4">
                   {accountUsersLoading ? (
                     <div>Loading...</div>
                   ) : (

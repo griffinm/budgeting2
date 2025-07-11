@@ -1,6 +1,6 @@
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { urls } from "@/utils/urls";
-import { Alert, Button, TextInput } from "@mantine/core";
+import { Alert, Button, Card, TextInput } from "@mantine/core";
 import { useEffect, useState, useContext } from "react";
 import { CurrentUserContext } from "@/providers/CurrentUser/CurrentUserContext";
 import { Errors } from "@/components/Errors";
@@ -65,44 +65,47 @@ export default function ProfilePage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-5">Profile</h1>
-      <Errors errors={error} />
-      {success && <Alert color="green" title="Success">Profile updated successfully</Alert>}
-      <form className="flex flex-col gap-4 w-full md:max-w-xs" onSubmit={handleSubmit}>
-        <TextInput
-          label="Email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={loading}
-        />
-        <TextInput
-          label="First Name"
-          required
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-          disabled={loading}
-        />
-        <TextInput
-          label="Last Name"
-          required
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          disabled={loading}
-        />
-        <TextInput
-          label="New Password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)} disabled={loading}
-        />
-        <TextInput
-          label="Confirm New Password"
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-        <Button disabled={loading} type="submit">Save</Button>
-      </form>
+
+      <Card className="max-w-sm">
+        <Errors errors={error} />
+        {success && <Alert color="green" title="Success">Profile updated successfully</Alert>}
+        <form className="flex flex-col gap-4 w-full md:max-w-xs" onSubmit={handleSubmit}>
+          <TextInput
+            label="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+          />
+          <TextInput
+            label="First Name"
+            required
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            disabled={loading}
+          />
+          <TextInput
+            label="Last Name"
+            required
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            disabled={loading}
+          />
+          <TextInput
+            label="New Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)} disabled={loading}
+          />
+          <TextInput
+            label="Confirm New Password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <Button disabled={loading} type="submit">Save</Button>
+        </form>
+      </Card>
     </div>
   );
 }
