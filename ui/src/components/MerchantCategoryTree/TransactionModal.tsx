@@ -55,6 +55,7 @@ export function TransactionModal({
           onSetSearchParams={setSearchParams}
           merchantTags={merchantTags}
           showSearch={false}
+          clearSearchParams={() => {}}
         />
       </Modal>
     </div>
