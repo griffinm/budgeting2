@@ -154,3 +154,9 @@ export interface Notification {
   message: string;
   type: 'success' | 'error' | 'info';
 }
+
+export interface UpdateAllResponse {
+  message: 'update_already_queued' | 'update_not_needed' | 'update_queued';
+  last_sync_time: string;
+  is_updating: boolean;
+}

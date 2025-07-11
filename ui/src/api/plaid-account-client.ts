@@ -1,5 +1,5 @@
 import { baseClient } from "./base-client";
-import { PlaidAccount } from "@/utils/types";
+import { PlaidAccount, UpdateAllResponse } from "@/utils/types";
 
 export const fetchPlaidAccounts = async (): Promise<PlaidAccount[]> => {
   const response = await baseClient.get("/plaid_accounts");
@@ -26,5 +26,10 @@ export const removeUserFromPlaidAccount = async ({
   userId: string;
 }) => {
   const response = await baseClient.delete(`/users/${userId}/plaid_accounts/${plaidAccountId}`);
+  return response.data;
+};
+
+export const updateAllPlaidAccounts = async (): Promise<UpdateAllResponse> => {
+  const response = await baseClient.get("/plaid_accounts/update_all?force_update=true");
   return response.data;
 };

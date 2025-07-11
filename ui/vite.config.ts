@@ -20,4 +20,17 @@ export default defineConfig({
       '@': '/src',
     },
   },
+
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'mantine-vendor': ['@mantine/core', '@mantine/hooks'],
+          'mantine-charts-vendor': ['@mantine/charts'],
+          'date-fns-vendor': ['date-fns'],
+        },
+      },
+    },
+  },
 })

@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     end
     resources :plaid_accounts, only: [:index] do
       collection do
+        get 'update_all', to: 'plaid_accounts#update_all'
         get 'account_balance', to: 'account_balances#index'
       end
     end
