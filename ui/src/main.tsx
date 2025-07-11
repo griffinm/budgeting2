@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
 import './index.css'
 import { AppRoutes } from './routes.tsx'
 import { 
@@ -8,6 +9,7 @@ import {
   createTheme,
   MantineColorsTuple,
 } from '@mantine/core'
+import { NotificationProvider } from '@/providers'
 
 const appColors: MantineColorsTuple = [
   '#e6ffee',
@@ -30,8 +32,10 @@ const theme = createTheme({
 
 createRoot(document.getElementById('root')!).render(
   <MantineProvider theme={theme}>
-    <StrictMode>
-      <AppRoutes />
-    </StrictMode>
+    <NotificationProvider>
+      <StrictMode>
+        <AppRoutes />
+      </StrictMode>
+    </NotificationProvider>
   </MantineProvider>
 )

@@ -6,3 +6,4 @@ export * from './data-client';
 export * from './plaid-account-client';
 export * from './sync-event-client';
 export * from './account-balance-client';
+export * from './account-client';

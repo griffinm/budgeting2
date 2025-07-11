@@ -10,6 +10,17 @@ Rails.application.routes.draw do
     get "users/current", to: "users#current"
     patch "users/current", to: "users#update"
     
+    resources :users, only: [] do
+      resources :plaid_accounts, only: [] do
+        post "", to: "plaid_accounts#create"
+        delete "", to: "plaid_accounts#destroy"
+      end
+    end
+
+    resources :accounts, only: [] do
+      resources :users, only: [:index]
+    end
+
     resources :transactions, only: [:index, :update]
     resources :merchants, only: [:index, :update, :show] do
       get 'spend_stats', to: 'merchants#spend_stats'

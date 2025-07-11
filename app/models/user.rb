@@ -11,13 +11,13 @@ class User < ApplicationRecord
   validates :last_name, presence: true
   validates :password, length: { minimum: 8 }, allow_nil: true
 
-  def as_json
-    {
+  def as_json(options = {})
+    super(options).merge({
       id: id,
       email: email,
-      first_name: first_name,
-      last_name: last_name,
-      account_id: account_id
-    }
+      firstName: first_name,
+      lastName: last_name,
+      accountId: account_id
+    })
   end
 end

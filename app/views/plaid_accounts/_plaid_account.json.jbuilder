@@ -6,3 +6,4 @@ json.plaidMask plaid_account.plaid_mask
 json.createdAt plaid_account.created_at
 json.updatedAt plaid_account.updated_at
 json.nickname plaid_account.nickname
+json.users plaid_account.users, partial: 'users/user', as: :user

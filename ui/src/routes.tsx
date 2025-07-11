@@ -8,6 +8,7 @@ import { CurrentUserProvider } from '@/providers';
 import { MainNavLinks } from './utils/urls';
 import { Loading } from '@/components/Loading';
 import MerchantPage from './pages/MerchantPage/MerchantPage';
+import { Notifications } from '@mantine/notifications';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
@@ -57,6 +58,7 @@ const router = createBrowserRouter([
 export function AppRoutes() {
   return (
     <CurrentUserProvider>
+      <Notifications />
       <RouterProvider router={router} />
     </CurrentUserProvider>
   )

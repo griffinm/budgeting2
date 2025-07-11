@@ -16,12 +16,23 @@ class UsersController < ApplicationController
   end
 
   def current
-    render json: current_user, status: :ok
+    render json: current_user.as_json, status: :ok
   end
 
   def create
     user = User.create!(user_params)
     render json: { user: user }, status: :created
+  end
+
+  # GET /accounts/:account_id/users
+  def index
+    account_id = params[:account_id]
+    if account_id.to_s != current_user.account_id.to_s
+      render json: { messages: ["You are not authorized to access this account. Account ID: #{account_id}, Current User Account ID: #{current_user.account_id}"] }, status: :unauthorized
+      return
+    end
+
+    @users = Account.find(account_id).users
   end
 
   # PATCH /users/current

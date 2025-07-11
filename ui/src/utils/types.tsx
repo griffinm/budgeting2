@@ -131,6 +131,7 @@ export interface PlaidAccount {
   nickname: string;
   createdAt: string;
   updatedAt: string;
+  users: User[];
 }
 
 export interface SyncEvent {
@@ -146,4 +147,10 @@ export interface AccountBalance {
   availableBalance: number;
   limit: number;
   plaidAccount: PlaidAccount;
+}
+
+export interface Notification {
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'info';
 }

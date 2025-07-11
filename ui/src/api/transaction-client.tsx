@@ -46,7 +46,6 @@ export const updateTransaction = async ({
   id: number;
   params: TransactionUpdateParams;
 }): Promise<Transaction> => {
-  console.log('updateTransaction', id, params);
   const response = await baseClient.patch<Transaction>(`/transactions/${id}`, { 
     transaction: {
       ...params,
