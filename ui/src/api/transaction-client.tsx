@@ -7,13 +7,9 @@ export interface TransactionSearchParams {
   end_date?: string;
   merchant_id?: number;
   merchant_name?: string;
-  plaid_category_primary?: string;
-  plaid_category_detail?: string;
-  payment_channel?: string;
   transaction_type?: string;
   check_number?: string;
   currency_code?: string;
-  pending?: boolean;
   search_term?: string;
   amount_greater_than?: string;
   amount_less_than?: string;
