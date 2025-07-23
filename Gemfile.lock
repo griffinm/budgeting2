@@ -137,7 +137,7 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
-    json (2.12.2)
+    json (2.13.0)
     jsonapi-renderer (0.2.2)
     jwt (2.10.1)
       base64
@@ -201,7 +201,7 @@ GEM
     puma (6.6.0)
       nio4r (~> 2.0)
     racc (1.8.1)
-    rack (3.1.15)
+    rack (3.1.16)
     rack-cors (3.0.0)
       logger
       rack (>= 3.0.14)
@@ -247,7 +247,7 @@ GEM
       psych (>= 4.0.0)
     redis (5.4.0)
       redis-client (>= 0.22.0)
-    redis-client (0.25.0)
+    redis-client (0.25.1)
       connection_pool
     reline (0.6.1)
       io-console (~> 0.5)
@@ -271,7 +271,7 @@ GEM
       rspec-support (~> 3.13)
     rspec-support (3.13.4)
     securerandom (0.4.1)
-    sidekiq (8.0.4)
+    sidekiq (8.0.6)
       connection_pool (>= 2.5.0)
       json (>= 2.9.0)
       logger (>= 1.6.2)
