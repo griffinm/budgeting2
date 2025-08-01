@@ -1,14 +1,18 @@
 class MerchantTagService < BaseService
-  def initialize(account_id:)
+  def initialize(account_id:, user_id:, start_date: nil, end_date: nil, tag_id: nil)
     @account = Account.find(account_id)
+    @user = User.find(user_id)
+    @start_date = start_date
+    @end_date = end_date
+    @tag_id = tag_id
 
     if @account.nil?
       raise "Account with id #{account_id} not found"
     end
   end
 
-  def spend_stats_for_all_tags(start_date: nil, end_date: nil)
-    ActiveRecord::Base.connection.execute(query(start_date: start_date, end_date: end_date)).to_a.map do |row|
+  def spend_stats_for_all_tags
+    ActiveRecord::Base.connection.execute(query).to_a.map do |row|
       {
         id: row['id'],
         name: row['name'],
@@ -18,8 +22,12 @@ class MerchantTagService < BaseService
     end
   end
 
-  def spend_stats_for_tag(tag_id:, start_date: nil, end_date: nil)
-    all = ActiveRecord::Base.connection.execute(query(start_date: start_date, end_date: end_date)).to_a.map do |row|
+  def spend_stats_for_tag
+    if !@tag_id.present?
+      raise ArgumentError, "tag_id is required"
+    end
+
+    all = ActiveRecord::Base.connection.execute(query).to_a.map do |row|
       {
         id: row['id'],
         name: row['name'],
@@ -31,9 +39,28 @@ class MerchantTagService < BaseService
     all.find { |tag| tag[:id] == tag_id }
   end
 
-  private def query(start_date: nil, end_date: nil)
-    sanitized_start_date = start_date&.to_date || '2025-05-01'
-    sanitized_end_date = end_date&.to_date || '2025-07-01'
+  private def itemized_query_for_tag
+    <<-SQL
+      SELECT
+        t.id,
+        t.date,
+        t.amount,
+        t.merchant_id,
+        m.merchant_name,
+        m.custom_name,
+        m.default_merchant_tag_id,
+        m.default_merchant_tag_name
+      FROM plaid_transactions t
+      JOIN merchants m ON m.id = t.merchant_id
+      WHERE t.merchant_tag_id = #{@tag_id}
+      AND t.date < #{ActiveRecord::Base.connection.quote(@end_date)}
+      AND t.date > #{ActiveRecord::Base.connection.quote(@start_date)}
+    SQL
+  end
+
+  private def query
+    sanitized_start_date = @start_date&.to_date || '2025-05-01'
+    sanitized_end_date = @end_date&.to_date || '2025-07-01'
 
     <<-SQL
       WITH RECURSIVE tag_tree AS (

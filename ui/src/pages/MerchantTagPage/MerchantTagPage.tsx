@@ -8,6 +8,7 @@ import { MerchantTag } from "@/utils/types";
 import { fetchMerchantTag } from "@/api/merchant-tags-client";
 import { Merchants } from "./Merchants";
 import { Transactions } from "./Transactions";
+import { TrendReport } from "./TrendReport";
 
 export default function MerchantTagPage() {
   const { id } = useParams();
@@ -45,6 +46,8 @@ export default function MerchantTagPage() {
       </div>
 
       <div className="flex flex-col gap-4">
+        <TrendReport tagId={Number(id)} />
+
         <Merchants tagId={Number(id)} />
 
         <Transactions tagId={Number(id)} />

@@ -17,27 +17,25 @@ export function Merchants({
     setSearchParams,
     updateMerchant,
   } = useMerchants({ initialSearchParams: { merchantTagId: tagId } });
-  const { merchantTags, loading: merchantTagsLoading } = useMerchantTags();
-
-  if (merchantTagsLoading || isLoading) {
-    return <Loading />;
-  }
+  const { merchantTags, loading } = useMerchantTags();
 
   return (
     <CollapsibleCard
       title="Merchants"
       initialState="collapsed"
     >
-      <MerchantsTable
-        merchants={merchants}
-        isLoading={isLoading}
-        page={page}
-        setPage={setPage}
-        searchParams={searchParams}
-        onSetSearchParams={setSearchParams}
-        onUpdateMerchant={updateMerchant}
-        allMerchantTags={merchantTags}
-      />
+      {loading ? <Loading /> : (
+        <MerchantsTable
+          merchants={merchants}
+          isLoading={isLoading}
+          page={page}
+          setPage={setPage}
+          searchParams={searchParams}
+          onSetSearchParams={setSearchParams}
+          onUpdateMerchant={updateMerchant}
+          allMerchantTags={merchantTags}
+        />
+      )}
     </CollapsibleCard>
   );
 }
