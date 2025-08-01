@@ -1,1 +1,1 @@
-json.partial! 'merchant_tags/merchant_tag', merchant_tag: @merchant_tag
+json.partial! 'merchant_tag', merchant_tag: @merchant_tag

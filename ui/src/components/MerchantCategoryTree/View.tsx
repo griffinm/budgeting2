@@ -13,6 +13,8 @@ import {
 } from "date-fns";
 import { DateInput } from "@mantine/dates";
 import { TransactionModal } from "./TransactionModal";
+import { Link } from "react-router-dom";
+import { urls } from "@/utils/urls";
 
 const defaultStartDate = startOfMonth(new Date());
 const defaultEndDate = endOfMonth(new Date());
@@ -164,7 +166,7 @@ function MerchantTagRow({
               >
               </div>
               <div>
-                {tag.name}
+                <Link to={urls.merchantTag.path(tag.id)}>{tag.name}</Link>
               </div>
           </div>
         </Table.Td>

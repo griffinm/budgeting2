@@ -7,6 +7,7 @@ import { AppRoutes } from './routes.tsx'
 import { MantineProvider } from '@mantine/core'
 import { NotificationProvider } from '@/providers'
 import { appTheme } from '@/theme'
+import 'material-icons/iconfont/material-icons.css';
 
 createRoot(document.getElementById('root')!).render(
   <MantineProvider theme={appTheme}>

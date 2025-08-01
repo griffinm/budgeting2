@@ -13,8 +13,11 @@ rake db:migrate   # Run all DB migrations
 ```
 
 ## Running in development
-Foreman is used as a process manager to start both the front and back end with 1 command.
-`foreman start`
+Foreman is used as a process manager to start both the front and back end with 1 command:
+
+```bash
+foreman start
+```
 
 To start the FE and BE seperately:
 ```bash

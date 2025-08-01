@@ -18,12 +18,16 @@ interface MerchantState {
   updateMerchant: (params: UpdateMerchantParams) => void;
 }
 
-export const useMerchants = (): MerchantState => {
+export const useMerchants = ({ 
+  initialSearchParams = {},
+}: { 
+  initialSearchParams?: MerchantSearchParams }
+): MerchantState => {
   const [state, setState] = useState<MerchantState>({
     merchants: [],
     isLoading: false,
     error: null,
-    searchParams: {},
+    searchParams: initialSearchParams || {},
     setSearchParams: () => {},
     page: {
       currentPage: 1,

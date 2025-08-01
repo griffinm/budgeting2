@@ -9,6 +9,7 @@ export interface UpdateMerchantParams {
 
 export interface MerchantSearchParams {
   searchTerm?: string;
+  merchantTagId?: number;
 }
 
 export const fetchMerchants = async ({
