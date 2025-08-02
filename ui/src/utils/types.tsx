@@ -160,3 +160,11 @@ export interface UpdateAllResponse {
   last_sync_time: string;
   is_updating: boolean;
 }
+
+export interface MerchantTagSpendStats {
+  month: number;
+  year: number;
+  tagId: number;
+  totalAmount: number;
+  merchantTag?: MerchantTag;
+}

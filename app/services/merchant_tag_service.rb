@@ -1,17 +1,17 @@
 class MerchantTagService < BaseService
-  def initialize(account_id:, user_id:, start_date: nil, end_date: nil, tag_id: nil)
+  def initialize(account_id:, user_id:)
     @account = Account.find(account_id)
     @user = User.find(user_id)
-    @start_date = start_date
-    @end_date = end_date
-    @tag_id = tag_id
 
     if @account.nil?
       raise "Account with id #{account_id} not found"
     end
   end
 
-  def spend_stats_for_all_tags
+  def spend_stats_for_all_tags(start_date:, end_date:)
+    @start_date = start_date
+    @end_date = end_date
+
     ActiveRecord::Base.connection.execute(query).to_a.map do |row|
       {
         id: row['id'],
@@ -22,40 +22,37 @@ class MerchantTagService < BaseService
     end
   end
 
-  def spend_stats_for_tag
-    if !@tag_id.present?
-      raise ArgumentError, "tag_id is required"
-    end
+  def spend_stats_for_tag(tag_id:, months_back: 6)
+    child_ids = @user.account.merchant_tags.find(tag_id).child_ids
+    end_date = Date.today.beginning_of_month
+    start_date = end_date - months_back.to_i.months
 
-    all = ActiveRecord::Base.connection.execute(query).to_a.map do |row|
+    sql = <<-SQL
+      SELECT
+          EXTRACT(MONTH FROM pt.date) AS month,
+          EXTRACT(YEAR FROM pt.date) AS year,
+          mt.id AS tag_id,
+          SUM(pt.amount) AS total_amount
+        FROM
+            merchant_tags mt INNER JOIN plaid_transactions pt ON mt.id = pt.merchant_tag_id
+        WHERE
+            (mt.id = #{tag_id} OR pt.merchant_tag_id IN (#{child_ids.join(',')}))
+            AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
+            AND pt.date < #{ActiveRecord::Base.connection.quote(end_date)}
+        GROUP BY
+            year, month, tag_id
+        ORDER BY
+            year ASC, month ASC
+    SQL
+
+    ActiveRecord::Base.connection.execute(sql).to_a.map do |row|
       {
-        id: row['id'],
-        name: row['name'],
-        parent_id: row['parent_id'],
-        total_transaction_amount: (row['total_transaction_amount'] || 0).to_f
+        month: row['month'].to_i,
+        year: row['year'].to_i,
+        tag_id: row['tag_id'].to_i,
+        total_amount: (row['total_amount'] || 0).abs.to_f
       }
     end
-
-    all.find { |tag| tag[:id] == tag_id }
-  end
-
-  private def itemized_query_for_tag
-    <<-SQL
-      SELECT
-        t.id,
-        t.date,
-        t.amount,
-        t.merchant_id,
-        m.merchant_name,
-        m.custom_name,
-        m.default_merchant_tag_id,
-        m.default_merchant_tag_name
-      FROM plaid_transactions t
-      JOIN merchants m ON m.id = t.merchant_id
-      WHERE t.merchant_tag_id = #{@tag_id}
-      AND t.date < #{ActiveRecord::Base.connection.quote(@end_date)}
-      AND t.date > #{ActiveRecord::Base.connection.quote(@start_date)}
-    SQL
   end
 
   private def query

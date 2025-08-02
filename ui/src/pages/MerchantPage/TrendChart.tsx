@@ -1,7 +1,6 @@
 import { Loading } from "@/components/Loading";
 import { MerchantSpendStats } from "@/utils/types";
 import { BarChart } from "@mantine/charts";
-import '@mantine/charts/styles.css';
 import { Select } from "@mantine/core";
 
 export function TrendChart({

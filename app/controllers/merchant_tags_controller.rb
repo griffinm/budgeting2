@@ -48,21 +48,20 @@ class MerchantTagsController < ApplicationController
     merchant_tag_service = MerchantTagService.new(
       account_id: current_user.account_id,
       user_id: current_user.id,
-      start_date: start_date,
-      end_date: end_date,
-      tag_id: params[:merchant_tag_id]
     )
     @data = []
-
+    
     if params[:merchant_tag_id].present?
-      @data = merchant_tag_service
-        .spend_stats_for_tag
+      @data = merchant_tag_service.spend_stats_for_tag(
+        tag_id: params[:merchant_tag_id],
+        months_back: params[:months_back],
+      )
+      render :spend_stats_for_one
     else
-      @data = merchant_tag_service
-        .spend_stats_for_all_tags
+      @data = merchant_tag_service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+      @all_tags = current_user.account.merchant_tags
+      render :spend_stats_for_all
     end
-  
-    @all_tags = current_user.account.merchant_tags.order(name: :asc)
   end
   
 

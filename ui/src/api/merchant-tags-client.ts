@@ -1,5 +1,5 @@
 import { baseClient } from "@/api/base-client";
-import { MerchantTag } from "@/utils/types";
+import { MerchantTag, MerchantTagSpendStats } from "@/utils/types";
 
 export type CreateMerchantTagRequest = Omit<Partial<MerchantTag>, 'id' | 'createdAt' | 'updatedAt' | 'children'>;
 
@@ -67,16 +67,22 @@ export const fetchMerchantTagSpendStats = async ({
   tagId,
   startDate,
   endDate,
+  monthsBack,
 }: {
   tagId?: number;
   startDate?: Date;
   endDate?: Date;
-}): Promise<MerchantTag[]> => {
+  monthsBack?: number;
+}): Promise<MerchantTagSpendStats[]> => {
   let url = `/merchant_tags/spend_stats`;
   if (tagId) {
     url = `/merchant_tags/${tagId}/spend_stats`;
   }
-
-  const response = await baseClient.get(url, { params: { start_date: startDate, end_date: endDate } });
+  const params = {
+    start_date: startDate,
+    end_date: endDate,
+    months_back: monthsBack,
+  };
+  const response = await baseClient.get(url, { params });
   return response.data;
 };
