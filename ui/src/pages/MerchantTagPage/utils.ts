@@ -104,9 +104,6 @@ export function formatSpendStatsForChart({
       const merchantTag = allMerchantTags.find((tag) => tag.id === tagId);
       const color = merchantTag?.color ? `#${merchantTag.color}` : '#000000';
       
-      // Debug: log the merchant tag and color
-      console.log(`Tag ${tagId}:`, merchantTag?.name, 'Color:', color);
-      
       return {
         id: tagId,
         name: merchantTag?.name || `Tag ${tagId}`,

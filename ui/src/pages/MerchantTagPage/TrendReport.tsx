@@ -79,9 +79,6 @@ function TrendChart({
     color: tag.color,
   }));
 
-  // Debug: log the series to check colors
-  console.log('Series configuration:', series);
-
   return <BarChart
     title="Spend over time"
     h={350}

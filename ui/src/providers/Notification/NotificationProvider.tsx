@@ -7,7 +7,6 @@ export const NotificationProvider = ({ children }: { children: React.ReactNode }
   const [notificationsList, setNotificationsList] = useState<Notification[]>([]);
 
   const showNotification = (notification: Notification) => {
-    console.log('showNotification called with:', notification);
     // Add to internal state
     setNotificationsList([...notificationsList, notification]);
     // Show Mantine notification for 5 seconds
