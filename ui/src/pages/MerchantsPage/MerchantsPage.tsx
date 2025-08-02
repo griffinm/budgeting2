@@ -19,7 +19,14 @@ export default function MerchantsPage() {
     searchParams, 
     setSearchParams,
     updateMerchant,
-  } = useMerchants();
+  } = useMerchants({
+    initialSearchParams: {
+      page: {
+        currentPage: 1,
+        perPage: 25,
+      },
+    },
+  });
   
   useEffect(() => {
     setTitle(urls.merchants.title());

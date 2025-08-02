@@ -10,6 +10,10 @@ export interface UpdateMerchantParams {
 export interface MerchantSearchParams {
   searchTerm?: string;
   merchantTagId?: number;
+  page?: {
+    currentPage: number;
+    perPage: number;
+  };
 }
 
 export const fetchMerchants = async ({
