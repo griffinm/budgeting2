@@ -100,7 +100,7 @@ class PlaidService < BaseService
         plaid_account_id: plaid_account.id,
         plaid_id: transaction.transaction_id,
         amount: transaction.amount,
-        name: transaction.name,
+        name: transaction.merchant_name || transaction.name,
         authorized_at: transaction.authorized_date,
         date: transaction.date,
         check_number: transaction.check_number,
@@ -128,7 +128,7 @@ class PlaidService < BaseService
         plaid_account_id: plaid_account&.id,
         plaid_id: transaction.transaction_id,
         amount: transaction.amount,
-        name: transaction.name,
+        name: transaction.merchant_name || transaction.name,
         authorized_at: transaction.authorized_date,
       )
     end
@@ -151,14 +151,14 @@ class PlaidService < BaseService
     return merchant if merchant
 
     # lookup by name
-    merchant = Merchant.find_by(merchant_name: transaction.name)
+    merchant = Merchant.find_by(merchant_name: transaction.merchant_name || transaction.name)
     return merchant if merchant
 
     # It does not exist, create it
     merchant = Merchant.create(
       account_id: @account.id,
       plaid_entity_id: plaid_entity_id,
-      merchant_name: transaction.name,
+      merchant_name: transaction.merchant_name || transaction.name,
     )
 
     return merchant
