@@ -103,6 +103,7 @@ RSpec.describe PlaidService do
             transaction_id: "txn_123",
             amount: -50.00,
             name: "Test Transaction",
+            merchant_name: nil,
             authorized_date: Date.current,
             date: Date.current,
             check_number: nil,
@@ -174,6 +175,7 @@ RSpec.describe PlaidService do
             account_id: plaid_account.plaid_id,
             amount: -75.00,
             name: "Updated Transaction",
+            merchant_name: nil,
             authorized_date: Date.current
           )
         end
@@ -192,7 +194,7 @@ RSpec.describe PlaidService do
 
       context 'when there are removed transactions' do
         let!(:existing_transaction) { create(:plaid_transaction, account: account, plaid_id: "txn_123") }
-        let(:mock_transaction) { double(transaction_id: "txn_123") }
+        let(:mock_transaction) { double(transaction_id: "txn_123", merchant_name: nil) }
 
         before do
           allow(mock_sync_response).to receive(:removed).and_return([mock_transaction])
@@ -367,6 +369,7 @@ RSpec.describe PlaidService do
         transaction_id: "txn_123",
         amount: -50.00,
         name: "Test Transaction",
+        merchant_name: nil,
         authorized_date: Date.current,
         date: Date.current,
         check_number: nil,
@@ -412,7 +415,7 @@ RSpec.describe PlaidService do
 
     describe '#remove_transactions' do
       let!(:existing_transaction) { create(:plaid_transaction, account: account, plaid_id: "txn_123") }
-      let(:mock_removed_transaction) { double(transaction_id: "txn_123") }
+      let(:mock_removed_transaction) { double(transaction_id: "txn_123", merchant_name: nil) }
 
       it 'removes the transaction' do
         expect { service.send(:remove_transactions, [mock_removed_transaction], plaid_sync_event) }.to change(PlaidTransaction, :count).by(-1)
@@ -424,7 +427,7 @@ RSpec.describe PlaidService do
       end
 
       context 'when transaction does not exist' do
-        let(:mock_removed_transaction) { double(transaction_id: "non_existent") }
+        let(:mock_removed_transaction) { double(transaction_id: "non_existent", merchant_name: nil) }
 
         it 'does not raise an error' do
           expect { service.send(:remove_transactions, [mock_removed_transaction], plaid_sync_event) }.not_to raise_error
