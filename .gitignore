@@ -33,3 +33,6 @@
 
 /ui/.env
 /ui/ui.tar.gz
+
+node_modules
+ui/node_modules

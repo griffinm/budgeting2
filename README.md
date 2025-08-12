@@ -1,24 +1,32 @@
-# README
+# Bear Budget
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Overview
+This repo contains 2 apps, a front end and a back end. 
+* **Front End** - A react application. This can be found in the "ui" folder in the root.
+* **Back End** - A ruby on rails application. This is located at the root of the application 
 
-Things you may want to cover:
+## Initial Dev Setup
+```bash
+bundle            # Install ruby deps for the API
+rake db:migrate   # Run all DB migrations
+(cd ui & npm i)   # Install node deps for the UI
+```
 
-* Ruby version
+## Running in development
+Foreman is used as a process manager to start both the front and back end with 1 command:
 
-* System dependencies
+```bash
+foreman start
+```
 
-* Configuration
+To start the FE and BE seperately:
+```bash
+rails s                   # Start the BE
+(cd ui & npm run start)   # Srart the FE
+```
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+## Deploying
+To deploy to production, run the deploy script with a param for the server address
+```bash
+./deploy.sh 192.168.1.1
+```

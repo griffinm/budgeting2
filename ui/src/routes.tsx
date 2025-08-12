@@ -14,6 +14,7 @@ import { Notifications } from '@mantine/notifications';
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
 const MainLayout = lazy(() => import('./layouts/MainLayout/MainLayout'));
 const AuthLayout = lazy(() => import('./layouts/AuthLayout/AuthLayout'));
+const MerchantTagPage = lazy(() => import('./pages/MerchantTagPage/MerchantTagPage'));
 
 const WithSuspense = (component: React.ReactNode) => (
   <Suspense fallback={<Loading />}>
@@ -26,11 +27,16 @@ const mainNavLinks = MainNavLinks.map(url => ({
   element: WithSuspense(<url.component />),
 }));
 
+// TODO: use the urls object instead of hardcoding the paths
 const otherRoutes = [
   {
     path: '/merchants/:id',
     element: WithSuspense(<MerchantPage />),
   },
+  {
+    path: '/categories/:id',
+    element: WithSuspense(<MerchantTagPage />),
+  }
 ];
 
 // Create the router

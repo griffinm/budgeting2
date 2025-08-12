@@ -4,6 +4,11 @@ class MerchantTagsController < ApplicationController
     @merchant_tags = current_user.account.merchant_tags.order(name: :asc)
   end
 
+  # GET /api/merchant_tags/:id
+  def show
+    @merchant_tag = current_user.account.merchant_tags.find(params[:id])
+  end
+
   # POST /api/merchant_tags
   def create
     @merchant_tag = current_user.account.merchant_tags.new(create_params)
@@ -35,22 +40,28 @@ class MerchantTagsController < ApplicationController
     end
   end
 
-  # /api/merchant_tags/spend_stats
+  # GET /api/merchant_tags/spend_stats
+  # GET /api/merchant_tags/:merchant_tag_id/spend_stats
   def spend_stats
     start_date = params[:start_date] || 6.months.ago.to_date
     end_date = params[:end_date] || Date.today
-    merchant_tag_service = MerchantTagService.new(account_id: current_user.account_id)
+    merchant_tag_service = MerchantTagService.new(
+      account_id: current_user.account_id,
+      user_id: current_user.id,
+    )
     @data = []
-
-    if params[:id].present?
-      @data = merchant_tag_service
-        .spend_stats_for_tag(tag_id: params[:id], start_date: start_date, end_date: end_date)
+    
+    if params[:merchant_tag_id].present?
+      @data = merchant_tag_service.spend_stats_for_tag(
+        tag_id: params[:merchant_tag_id],
+        months_back: params[:months_back],
+      )
+      render :spend_stats_for_one
     else
-      @data = merchant_tag_service
-        .spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+      @data = merchant_tag_service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+      @all_tags = current_user.account.merchant_tags
+      render :spend_stats_for_all
     end
-  
-    @all_tags = current_user.account.merchant_tags.order(name: :asc)
   end
   
 

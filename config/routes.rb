@@ -25,22 +25,27 @@ Rails.application.routes.draw do
     resources :merchants, only: [:index, :update, :show] do
       get 'spend_stats', to: 'merchants#spend_stats'
     end
-    resources :merchant_tags, only: [:index, :update, :create, :destroy] do
+
+    resources :merchant_tags, only: [:index, :update, :create, :destroy, :show] do
+      get "spend_stats", to: "merchant_tags#spend_stats"
       collection do
         get 'spend_stats', to: 'merchant_tags#spend_stats'
       end
     end
+
     resources :plaid_accounts, only: [:index] do
       collection do
         get 'update_all', to: 'plaid_accounts#update_all'
         get 'account_balance', to: 'account_balances#index'
       end
     end
+
     resources :sync_events, only: [] do
       collection do
         get 'latest', to: 'sync_events#latest'
       end
     end
+
     resources :data, only: [] do
       collection do
         get "monthly_spend", to: "data#monthly_spend"

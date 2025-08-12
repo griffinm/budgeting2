@@ -1,7 +1,6 @@
 import { Transaction, TransactionType } from "@/utils/types";
 import { LineChart } from "@mantine/charts";
 import { transactionArrayToDailySeries } from "@/utils/chartUtils";
-import '@mantine/charts/styles.css';
 import { Select } from "@mantine/core";
 import { useState } from "react";
 

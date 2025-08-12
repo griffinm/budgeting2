@@ -56,10 +56,14 @@ run_local_command() {
 }
 
 # Check if the correct number of arguments are provided
-if [ $# -ne 1 ]; then
-    echo -e "${RED}✖ Usage: $0 <server_ip>${RESET}"
+if [ $# -lt 1 ] || [ $# -gt 2 ]; then
+    echo -e "${RED}✖ Usage: $0 <server_ip> [branch_name]${RESET}"
+    echo -e "${YELLOW}  If no branch is specified, 'release' will be used${RESET}"
     exit 1
 fi
+
+# Set branch name (default to "release" if not provided)
+BRANCH_NAME=${2:-"release"}
 
 print_section "PRE-DEPLOY CHECKS"
 print_info "Installing local Ruby dependencies"
@@ -84,8 +88,8 @@ else
 fi
 
 print_section "DEPLOYMENT"
-print_info "Pulling latest code"
-run_remote_command $1 "cd $DEPLOY_DIR && git pull origin main"
+print_info "Pulling latest code from branch: $BRANCH_NAME"
+run_remote_command $1 "cd $DEPLOY_DIR && git pull origin $BRANCH_NAME"
 
 print_info "Installing remote Rails dependencies"
 run_remote_command $1 "cd $DEPLOY_DIR && bundle install"

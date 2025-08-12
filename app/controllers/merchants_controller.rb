@@ -3,7 +3,9 @@ class MerchantsController < ApplicationController
     @page, @merchants = pagy(
       MerchantSearchService.new(
         account_id: current_user.account_id,
-        search_term: params[:search_term]
+        user_id: current_user.id,
+        search_term: params[:search_term],
+        merchant_tag_id: params[:merchant_tag_id],
       ).call
     )
   end

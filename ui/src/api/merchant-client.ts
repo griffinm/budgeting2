@@ -1,6 +1,6 @@
 import { baseClient } from "@/api/base-client";
 import { queryStringFromObject } from "@/utils/queryStringFromObject";
-import { PageResponse, Merchant, MerchantSpendStats } from "@/utils/types";
+import { PageResponse, Merchant, MerchantSpendStats, PageRequestParams } from "@/utils/types";
 
 export interface UpdateMerchantParams {
   id: number;
@@ -9,14 +9,19 @@ export interface UpdateMerchantParams {
 
 export interface MerchantSearchParams {
   searchTerm?: string;
+  merchantTagId?: number;
+  page?: PageRequestParams;
 }
 
 export const fetchMerchants = async ({
-  params
+  params,
 }: {
   params: MerchantSearchParams;
 }): Promise<PageResponse<Merchant>> => {
-  const url = `/merchants?${queryStringFromObject({...params})}`;
+  console.log("params", params);
+  const queryString = `page=${params.page?.page || 1}&per_page=${params.page?.perPage || 25}&${queryStringFromObject({...params})}`;
+  console.log("queryString", queryString);
+  const url = `/merchants?${queryString}`;
   const response = await baseClient.get(url);
   return response.data;
 };

@@ -19,8 +19,8 @@ export default function MerchantsPage() {
     searchParams, 
     setSearchParams,
     updateMerchant,
-  } = useMerchants();
-  
+  } = useMerchants({});
+
   useEffect(() => {
     setTitle(urls.merchants.title());
   }, [setTitle]);

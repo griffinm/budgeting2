@@ -12,6 +12,7 @@ const TransactionsPage = lazy(() => import('@/pages/TransactionsPage/Transaction
 const MerchantsPage = lazy(() => import('@/pages/MerchantsPage/MerchantsPage'));
 const MerchantPage = lazy(() => import('@/pages/MerchantPage/MerchantPage'));
 const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTagsPage'));
+const MerchantTagPage = lazy(() => import('@/pages/MerchantTagPage/MerchantTagPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage/ProfilePage'));
 const PlaidAccountsPage = lazy(() => import('@/pages/AccountsPage/AccountPage'));
@@ -22,6 +23,7 @@ interface Url {
   title: (...args: any[]) => string;
   component: React.ComponentType;
   section?: MenuSection;
+  routeString?: string;
 }
 
 export const urls: Record<string, Url> = {
@@ -58,6 +60,7 @@ export const urls: Record<string, Url> = {
     title: () => 'Merchant' + TITLE_SUFFIX,
     component: MerchantPage,
     section: 'none',
+    routeString: '/merchants/:id',
   },
   merchantTags: {
     path: () =>'/categories',
@@ -65,6 +68,13 @@ export const urls: Record<string, Url> = {
     title: () => 'Categories' + TITLE_SUFFIX,
     component: MerchantTagsPage,
     section: 'main',
+  },
+  merchantTag: {
+    path: (id: number) => `/categories/${id}`,
+    title: ({ tagName }: { tagName: string }) => `Category - ${tagName}` + TITLE_SUFFIX,
+    component: MerchantTagPage,
+    section: 'none',
+    routeString: '/categories/:id',
   },
   profile: {
     path: () =>'/profile',
