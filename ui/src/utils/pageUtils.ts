@@ -11,5 +11,5 @@ export function getUrlPagePageParams({
     return '';
   }
 
-  return `page=${pageRequestParams.page.currentPage || 1}&per_page=${pageRequestParams.perPage || DEFAULT_PAGE_SIZE}`;
+  return `page=${pageRequestParams.page || 1}&per_page=${pageRequestParams.perPage || DEFAULT_PAGE_SIZE}`;
 }

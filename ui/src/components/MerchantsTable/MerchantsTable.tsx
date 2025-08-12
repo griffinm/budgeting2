@@ -28,7 +28,7 @@ export function MerchantsTable({
   searchParams: MerchantSearchParams;
   onSetSearchParams: (searchParams: MerchantSearchParams) => void;
   onUpdateMerchant: (params: UpdateMerchantParams) => void;
-  allMerchantTags?: MerchantTag[];
+  allMerchantTags: MerchantTag[];
 }) {
   const isMobile = useMediaQuery('(max-width: 600px)');
 

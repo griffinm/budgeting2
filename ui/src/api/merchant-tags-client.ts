@@ -73,7 +73,7 @@ export const fetchMerchantTagSpendStats = async ({
   startDate?: Date;
   endDate?: Date;
   monthsBack?: number;
-}): Promise<MerchantTagSpendStats[]> => {
+}): Promise<MerchantTagSpendStats[] | MerchantTag[]> => {
   let url = `/merchant_tags/spend_stats`;
   if (tagId) {
     url = `/merchant_tags/${tagId}/spend_stats`;

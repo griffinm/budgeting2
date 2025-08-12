@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '@/utils/types';
-import { fetchCurrentUser, updateAllPlaidAccounts } from '@/api';
+import { fetchCurrentUser } from '@/api';
 import { CurrentUserContext } from './CurrentUserContext';
 import { urls } from '@/utils/urls';
 import { AUTH_TOKEN_STORAGE_KEY } from '@/utils/constants';
@@ -27,9 +27,6 @@ export const CurrentUserProvider: React.FC<CurrentUserProviderProps> = ({ childr
         setUser(null);
       }
       setUserLoading(false);
-
-      // Once the current user is fetched send a command to sync all plaid accounts
-      updateAllPlaidAccounts();
     });
   }, []);
 
