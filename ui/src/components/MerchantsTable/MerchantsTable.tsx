@@ -31,7 +31,7 @@ export function MerchantsTable({
   allMerchantTags?: MerchantTag[];
 }) {
   const isMobile = useMediaQuery('(max-width: 600px)');
-  
+
   return (
     <div>
       <div className="flex flex-row justify-between mb-3">
