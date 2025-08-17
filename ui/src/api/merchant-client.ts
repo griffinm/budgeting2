@@ -18,13 +18,7 @@ export const fetchMerchants = async ({
 }: {
   params: MerchantSearchParams;
 }): Promise<PageResponse<Merchant>> => {
-<<<<<<< HEAD
-  console.log("params", params);
   const queryString = `page=${params.page?.page || 1}&per_page=${params.page?.perPage || 25}&${queryStringFromObject({...params})}`;
-  console.log("queryString", queryString);
-=======
-  const queryString = `page=${params.page?.page || 1}&per_page=${params.page?.perPage || 25}&${queryStringFromObject({...params})}`;
->>>>>>> cat-enhancements
   const url = `/merchants?${queryString}`;
   const response = await baseClient.get(url);
   return response.data;
