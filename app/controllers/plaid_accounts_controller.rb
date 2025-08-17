@@ -21,36 +21,7 @@ class PlaidAccountsController < ApplicationController
 
   # GET /api/plaid_accounts/update_all
   def update_all
-    force_update = params[:force_update] == "true"
-    redis_service = RedisService.new(user: current_user)
-    last_sync_time = redis_service.get_last_sync_time
-    is_updating = redis_service.get_is_updating_transactions?
-
-    if is_updating && !force_update
-      render json: {
-        message: 'update_already_queued',
-        last_sync_time: last_sync_time,
-        is_updating: is_updating,
-      }, status: :ok
-      return
-    end
-
-    if last_sync_time.blank? || last_sync_time < Constants::TransactionUpdates::FREQUENCY.ago || force_update
-      Transactions::SyncForAccountJob.perform_async(account_id: current_user.account_id, user_id: current_user.id, force_update: force_update)
-      redis_service.set_is_updating_transactions(false)
-    else
-      render json: {
-        message: 'update_not_needed',
-        last_sync_time: last_sync_time,
-        is_updating: is_updating,
-      }, status: :ok
-      return
-    end
-
-    render json: {
-      message: 'update_queued',
-      last_sync_time: last_sync_time,
-      is_updating: is_updating,
-    }, status: :ok
+    PlaidService.new(account_id: current_user.account_id).sync_transactions
+    render json: { message: "Updates complete" }, status: :ok
   end
 end
