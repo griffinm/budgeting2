@@ -32,7 +32,7 @@ export const getTransactions = async ({
 }: {
   params: TransactionSearchParams;
 }): Promise<PageResponse<Transaction>> => {
-  const response = await baseClient.get(`/transactions?${queryStringFromObject({...params})}`);
+  const response = await baseClient.get(`/transactions?${queryStringFromObject({...params})}&page=${params.page || 1}`);
   return response.data;
 }; 
 
