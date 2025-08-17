@@ -38,7 +38,6 @@ export const View = () => {
     setLoading(true);
     fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
     .then((merchantTagSpendStats) => {
-      console.log("merchantTagSpendStats", merchantTagSpendStats);
       setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
       setLoading(false);
     });
