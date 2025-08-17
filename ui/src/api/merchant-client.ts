@@ -10,10 +10,7 @@ export interface UpdateMerchantParams {
 export interface MerchantSearchParams {
   searchTerm?: string;
   merchantTagId?: number;
-  page?: {
-    currentPage: number;
-    perPage: number;
-  };
+  page: { currentPage: number; perPage: number };
 }
 
 export const fetchMerchants = async ({
@@ -21,7 +18,8 @@ export const fetchMerchants = async ({
 }: {
   params: MerchantSearchParams;
 }): Promise<PageResponse<Merchant>> => {
-  const url = `/merchants?${queryStringFromObject({...params})}`;
+  const { page, ...restParams } = params;
+  const url = `/merchants?${queryStringFromObject({ ...restParams, ...page })}`;
   const response = await baseClient.get(url);
   return response.data;
 };
