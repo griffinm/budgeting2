@@ -168,3 +168,8 @@ export interface MerchantTagSpendStats {
   totalAmount: number;
   merchantTag?: MerchantTag;
 }
+
+export interface PageRequestParams {
+  page: number;
+  perPage: number;
+}

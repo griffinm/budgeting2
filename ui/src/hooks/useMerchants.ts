@@ -22,7 +22,7 @@ export const useMerchants = ({
   initialSearchParams = {},
 }: { 
   initialSearchParams?: MerchantSearchParams }
-): MerchantState => {
+): MerchantState => {  
   const [state, setState] = useState<MerchantState>({
     merchants: [],
     isLoading: false,
@@ -38,17 +38,21 @@ export const useMerchants = ({
     updateMerchant: () => {},
   });
 
-  const getMerchants = useCallback(async () => {
+  const getMerchants = useCallback(async (searchParamsOverride?: MerchantSearchParams, pageOverride?: number) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
-    const apiParams = {
-      ...state.searchParams,
-      page: state.page.currentPage,
-    };
+    const currentSearchParams = searchParamsOverride || state.searchParams;
+    const currentPage = pageOverride || state.page.currentPage;
 
     try {
       const response = await fetchMerchants({
-        params: apiParams,
+        params: {
+          ...currentSearchParams,
+          page: {
+            page: currentPage,
+            perPage: 25,
+          },
+        },
       });
       setState(prev => ({ 
         ...prev, 
@@ -58,21 +62,29 @@ export const useMerchants = ({
         page: response.page,
       }));
     } catch (error) {
+      console.error('API error:', error);
       setState(prev => ({ 
         ...prev, 
         isLoading: false, 
         error: error instanceof Error ? error : new Error('Failed to fetch merchants'),
       }));
     }
-  }, [state.searchParams, state.page.currentPage]);
+  }, []);
 
   const setSearchParams = useCallback((newParams: MerchantSearchParams) => {
-    setState(prev => ({ ...prev, searchParams: { ...prev.searchParams, ...newParams }, page: { ...prev.page, currentPage: 1 } }));
-  }, []);
+    const updatedSearchParams = { ...state.searchParams, ...newParams };
+    setState(prev => ({ 
+      ...prev, 
+      searchParams: updatedSearchParams, 
+      page: { ...prev.page, currentPage: 1 } 
+    }));
+    getMerchants(updatedSearchParams, 1);
+  }, [getMerchants]);
 
   const setPage = useCallback((newPage: number) => {
     setState(prev => ({ ...prev, page: { ...prev.page, currentPage: newPage } }));
-  }, []);
+    getMerchants(state.searchParams, newPage);
+  }, [getMerchants, state.searchParams]);
 
   const updateMerchant = useCallback(async (params: UpdateMerchantParams) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -93,7 +105,8 @@ export const useMerchants = ({
 
   useEffect(() => {
     getMerchants();
-  }, [getMerchants]);
+  }, []);
+
   return {
     ...state,
     setSearchParams,

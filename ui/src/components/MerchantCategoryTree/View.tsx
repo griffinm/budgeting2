@@ -34,12 +34,12 @@ export const View = () => {
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [selectedMerchantTag, setSelectedMerchantTag] = useState<MerchantTag | undefined>();
-
   useEffect(() => {
     setLoading(true);
     fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
-    .then((merchantTags) => {
-      setMerchantTags(formatMerchantTagsAsTree({ merchantTags }));
+    .then((merchantTagSpendStats) => {
+      console.log("merchantTagSpendStats", merchantTagSpendStats);
+      setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
       setLoading(false);
     });
   }, [startDate, endDate]);

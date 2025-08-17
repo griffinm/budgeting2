@@ -24,7 +24,9 @@ export function TrendReport({
 
   useEffect(() => {
     fetchMerchantTagSpendStats({ tagId, monthsBack })
-      .then(setStats)
+      .then((resp) => {
+        setStats(resp as MerchantTagSpendStats[]);
+      })
       .finally(() => setLoadingStats(false));
   }, [tagId, monthsBack]);
 
