@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchMerchant, fetchMerchantSpendStats } from "@/api";
 import { Merchant, MerchantSpendStats } from "@/utils/types";
-import { useTransactions } from "@/hooks";
+import { useMerchants, useTransactions } from "@/hooks";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading } from "@/components/Loading";
 import { Blockquote, Breadcrumbs, Card } from "@mantine/core";
@@ -10,6 +10,8 @@ import { currentMonthSpend, lastMonthSpend } from "./utils";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { urls } from "@/utils/urls";
 import { TrendChart } from "./TrendChart";
+import { EditableLabel } from "@/components/EditableLabel";
+import { updateMerchant } from "@/api/merchant-client";
 
 export default function MerchantPage() {
   const { id } = useParams();
@@ -84,7 +86,18 @@ export default function MerchantPage() {
         <span>{merchantDisplayName(merchant)}</span>
       </Breadcrumbs>
       <div className="flex flex-col gap-4">
-        <h1 className="text-3xl font-bold">{merchantDisplayName(merchant)}</h1>
+        <EditableLabel
+          id={merchant.id}
+          component="h1"
+          additionalClasses="text-2xl font-bold"
+          value={merchantDisplayName(merchant)}
+          linkValue={urls.merchant.path(merchant.id)}
+          onSave={async (id: number, value: string) => {
+            updateMerchant({ id, value: { customName: value } }).then(() => {
+              setMerchant(prev => prev ? { ...prev, customName: value } : null);
+            });
+          }}
+        />
 
         <Card>
           <h2 className="text-xl font-bold mb-4">Spend Summary</h2>
