@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { fetchMerchant, fetchMerchantSpendStats } from "@/api";
 import { Merchant, MerchantSpendStats } from "@/utils/types";
-import { useMerchants, useTransactions } from "@/hooks";
+import { useTransactions } from "@/hooks";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading } from "@/components/Loading";
 import { Blockquote, Breadcrumbs, Card } from "@mantine/core";
