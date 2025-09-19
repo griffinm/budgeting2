@@ -7,7 +7,6 @@ class UtilController < ApplicationController
     Account.find_each do |account|
       service = PlaidService.new(account_id: account.id)
       service.sync_transactions
-      service.update_account_balances
     end
 
     render json: { message: "Updates complete" }

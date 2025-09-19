@@ -1,25 +1,23 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTransactions, usePageTitle } from '@/hooks';
 import { urls } from '@/utils/urls';
 import { TransactionsTable } from '@/components/TransactionsTable';
 import { MerchantTag } from '@/utils/types';
-import { 
-  fetchMerchantTags, 
-  updateAllPlaidAccounts as updateAllPlaidAccountsApi,
-} from '@/api';
+import { fetchMerchantTags } from '@/api/merchant-tags-client';
 import { useSyncEvent } from '@/hooks/useSyncEvent';
 import { format as formatDate } from 'date-fns';
-import { Button, Card } from '@mantine/core';
-import { NotificationContext } from '@/providers';
+import { Card } from '@mantine/core';
+import { Search } from '@/components/TransactionsTable/Search';
 
 export default function TransactionsPage() {
   const { 
     transactions,
     isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
     error,
     page,
-    setPage,
-    setPerPage,
     searchParams,
     setSearchParams,
     updateTransaction,
@@ -31,7 +29,6 @@ export default function TransactionsPage() {
   } = useSyncEvent();
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
   const setTitle = usePageTitle();
-  const { showNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     setTitle(urls.transactions.title());
@@ -43,62 +40,37 @@ export default function TransactionsPage() {
       .catch(console.error);
   }, []);
 
-  const updateAllPlaidAccounts = () => {
-    updateAllPlaidAccountsApi().then((response) => {
-      if (response.message === 'update_queued') {
-        showNotification({
-          title: 'Update queued',
-          message: 'Transactions will be updated in the background',
-          type: 'success',
-        });
-      } else if (response.message === 'update_already_queued') {
-        showNotification({
-          title: 'Update already queued',
-          message: 'Transactions are already being updated',
-          type: 'error',
-        });
-      } else if (response.message === 'update_not_needed') {
-        showNotification({
-          title: 'Update not needed',
-          message: 'Transactions were last updated at ' + formatDate(response.last_sync_time, 'MM/dd/yyyy hh:mm a'),
-          type: 'info',
-        });
-      }
-    });
-  };
-
   return (
-    <div>
-      <div className="flex flex-col md:flex-row justify-between mb-3">
+    <div className="h-full flex flex-col">
+      <div className="flex flex-col md:flex-row justify-between mb-3 flex-shrink-0">
         <h1 className="text-2xl font-bold mb-4">Transactions</h1>
-        <div className="text-sm text-gray-500 flex items-center gap-2">
-          
+        <div className="small-text flex items-center gap-2">
           <div>
             {isSyncEventLoading ? <div>Loading...</div> : latestSyncEvent ? (
-              <>Last synced at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy hh:mm a')}</strong></>
+              <>Last updated at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy h:mm a')}</strong></>
             ) : (
               <em>Transactions not yet synced</em>
             )}
           </div>
-
-          <Button variant="subtle" size="xs" color="gray" onClick={() => updateAllPlaidAccounts()}>Update Now</Button>
         </div>
       </div>
-      <Card>
+      
+      <div className="flex-shrink-0 mb-3">
+        <Search searchParams={searchParams} onSetSearchParams={setSearchParams} clearSearchParams={clearSearchParams} />
+      </div>
+      
+      <Card p={0} className="flex-1 min-h-0"> 
         <TransactionsTable
           transactions={transactions}
           isLoading={isLoading}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          loadMore={loadMore}
           error={error}
           page={page}
-          setPage={setPage}
-          setPerPage={setPerPage}
-          searchParams={searchParams}
-          onSetSearchParams={setSearchParams}
           updateTransaction={updateTransaction}
           merchantTags={merchantTags}
-          clearSearchParams={clearSearchParams}
         />
-
       </Card>
     </div>
   );

@@ -1,4 +1,6 @@
 class PlaidAccountsController < ApplicationController
+  skip_before_action :require_authenticated_user!, only: [:update_all]
+
   def index
     @plaid_accounts = current_user.plaid_accounts.includes(:users)
   end
@@ -21,7 +23,18 @@ class PlaidAccountsController < ApplicationController
 
   # GET /api/plaid_accounts/update_all
   def update_all
-    PlaidService.new(account_id: current_user.account_id).sync_transactions
+    token = params[:token]
+    if token != ENV.fetch("UPDATE_ALL_TOKEN")
+      render json: { error: "Unauthorized" }, status: :unauthorized
+      return
+    end
+
+    Rails.logger.info("Updating all accounts information from Plaid")
+    Account.find_each do |account|
+      service = PlaidService.new(account_id: account.id)
+      service.sync_transactions
+    end
+    Rails.logger.info("Update all accounts complete")
     render json: { message: "Updates complete" }, status: :ok
   end
 end

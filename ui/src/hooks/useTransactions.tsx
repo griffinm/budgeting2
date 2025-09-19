@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { 
   getTransactions,
   TransactionSearchParams,
@@ -16,7 +16,9 @@ function localStorageBaseKey() {
 }
 
 function saveSearchToLocalStorage(search: TransactionSearchParams) {
-  localStorage.setItem(localStorageBaseKey(), JSON.stringify(search));
+  // Remove page from search params before saving since we don't need to restore page with infinite scroll
+  const { ...searchWithoutPage } = search;
+  localStorage.setItem(localStorageBaseKey(), JSON.stringify(searchWithoutPage));
 }
 
 function getSearchFromLocalStorage(): TransactionSearchParams | null {
@@ -31,10 +33,12 @@ function clearSearchFromLocalStorage() {
 interface TransactionsState {
   transactions: Transaction[];
   isLoading: boolean;
+  isLoadingMore: boolean;
   error: Error | null;
   searchParams: TransactionSearchParams;
   setSearchParams: (searchParams: TransactionSearchParams) => void;
   page: Page;
+  hasMore: boolean;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
 }
 
@@ -48,71 +52,132 @@ export const useTransactions = ({
     setSearchParams: () => {},
     transactions: [],
     isLoading: false,
+    isLoadingMore: false,
     error: null,
     updateTransaction: () => {},
+    hasMore: true,
     page: {
-      currentPage: getSearchFromLocalStorage()?.page || 1,
+      currentPage: 1, // Always start from page 1 with infinite scroll
       totalPages: 1,
       totalCount: 0,
     },
   });
 
-  const fetchTransactions = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
+  // Use refs to track current values to avoid stale closures
+  const currentPageRef = useRef(1);
+  const searchParamsRef = useRef(state.searchParams);
+  
+  // Update refs when state changes
+  useEffect(() => {
+    currentPageRef.current = state.page.currentPage;
+    searchParamsRef.current = state.searchParams;
+  }, [state.page.currentPage, state.searchParams]);
+
+  const fetchTransactions = useCallback(async (isLoadingMore = false) => {
+    // Calculate the page to fetch using current ref values
+    const currentPage = isLoadingMore ? currentPageRef.current + 1 : currentPageRef.current;
+    const searchParams = searchParamsRef.current;
+
+    // Update loading state and page immediately to prevent duplicate requests
+    setState(prev => {
+      if (isLoadingMore) {
+        return { 
+          ...prev, 
+          isLoadingMore: true, 
+          error: null,
+          page: { ...prev.page, currentPage }
+        };
+      } else {
+        return { ...prev, isLoading: true, error: null };
+      }
+    });
 
     const apiParams = {
-      ...state.searchParams,
-      page: state.page.currentPage,
+      ...searchParams,
+      page: currentPage,
+      per_page: 100,
     };
 
-    saveSearchToLocalStorage(apiParams);
+    if (!isLoadingMore) {
+      saveSearchToLocalStorage(apiParams);
+    }
 
     try {
       const response = await getTransactions({
         params: apiParams,
       });
-      setState(prev => ({
-        ...prev,
-        transactions: response.items || [],
-        isLoading: false,
-        error: null,
-        page: {
-          currentPage: response.page?.currentPage ?? prev.page.currentPage,
-          totalPages: response.page?.totalPages ?? 1,
-          totalCount: response.page?.totalCount ?? 0,
-        },
-      }));
+      
+      const newTransactions = response.items || [];
+      const hasMore = currentPage < (response.page?.totalPages ?? 1);
+      
+      setState(prev => {
+        let updatedTransactions: Transaction[];
+        
+        if (isLoadingMore) {
+          // Merge new transactions with existing ones, removing duplicates
+          const existingIds = new Set(prev.transactions.map(t => t.id));
+          const uniqueNewTransactions = newTransactions.filter(t => !existingIds.has(t.id));
+          updatedTransactions = [...prev.transactions, ...uniqueNewTransactions];
+        } else {
+          updatedTransactions = newTransactions;
+        }
+        
+        return {
+          ...prev,
+          transactions: updatedTransactions,
+          isLoading: false,
+          isLoadingMore: false,
+          error: null,
+          hasMore,
+          page: {
+            currentPage: response.page?.currentPage ?? currentPage,
+            totalPages: response.page?.totalPages ?? 1,
+            totalCount: response.page?.totalCount ?? 0,
+          },
+        };
+      });
     } catch (error) {
       setState(prev => ({
         ...prev,
         isLoading: false,
+        isLoadingMore: false,
         error: error instanceof Error ? error : new Error('Failed to fetch transactions'),
       }));
     }
-  }, [state.searchParams, state.page.currentPage]);
+  }, []);
 
   const setSearchParams = useCallback((newParams: TransactionSearchParams) => {
-    setState(prev => ({ 
-      ...prev, 
-      searchParams: { ...prev.searchParams, ...newParams },
-      page: { ...prev.page, currentPage: 1 } // Reset to first page when search params change
-    }));
-  }, []);
+    setState(prev => {
+      const updatedSearchParams = { ...prev.searchParams, ...newParams };
+      
+      // Update refs immediately with new values
+      searchParamsRef.current = updatedSearchParams;
+      currentPageRef.current = 1;
+      
+      // Trigger fetch after updating refs
+      setTimeout(() => {
+        fetchTransactions();
+      }, 0);
+      
+      return {
+        ...prev, 
+        searchParams: updatedSearchParams,
+        page: { ...prev.page, currentPage: 1 }, // Reset to first page when search params change
+        hasMore: true, // Reset hasMore when search params change
+      };
+    });
+  }, [fetchTransactions]);
 
-  const setPage = useCallback((page: number) => {
-    setState(prev => ({ 
-      ...prev, 
-      page: { ...prev.page, currentPage: page } 
-    }));
-  }, []);
+  const loadMore = useCallback(() => {
+    setState(prev => {
+      if (prev.hasMore && !prev.isLoadingMore) {
+        fetchTransactions(true);
+      }
+      return prev;
+    });
+  }, [fetchTransactions]);
 
-  const setPerPage = useCallback((per_page: number) => {
-    setState(prev => ({ 
-      ...prev, 
-      per_page,
-      page: { ...prev.page, currentPage: 1 } // Reset to first page when per_page changes
-    }));
-  }, []);
+  // Removed setPage and setPerPage functions since they're not needed with infinite scroll
 
   const updateTransaction = useCallback((id: number, params: TransactionUpdateParams) => {
     updateTransactionApi({ id, params }).then((newTransaction) => {
@@ -125,11 +190,23 @@ export const useTransactions = ({
 
   const clearSearchParams = () => {
     clearSearchFromLocalStorage();
-    setState(prev => ({ 
-      ...prev, 
-      searchParams: {},
-      page: { ...prev.page, currentPage: 1 } // Reset to first page when clearing search
-    }));
+    setState(prev => {
+      // Update refs immediately with cleared values
+      searchParamsRef.current = {};
+      currentPageRef.current = 1;
+      
+      // Trigger fetch after updating refs
+      setTimeout(() => {
+        fetchTransactions();
+      }, 0);
+      
+      return {
+        ...prev, 
+        searchParams: {},
+        page: { ...prev.page, currentPage: 1 }, // Reset to first page when clearing search
+        hasMore: true, // Reset hasMore when clearing search
+      };
+    });
   }
 
   // Initial fetch
@@ -137,11 +214,11 @@ export const useTransactions = ({
     fetchTransactions();
   }, [fetchTransactions]);
 
+
   return {
     ...state,
     fetchTransactions,
-    setPage,
-    setPerPage,
+    loadMore,
     setSearchParams,
     updateTransaction,
     clearSearchParams,

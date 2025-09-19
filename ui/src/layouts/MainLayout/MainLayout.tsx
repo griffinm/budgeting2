@@ -58,14 +58,16 @@ export default function MainLayout() {
             BearBudget
           </div>
           <div>
-            {user?.email}
+            <span className="text-sm text-gray-500 mr-2">
+              Logged in as&nbsp;{user?.firstName}
+            </span>
             <Button variant="subtle" size="xs" onClick={handleLogout}>Logout</Button>
           </div>
         </div>
         
       </AppShell.Header>
 
-      <AppShell.Navbar p="md" className="sidebar">
+      <AppShell.Navbar p={0} className="sidebar">
         {MainNavLinks.map((link) => (
           <NavLink
             key={link.path()}
