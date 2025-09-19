@@ -1,16 +1,12 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTransactions, usePageTitle } from '@/hooks';
 import { urls } from '@/utils/urls';
 import { TransactionsTable } from '@/components/TransactionsTable';
 import { MerchantTag } from '@/utils/types';
-import { 
-  fetchMerchantTags, 
-  updateAllPlaidAccounts as updateAllPlaidAccountsApi,
-} from '@/api';
+import { fetchMerchantTags } from '@/api/merchant-tags-client';
 import { useSyncEvent } from '@/hooks/useSyncEvent';
 import { format as formatDate } from 'date-fns';
-import { Button, Card } from '@mantine/core';
-import { NotificationContext } from '@/providers';
+import { Card } from '@mantine/core';
 
 export default function TransactionsPage() {
   const { 
@@ -31,7 +27,6 @@ export default function TransactionsPage() {
   } = useSyncEvent();
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
   const setTitle = usePageTitle();
-  const { showNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     setTitle(urls.transactions.title());
@@ -42,30 +37,6 @@ export default function TransactionsPage() {
       .then(setMerchantTags)
       .catch(console.error);
   }, []);
-
-  const updateAllPlaidAccounts = () => {
-    updateAllPlaidAccountsApi().then((response) => {
-      if (response.message === 'update_queued') {
-        showNotification({
-          title: 'Update queued',
-          message: 'Transactions will be updated in the background',
-          type: 'success',
-        });
-      } else if (response.message === 'update_already_queued') {
-        showNotification({
-          title: 'Update already queued',
-          message: 'Transactions are already being updated',
-          type: 'error',
-        });
-      } else if (response.message === 'update_not_needed') {
-        showNotification({
-          title: 'Update not needed',
-          message: 'Transactions were last updated at ' + formatDate(response.last_sync_time, 'MM/dd/yyyy hh:mm a'),
-          type: 'info',
-        });
-      }
-    });
-  };
 
   return (
     <div>
@@ -80,8 +51,6 @@ export default function TransactionsPage() {
               <em>Transactions not yet synced</em>
             )}
           </div>
-
-          <Button variant="subtle" size="xs" color="gray" onClick={() => updateAllPlaidAccounts()}>Update Now</Button>
         </div>
       </div>
       <Card>

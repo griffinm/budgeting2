@@ -28,8 +28,3 @@ export const removeUserFromPlaidAccount = async ({
   const response = await baseClient.delete(`/users/${userId}/plaid_accounts/${plaidAccountId}`);
   return response.data;
 };
-
-export const updateAllPlaidAccounts = async (): Promise<UpdateAllResponse> => {
-  const response = await baseClient.get("/plaid_accounts/update_all?force_update=true");
-  return response.data;
-};
