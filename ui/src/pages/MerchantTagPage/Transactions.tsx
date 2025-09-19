@@ -13,12 +13,7 @@ export function Transactions({
     isLoading,
     error,
     page,
-    setPage,
-    setPerPage,
-    searchParams,
-    setSearchParams,
     updateTransaction,
-    clearSearchParams,
   } = useTransactions({ initialSearchParams: { merchant_tag_id: tagId } });
   const { merchantTags, loading } = useMerchantTags();
 
@@ -31,15 +26,13 @@ export function Transactions({
         <TransactionsTable
           transactions={transactions}
           isLoading={isLoading}
+          isLoadingMore={false}
+          hasMore={false}
+          loadMore={() => {}}
           error={error}
           page={page}
-          setPage={setPage}
-          setPerPage={setPerPage}
-          searchParams={searchParams}
-          onSetSearchParams={setSearchParams}
           updateTransaction={updateTransaction}
           merchantTags={merchantTags}
-          clearSearchParams={clearSearchParams}
         />
       )}
     </CollapsibleCard>

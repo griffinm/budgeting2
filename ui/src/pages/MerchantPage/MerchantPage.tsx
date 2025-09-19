@@ -25,12 +25,8 @@ export default function MerchantPage() {
     setSearchParams,
     isLoading: merchantTransactionsLoading,
     page: merchantTransactionsPage,
-    setPage: setMerchantTransactionsPage,
-    setPerPage: setMerchantTransactionsPerPage,
-    searchParams: merchantTransactionsSearchParams,
     updateTransaction: updateMerchantTransaction,
     error: merchantTransactionsError,
-    clearSearchParams,
   } = useTransactions({
     initialSearchParams: {
       merchant_id: Number(id),
@@ -144,16 +140,13 @@ export default function MerchantPage() {
             transactions={transactions}
             isLoading={merchantTransactionsLoading}
             page={merchantTransactionsPage}
-            setPage={setMerchantTransactionsPage}
-            setPerPage={setMerchantTransactionsPerPage}
-            searchParams={merchantTransactionsSearchParams}
-            onSetSearchParams={setSearchParams}
             updateTransaction={updateMerchantTransaction}
             merchantTags={[]}
             error={merchantTransactionsError}
             condensed={true}
-            showSearch={false}
-            clearSearchParams={clearSearchParams}
+            isLoadingMore={false}
+            hasMore={false}
+            loadMore={() => {}}
           />
         </Card>
 

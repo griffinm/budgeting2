@@ -18,11 +18,8 @@ export function TransactionModal({
     transactions,
     isLoading,
     error,
-    searchParams,
     setSearchParams,
     page,
-    setPage,
-    setPerPage,
     updateTransaction,
   } = useTransactions();
   const {
@@ -49,13 +46,10 @@ export function TransactionModal({
           error={error}
           page={page}
           updateTransaction={updateTransaction}
-          setPage={setPage}
-          setPerPage={setPerPage}
-          searchParams={searchParams}
-          onSetSearchParams={setSearchParams}
+          isLoadingMore={false}
+          hasMore={false}
+          loadMore={() => {}}
           merchantTags={merchantTags}
-          showSearch={false}
-          clearSearchParams={() => {}}
         />
       </Modal>
     </div>

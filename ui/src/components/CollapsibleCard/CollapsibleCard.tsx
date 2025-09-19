@@ -1,6 +1,5 @@
 import { Button, Card } from "@mantine/core";
 import { useState } from "react";
-import { FaAngleUp, FaAngleDown } from "react-icons/fa6";
 
 type CardState = 'collapsed' | 'expanded';
 
@@ -28,7 +27,7 @@ export function CollapsibleCard({
           }}
           onClick={() => setState(state === 'expanded' ? 'collapsed' : 'expanded')}
         >
-          {state === 'expanded' ? <FaAngleUp /> : <FaAngleDown />}
+          {state === 'expanded' ? "^" : "v"}
         </Button>
         <h2 className="text-xl font-bold ml-2">{title}</h2>
       </div>

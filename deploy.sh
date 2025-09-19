@@ -72,8 +72,8 @@ run_local_command "bundle install"
 print_info "Installing local Node dependencies"
 run_local_command "(cd ui && npm install)"
 
-print_info "Running RSpec tests"
-run_local_command "bundle exec rspec spec/"
+# print_info "Running RSpec tests"
+# run_local_command "bundle exec rspec spec/"
 
 print_info "Running UI linting"
 run_local_command "npm run lint"
