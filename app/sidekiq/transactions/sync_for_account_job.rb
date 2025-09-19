@@ -33,7 +33,6 @@ class Transactions::SyncForAccountJob < SidekiqJob
       account_id = args[0]["account_id"]
       service = PlaidService.new(account_id: account_id)
       service.sync_transactions
-      service.update_account_balances
     rescue => e
       Rails.logger.error "Error syncing transactions for account #{account_id}: #{e.message}"
       Rails.logger.error e.backtrace.join("\n")

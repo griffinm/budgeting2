@@ -12,5 +12,8 @@
     "lint": "cd ui && npm run lint"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@fortawesome/free-regular-svg-icons": "^7.0.1"
+  }
 }

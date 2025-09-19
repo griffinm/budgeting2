@@ -5,7 +5,6 @@ import { MantineProvider } from '@mantine/core'
 import { NotificationProvider } from '@/providers'
 import { appTheme } from '@/theme'
 
-import 'material-icons/iconfont/material-icons.css';
 import '@mantine/core/styles.css'
 import '@mantine/notifications/styles.css'
 import '@mantine/charts/styles.css';
