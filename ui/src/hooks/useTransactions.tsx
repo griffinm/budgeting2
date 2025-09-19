@@ -146,13 +146,26 @@ export const useTransactions = ({
   }, []);
 
   const setSearchParams = useCallback((newParams: TransactionSearchParams) => {
-    setState(prev => ({ 
-      ...prev, 
-      searchParams: { ...prev.searchParams, ...newParams },
-      page: { ...prev.page, currentPage: 1 }, // Reset to first page when search params change
-      hasMore: true, // Reset hasMore when search params change
-    }));
-  }, []);
+    setState(prev => {
+      const updatedSearchParams = { ...prev.searchParams, ...newParams };
+      
+      // Update refs immediately with new values
+      searchParamsRef.current = updatedSearchParams;
+      currentPageRef.current = 1;
+      
+      // Trigger fetch after updating refs
+      setTimeout(() => {
+        fetchTransactions();
+      }, 0);
+      
+      return {
+        ...prev, 
+        searchParams: updatedSearchParams,
+        page: { ...prev.page, currentPage: 1 }, // Reset to first page when search params change
+        hasMore: true, // Reset hasMore when search params change
+      };
+    });
+  }, [fetchTransactions]);
 
   const loadMore = useCallback(() => {
     setState(prev => {
@@ -176,18 +189,30 @@ export const useTransactions = ({
 
   const clearSearchParams = () => {
     clearSearchFromLocalStorage();
-    setState(prev => ({ 
-      ...prev, 
-      searchParams: {},
-      page: { ...prev.page, currentPage: 1 }, // Reset to first page when clearing search
-      hasMore: true, // Reset hasMore when clearing search
-    }));
+    setState(prev => {
+      // Update refs immediately with cleared values
+      searchParamsRef.current = {};
+      currentPageRef.current = 1;
+      
+      // Trigger fetch after updating refs
+      setTimeout(() => {
+        fetchTransactions();
+      }, 0);
+      
+      return {
+        ...prev, 
+        searchParams: {},
+        page: { ...prev.page, currentPage: 1 }, // Reset to first page when clearing search
+        hasMore: true, // Reset hasMore when clearing search
+      };
+    });
   }
 
   // Initial fetch
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
+
 
   return {
     ...state,

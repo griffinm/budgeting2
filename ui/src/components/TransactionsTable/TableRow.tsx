@@ -1,7 +1,6 @@
 import { MerchantTag, Transaction } from "@/utils/types";
 import { Button, Input } from "@mantine/core";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
-import { format as formatDate } from "date-fns";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
@@ -56,11 +55,6 @@ function CondensedTableRow({
         </div>
         <div className="flex flex-col w-1/3">
           <span className="text-sm text-gray-500">
-            {formatDate(transaction.date, 'M/d/yy')}
-          </span>
-        </div>
-        <div className="flex flex-col w-1/3">
-          <span className="text-sm text-gray-500">
             {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
           </span>
         </div>
@@ -81,14 +75,10 @@ function FullTableRow({
   merchantTags: MerchantTag[];
 }) {
   return (
-    <div className="flex flex-row w-full relative">      
+    <div className="flex flex-row w-full relative border-b border-gray-300 pt-2">      
       <div className="flex flex-col w-1/3">
         <span className="text-lg">
           <TransactionAmount amount={transaction.amount} />
-        </span>
-
-        <span className="text-sm text-gray-500">
-          {formatDate(transaction.date, 'M/d/yy')}
         </span>
 
         <span className="text-sm text-gray-500">
@@ -96,8 +86,8 @@ function FullTableRow({
         </span>
       </div>
 
-      <div className="flex flex-col gap-2 w-1/3">
-        <div>
+      <div className="flex flex-col w-1/3">
+        <div className="text-sm">
           <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
             {merchantDisplayName(transaction.merchant)}
           </Link>
@@ -110,7 +100,7 @@ function FullTableRow({
         </div>
       </div>
 
-      <div className="w-1/3">
+      <div className="w-1/3 h-full pb-2 min-h-[60px]">
         <CategoryDisplay
           category={transaction.merchantTag}
           onSave={({ id, useDefaultCategory }) => {
