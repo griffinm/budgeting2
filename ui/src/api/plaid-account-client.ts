@@ -1,5 +1,5 @@
 import { baseClient } from "./base-client";
-import { PlaidAccount, UpdateAllResponse } from "@/utils/types";
+import { PlaidAccount } from "@/utils/types";
 
 export const fetchPlaidAccounts = async (): Promise<PlaidAccount[]> => {
   const response = await baseClient.get("/plaid_accounts");

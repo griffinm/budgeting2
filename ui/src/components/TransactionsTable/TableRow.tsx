@@ -1,5 +1,5 @@
 import { MerchantTag, Transaction } from "@/utils/types";
-import { Button, Card, Input } from "@mantine/core";
+import { Button, Input } from "@mantine/core";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { format as formatDate } from "date-fns";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
@@ -22,7 +22,7 @@ export function TableRow({
   merchantTags: MerchantTag[];
 }) {
   return (
-    <Card className="flex flex-row" p="xs">
+    <>
       {condensed ? (
         <CondensedTableRow
           transaction={transaction}
@@ -35,7 +35,7 @@ export function TableRow({
           merchantTags={merchantTags}
         />
       )}
-    </Card>
+    </>
   )
 }
 

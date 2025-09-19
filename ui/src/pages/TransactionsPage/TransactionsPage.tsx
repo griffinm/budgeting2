@@ -12,10 +12,11 @@ export default function TransactionsPage() {
   const { 
     transactions,
     isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
     error,
     page,
-    setPage,
-    setPerPage,
     searchParams,
     setSearchParams,
     updateTransaction,
@@ -57,10 +58,11 @@ export default function TransactionsPage() {
         <TransactionsTable
           transactions={transactions}
           isLoading={isLoading}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          loadMore={loadMore}
           error={error}
           page={page}
-          setPage={setPage}
-          setPerPage={setPerPage}
           searchParams={searchParams}
           onSetSearchParams={setSearchParams}
           updateTransaction={updateTransaction}
