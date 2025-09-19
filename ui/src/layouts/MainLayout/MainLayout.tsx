@@ -67,7 +67,7 @@ export default function MainLayout() {
         
       </AppShell.Header>
 
-      <AppShell.Navbar p="md" className="sidebar">
+      <AppShell.Navbar p={0} className="sidebar">
         {MainNavLinks.map((link) => (
           <NavLink
             key={link.path()}

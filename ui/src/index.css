@@ -7,6 +7,7 @@ body, html {
 
 #root {
   height: 100%;
+  @apply bg-neutral-50;
 }
 
 a {
@@ -49,4 +50,15 @@ a:hover {
 }
 .scrollbar-hide::-webkit-scrollbar { 
   display: none;  /* Safari and Chrome */
+}
+
+.small-text {
+  @apply text-sm text-gray-500;
+}
+
+/* Ensure full height layout */
+.main-content {
+  height: calc(100vh - 60px); /* Subtract header height */
+  display: flex;
+  flex-direction: column;
 }

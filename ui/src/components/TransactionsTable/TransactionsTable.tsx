@@ -1,6 +1,5 @@
 import { Transaction, Page, MerchantTag } from "@/utils/types";
-import { Search } from "./Search";
-import { TransactionSearchParams, TransactionUpdateParams } from "@/api/transaction-client";
+import { TransactionUpdateParams } from "@/api/transaction-client";
 import { TableRow } from "./TableRow";
 import { Loading } from "../Loading";
 import { groupTransactionsByDate } from './utils';
@@ -13,14 +12,9 @@ export function TransactionsTable({
   isLoadingMore,
   hasMore,
   loadMore,
-  page,
-  searchParams,
-  onSetSearchParams,
   updateTransaction,
   merchantTags,
   condensed = false,
-  showSearch = true,
-  clearSearchParams,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
@@ -29,15 +23,12 @@ export function TransactionsTable({
   loadMore: () => void;
   error: Error | null;
   page: Page;
-  searchParams: TransactionSearchParams;
-  onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
   condensed?: boolean;
-  showSearch?: boolean;
-  clearSearchParams: () => void;
 }) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [displayTransactions, setDisplayTransactions] = useState(transactions);
   
@@ -70,7 +61,7 @@ export function TransactionsTable({
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
-    if (!loadMoreRef.current || !hasMore || isLoadingMore) {
+    if (!loadMoreRef.current || !scrollContainerRef.current || !hasMore || isLoadingMore) {
       return;
     }
 
@@ -80,26 +71,20 @@ export function TransactionsTable({
           loadMore();
         }
       },
-      { threshold: 0.1 }
+      { 
+        threshold: 0.1,
+        // Use the scroll container as the root instead of viewport
+        root: scrollContainerRef.current
+      }
     );
 
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [hasMore, isLoadingMore, loadMore]);
+  }, [hasMore, isLoadingMore, loadMore, displayTransactions.length]);
 
   return (
-    <div>
-      <div className="flex flex-row justify-between mb-3">
-        <div className="flex justify-baseline items-baseline text-sm text-gray-500 self-end">
-          {isLoading ? 'Loading...' : `Found ${page.totalCount.toLocaleString()} transactions`}
-        </div>
-        {showSearch && (
-          <Search searchParams={searchParams} onSetSearchParams={onSetSearchParams} clearSearchParams={clearSearchParams} />
-        )}
-      </div>
-
-
-      <div className="flex flex-col gap-3 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-hide">
+    <div className="h-full flex flex-col">
+      <div ref={scrollContainerRef} className="flex-1 flex flex-col gap-3 overflow-y-auto scrollbar-hide">
         {isLoading && displayTransactions.length === 0 ? (
           <div className="flex flex-row justify-center transition-opacity duration-300 ease-in-out">
             <Loading fullHeight={false} />
@@ -113,7 +98,7 @@ export function TransactionsTable({
                   transactionCount={group.transactions.length}
                 />
                 
-                <div className="flex flex-col mx-2">
+                <div className="flex flex-col">
                   {group.transactions.map((transaction) => (
                     <TableRow
                       key={transaction.id}
@@ -128,7 +113,7 @@ export function TransactionsTable({
             ))}
             
             {/* Infinite scroll trigger and loading indicator */}
-            {hasMore && !isLoading && displayTransactions.length > 0 && (
+            {hasMore && displayTransactions.length > 0 && (
               <div ref={loadMoreRef} className="flex justify-center py-4">
                 {isLoadingMore ? (
                   <Loading fullHeight={false} />

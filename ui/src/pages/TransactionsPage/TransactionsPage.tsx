@@ -7,6 +7,7 @@ import { fetchMerchantTags } from '@/api/merchant-tags-client';
 import { useSyncEvent } from '@/hooks/useSyncEvent';
 import { format as formatDate } from 'date-fns';
 import { Card } from '@mantine/core';
+import { Search } from '@/components/TransactionsTable/Search';
 
 export default function TransactionsPage() {
   const { 
@@ -40,21 +41,25 @@ export default function TransactionsPage() {
   }, []);
 
   return (
-    <div>
-      <div className="flex flex-col md:flex-row justify-between mb-3">
+    <div className="h-full flex flex-col">
+      <div className="flex flex-col md:flex-row justify-between mb-3 flex-shrink-0">
         <h1 className="text-2xl font-bold mb-4">Transactions</h1>
-        <div className="text-sm text-gray-500 flex items-center gap-2">
-          
+        <div className="small-text flex items-center gap-2">
           <div>
             {isSyncEventLoading ? <div>Loading...</div> : latestSyncEvent ? (
-              <>Last synced at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy hh:mm a')}</strong></>
+              <>Last updated at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy h:mm a')}</strong></>
             ) : (
               <em>Transactions not yet synced</em>
             )}
           </div>
         </div>
       </div>
-      <Card>
+      
+      <div className="flex-shrink-0 mb-3">
+        <Search searchParams={searchParams} onSetSearchParams={setSearchParams} clearSearchParams={clearSearchParams} />
+      </div>
+      
+      <Card p={0} className="flex-1 min-h-0"> 
         <TransactionsTable
           transactions={transactions}
           isLoading={isLoading}
@@ -63,13 +68,9 @@ export default function TransactionsPage() {
           loadMore={loadMore}
           error={error}
           page={page}
-          searchParams={searchParams}
-          onSetSearchParams={setSearchParams}
           updateTransaction={updateTransaction}
           merchantTags={merchantTags}
-          clearSearchParams={clearSearchParams}
         />
-
       </Card>
     </div>
   );

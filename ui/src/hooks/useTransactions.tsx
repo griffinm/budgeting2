@@ -95,6 +95,7 @@ export const useTransactions = ({
     const apiParams = {
       ...searchParams,
       page: currentPage,
+      per_page: 100,
     };
 
     if (!isLoadingMore) {

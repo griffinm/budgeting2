@@ -6,7 +6,7 @@ export function DayHeader({
   transactionCount: number;
 }) {
   return (
-    <div className="sticky top-0 z-10 border-b bg-neutral-100 border-gray-300 py-2 px-3 rounded-md flex flex-row justify-between">
+    <div className="sticky top-0 z-10 border-b bg-neutral-100 border-gray-300 py-2 px-3 flex flex-row justify-between">
       <h3 className="text-sm font-medium text-gray-700">
         {new Date(date).toLocaleDateString('en-US', {
           weekday: 'long',

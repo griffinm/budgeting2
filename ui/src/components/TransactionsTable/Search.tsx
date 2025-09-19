@@ -7,6 +7,8 @@ import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
 import { TransactionType } from "@/utils/types";
 
+const SEARCH_TIMEOUT = 250;
+
 export function Search({
   searchParams,
   onSetSearchParams,
@@ -33,7 +35,7 @@ export function Search({
     }
     searchTimeout.current = setTimeout(() => {
       onSetSearchParams(newParams);
-    }, 500);
+    }, SEARCH_TIMEOUT);
   };
 
   const updateSearchTerm = (value: string) => {
@@ -50,22 +52,25 @@ export function Search({
   };
 
   return (
-    <div className="flex flex-col justify-end items-end">
-      <div className="max-w-[200px]">
-        <Input
-          placeholder="Search"
-          value={search}
-          onChange={(e) => updateSearchTerm(e.target.value)}
-        />
+    <div>
+      <div className="flex flex-row gap-2">
+        <div className="max-w-[200px]">
+          <Input
+            placeholder="Search"
+            value={search}
+            onChange={(e) => updateSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="mt-2 text-sm text-gray-500 cursor-pointer" onClick={() => setShowAdvanced(!showAdvanced)}>
+          {showAdvanced ? '- Hide Advanced Search' : '+ Show Advanced Search'}
+        </div>
       </div>
-      <div className="mt-2 text-sm text-gray-500 cursor-pointer" onClick={() => setShowAdvanced(!showAdvanced)}>
-        {showAdvanced ? '- Hide Advanced Search' : '+ Show Advanced Search'}
-      </div>
+
       {showAdvanced && (
         <div className="mt-2">
           <form>
-            <Card withBorder className="p-2" shadow="xs" radius="md" style={{ maxWidth: '850px' }}>
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-5">
+            <Card shadow="xs" radius="md" p="xs">
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-7">
                 <DatePickerInput
                   label="Start Date"
                   value={localParams.start_date}
@@ -115,7 +120,7 @@ export function Search({
                 </div>
 
               </div>
-              <div className="flex flex-row justify-end">
+              <div className="mt-2">
                 <Button variant="subtle" size="xs" color="gray" onClick={() => clearSearchParams()}>Clear Search</Button>
               </div>
             </Card>
