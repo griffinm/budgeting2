@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_21_144817) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_21_154422) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -85,6 +85,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_21_144817) do
     t.string "plaid_category_detail"
     t.string "plaid_category_confidence_level"
     t.string "plaid_categories", default: [], array: true
+    t.string "phone_number"
     t.index ["account_id"], name: "index_merchants_on_account_id"
   end
 
@@ -168,6 +169,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_21_144817) do
     t.datetime "updated_at", null: false
     t.bigint "merchant_tag_id"
     t.text "note"
+    t.boolean "recurring", default: false
+    t.string "plaid_category_confidence_level"
     t.index ["account_id"], name: "index_plaid_transactions_on_account_id"
     t.index ["date"], name: "index_plaid_transactions_on_date"
     t.index ["merchant_id"], name: "index_plaid_transactions_on_merchant_id"

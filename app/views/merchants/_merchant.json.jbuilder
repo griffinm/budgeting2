@@ -10,6 +10,9 @@ json.plaidEntityId merchant.plaid_entity_id
 json.website merchant.website
 json.defaultTransactionType merchant.default_transaction_type
 json.defaultMerchantTagId merchant.default_merchant_tag_id
+json.plaidCategoryPrimary merchant.plaid_category_primary
+json.plaidCategoryDetail merchant.plaid_category_detail
+json.plaidCategoryConfidenceLevel merchant.plaid_category_confidence_level
 
 json.defaultMerchantTag do
   if merchant.default_merchant_tag

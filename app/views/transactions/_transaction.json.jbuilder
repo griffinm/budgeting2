@@ -13,6 +13,10 @@ json.checkNumber transaction.check_number
 json.currencyCode transaction.currency_code
 json.hasDefaultMerchantTag transaction.has_default_merchant_tag?
 json.note transaction.note
+json.recurring transaction.recurring
+json.categoryPrimary transaction.plaid_category_primary
+json.categoryDetail transaction.plaid_category_detail
+json.categoryConfidenceLevel transaction.plaid_category_confidence_level
 
 json.merchant do
   json.partial! "merchants/merchant", merchant: transaction.merchant

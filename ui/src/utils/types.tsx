@@ -85,6 +85,10 @@ export interface Transaction {
   merchantTag?: MerchantTag | null;
   hasDefaultMerchantTag?: boolean;
   note?: string | null;
+  recurring: boolean;
+  categoryPrimary: string | null;
+  categoryDetail: string | null;
+  categoryConfidenceLevel: string | null;
 }
 
 export interface MerchantTag {
