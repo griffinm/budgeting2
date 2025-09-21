@@ -95,7 +95,7 @@ export function TransactionsTable({
               <div key={group.date} className="flex flex-col">
                 <DayHeader
                   date={group.date}
-                  transactionCount={group.transactions.length}
+                  transactions={group.transactions}
                 />
                 
                 <div className="flex flex-col">
