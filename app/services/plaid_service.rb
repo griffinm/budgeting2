@@ -7,7 +7,7 @@ class PlaidService < BaseService
   private def update_balance_for_account(plaid_sync_response:)
     begin
       plaid_sync_response.accounts.each do |plaid_api_account|
-        Rails.logger.info "Updating balance for account #{plaid_api_account.id}"
+        Rails.logger.info "Updating balance for account #{plaid_api_account.account_id}"
         plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
         next unless plaid_account
         current = plaid_api_account.balances.current&.to_f
@@ -62,6 +62,9 @@ class PlaidService < BaseService
       # Update the balance for the account
       update_balance_for_account(plaid_sync_response: sync_response)
 
+      # Save the API response to a file
+      File.write("plaid_sync_response_#{@account.id}_#{plaid_sync_event.id}.json", sync_response.to_json)
+
       # If there are more pages to sync, continue
       while sync_response.has_more
         Rails.logger.info "Processing more transactions for account #{@account.id} sync event #{plaid_sync_event.id}"
@@ -100,7 +103,7 @@ class PlaidService < BaseService
         amount: transaction.amount,
         name: transaction.merchant_name || transaction.name,
         authorized_at: transaction.authorized_date,
-        date: transaction.date,
+        date: transaction.date.in_time_zone(@account.user.time_zone).to_date + 12.hours,
         check_number: transaction.check_number,
         currency_code: transaction.iso_currency_code,
         pending: transaction.pending,
@@ -108,6 +111,12 @@ class PlaidService < BaseService
         plaid_category_detail: transaction.personal_finance_category.detailed,
         payment_channel: transaction.payment_channel,
         transaction_type: "expense",
+        website: transaction.website,
+        logo_url: transaction.logo_url,
+        plaid_category_primary: transaction.personal_finance_category.primary,
+        plaid_category_detail: transaction.personal_finance_category.detailed,
+        plaid_category_confidence_level: transaction.personal_finance_category.confidence_level,
+        plaid_categories: transaction.category,
       )
 
       merchant = merchant_for_transaction(transaction, transaction.merchant_entity_id)
@@ -122,12 +131,27 @@ class PlaidService < BaseService
       existing_transaction = PlaidTransaction.find_by(plaid_id: transaction.transaction_id)
       plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: @account.id)
       existing_transaction.update(
+        account_id: @account.id,
         plaid_sync_event_id: plaid_sync_event.id,
-        plaid_account_id: plaid_account&.id,
+        plaid_account_id: plaid_account.id,
         plaid_id: transaction.transaction_id,
         amount: transaction.amount,
         name: transaction.merchant_name || transaction.name,
         authorized_at: transaction.authorized_date,
+        date: transaction.date.in_time_zone(@account.user.time_zone).to_date + 12.hours,
+        check_number: transaction.check_number,
+        currency_code: transaction.iso_currency_code,
+        pending: transaction.pending,
+        plaid_category_primary: transaction.personal_finance_category.primary,
+        plaid_category_detail: transaction.personal_finance_category.detailed,
+        payment_channel: transaction.payment_channel,
+        transaction_type: "expense",
+        website: transaction.website,
+        logo_url: transaction.logo_url,
+        plaid_category_primary: transaction.personal_finance_category.primary,
+        plaid_category_detail: transaction.personal_finance_category.detailed,
+        plaid_category_confidence_level: transaction.personal_finance_category.confidence_level,
+        plaid_categories: transaction.category,
       )
     end
   end

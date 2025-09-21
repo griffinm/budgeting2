@@ -10,6 +10,13 @@ class User < ApplicationRecord
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :password, length: { minimum: 8 }, allow_nil: true
+  before_save :apply_defaults
+
+  private def apply_defaults
+    if(self.time_zone.blank?)
+      self.time_zone = 'Eastern Time (US & Canada)'
+    end
+  end
 
   def as_json(options = {})
     super(options).merge({

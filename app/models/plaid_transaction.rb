@@ -40,6 +40,16 @@ class PlaidTransaction < ApplicationRecord
   def set_default_categories
     self.merchant_tag_id = self.merchant.default_merchant_tag_id if self.merchant.default_merchant_tag_id.present?
     self.transaction_type = self.merchant.default_transaction_type if self.merchant.default_transaction_type.present?
+
+    if self.transaction_type.blank?
+      # Infer the transaction type based on the amount
+      if self.amount < 0
+        # negative amount is income, it's just the way plaid works
+        self.transaction_type = 'income'
+      else
+        self.transaction_type = 'expense'
+      end
+    end
   end
 
   def self.monthly_average_by_type(transaction_type, months_back = 1)
@@ -69,4 +79,5 @@ class PlaidTransaction < ApplicationRecord
 
     monthly_averages.reduce(:+) / monthly_averages.length.to_f
   end
+
 end 
