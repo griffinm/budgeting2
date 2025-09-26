@@ -23,6 +23,9 @@ export function DayHeader({
       </h3>
         {transactionCount > 0 && (
           <div>
+            <span className="text-xs text-gray-500">
+              {transactionCount} transactions
+            </span>
             <span className="text-xs text-gray-500 mr-3">
               {transactionCount} transaction{transactionCount > 1 ? 's' : ''}
             </span>

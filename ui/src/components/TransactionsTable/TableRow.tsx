@@ -90,6 +90,7 @@ function FullTableRow({
         <div className="h-[50px] w-[50px] flex items-center mr-3">
           <Logo merchant={transaction.merchant} />
         </div>
+
         <div className="flex flex-col w-1/3">
           <div className="text-sm">
             <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
