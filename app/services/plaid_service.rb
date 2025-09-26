@@ -7,11 +7,7 @@ class PlaidService < BaseService
   private def update_balance_for_account(plaid_sync_response:)
     begin
       plaid_sync_response.accounts.each do |plaid_api_account|
-<<<<<<< HEAD
         Rails.logger.info "Updating balance for account #{plaid_api_account.account_id}"
-=======
-        Rails.logger.info "Updating balance for account #{plaid_api_account.id}"
->>>>>>> SEP25
         plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
         next unless plaid_account
         current = plaid_api_account.balances.current&.to_f
@@ -66,12 +62,6 @@ class PlaidService < BaseService
       # Update the balance for the account
       update_balance_for_account(plaid_sync_response: sync_response)
 
-<<<<<<< HEAD
-      # Save the API response to a file
-      File.write("plaid_sync_response_#{@account.id}_#{plaid_sync_event.id}.json", sync_response.to_json)
-
-=======
->>>>>>> SEP25
       # If there are more pages to sync, continue
       while sync_response.has_more
         Rails.logger.info "Processing more transactions for account #{@account.id} sync event #{plaid_sync_event.id}"
