@@ -52,9 +52,6 @@ export function Display({
 
     return (
       <div className="flex flex-row gap-2">
-        <div className="h-full w-[30px] rounded-md" style={{ backgroundColor: `#${tag.color}` }}>
-          &nbsp;
-        </div>
         <div className="flex flex-col">
           <div className="text-gray-500 text-sm">{fullyQualifiedTagName(tag, allCategories)}</div>
           <div className="font-bold">{tag.name}</div>

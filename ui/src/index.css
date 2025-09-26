@@ -10,17 +10,6 @@ body, html {
   @apply bg-neutral-50;
 }
 
-a {
-  color: #007bff;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-a:hover {
-  color: #0056b3;
-}
-
 .hover-bounce {
   transition: all 0.3s ease;
 

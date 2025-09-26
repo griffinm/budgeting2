@@ -5,7 +5,7 @@ import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmo
 import { TransactionType } from "@/components/TransactionType/TransactionType";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { urls } from "@/utils/urls";
-import { Link } from "react-router-dom";
+import { Link } from "@/components/Link";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { useState } from "react";
 import { Logo } from "./Logo";
@@ -93,7 +93,7 @@ function FullTableRow({
 
         <div className="flex flex-col w-1/3">
           <div className="text-sm">
-            <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
+            <Link to={urls.merchant.path(transaction.merchant.id)}>
               {merchantDisplayName(transaction.merchant)}
             </Link>
           </div>
