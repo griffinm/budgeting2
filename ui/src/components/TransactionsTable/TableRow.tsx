@@ -1,5 +1,5 @@
 import { MerchantTag, Transaction } from "@/utils/types";
-import { Avatar, Button, Input } from "@mantine/core";
+import { Button, Input } from "@mantine/core";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
@@ -8,7 +8,6 @@ import { urls } from "@/utils/urls";
 import { Link } from "react-router-dom";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { useState } from "react";
-import { getAvatarAlt } from "./utils";
 import { Logo } from "./Logo";
 
 export function TableRow({
