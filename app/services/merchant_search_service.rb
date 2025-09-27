@@ -1,16 +1,17 @@
 class MerchantSearchService < BaseService
-  def initialize(account_id:, user_id:, search_term: nil, merchant_tag_id: nil)
+  def initialize(account_id:, user_id:, search_term: nil, merchant_tag_id: nil, merchant_group_id: nil)
     @account_id = account_id
     @user_id = user_id
 
     # Optional params
     @merchant_tag_id = merchant_tag_id
+    @merchant_group_id = merchant_group_id
     @search_term = search_term
   end
 
   def call
     merchants = Merchant.joins(:account)
-      .includes(:default_merchant_tag, :account)
+      .includes(:default_merchant_tag, :account, :merchant_group)
       .where(accounts: { id: @account_id })
       .order(merchants: { merchant_name: :asc })
 
@@ -23,6 +24,10 @@ class MerchantSearchService < BaseService
       merchants = merchants.left_joins(:plaid_transactions)
         .where("plaid_transactions.merchant_tag_id = ? OR merchants.default_merchant_tag_id = ?", @merchant_tag_id, @merchant_tag_id)
         .distinct
+    end
+
+    if @merchant_group_id.present?
+      merchants = merchants.where(merchant_group_id: @merchant_group_id)
     end
 
     merchants

@@ -13,19 +13,28 @@ export function DayHeader({
 
   return (
     <div className="sticky top-0 z-10 border-b bg-neutral-100 border-gray-300 py-2 px-3 flex flex-row justify-between">
-      <h3 className="text-sm font-medium text-gray-700">
+      
+      {/* Desktop display */}
+      <h3 className="text-sm font-medium text-gray-700 hidden md:block">
         {new Date(date).toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
-          month: 'long',
+          month: 'short',
+          day: 'numeric'
+        })}
+      </h3>
+
+      {/* Mobile display */}
+      <h3 className="text-sm font-medium text-gray-700 visible md:hidden">
+        {new Date(date).toLocaleDateString('en-US', {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
           day: 'numeric'
         })}
       </h3>
         {transactionCount > 0 && (
           <div>
-            <span className="text-xs text-gray-500">
-              {transactionCount} transactions
-            </span>
             <span className="text-xs text-gray-500 mr-3">
               {transactionCount} transaction{transactionCount > 1 ? 's' : ''}
             </span>

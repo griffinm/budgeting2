@@ -24,6 +24,21 @@ Rails.application.routes.draw do
     resources :transactions, only: [:index, :update]
     resources :merchants, only: [:index, :update, :show] do
       get 'spend_stats', to: 'merchants#spend_stats'
+      get 'suggest_groups', to: 'merchants#suggest_groups'
+      post 'create_group', to: 'merchants#create_group'
+    end
+
+    resources :merchant_groups, only: [:index, :show, :create, :update, :destroy] do
+      member do
+        post 'add_merchant', to: 'merchant_groups#add_merchant'
+        delete 'remove_merchant', to: 'merchant_groups#remove_merchant'
+        patch 'set_primary_merchant', to: 'merchant_groups#set_primary_merchant'
+        get 'spend_stats', to: 'merchant_groups#spend_stats'
+      end
+      collection do
+        get 'suggest_groups', to: 'merchant_groups#suggest_groups'
+        post 'auto_group', to: 'merchant_groups#auto_group'
+      end
     end
 
     resources :merchant_tags, only: [:index, :update, :create, :destroy, :show] do

@@ -19,3 +19,27 @@ json.defaultMerchantTag do
     json.partial! 'merchant_tags/merchant_tag', merchant_tag: merchant.default_merchant_tag
   end
 end
+
+json.merchantGroup do
+  if merchant.merchant_group
+    json.id merchant.merchant_group.id
+    json.name merchant.merchant_group.name
+    json.description merchant.merchant_group.description
+    json.createdAt merchant.merchant_group.created_at
+    json.updatedAt merchant.merchant_group.updated_at
+    
+    json.primaryMerchant do
+      json.id merchant.merchant_group.primary_merchant.id
+      json.name merchant.merchant_group.primary_merchant.merchant_name
+      json.customName merchant.merchant_group.primary_merchant.custom_name
+    end
+    
+    json.merchants merchant.merchant_group.merchants do |group_merchant|
+      json.id group_merchant.id
+      json.name group_merchant.merchant_name
+      json.customName group_merchant.custom_name
+    end
+    
+    json.merchantCount merchant.merchant_group.merchants.count
+  end
+end

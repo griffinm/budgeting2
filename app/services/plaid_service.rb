@@ -168,6 +168,10 @@ class PlaidService < BaseService
     merchant = Merchant.find_by(merchant_name: transaction.merchant_name || transaction.name)
     return merchant if merchant
 
+    # Check for similar merchants in existing groups
+    similar_merchant = find_similar_merchant_in_groups(transaction.merchant_name || transaction.name)
+    return similar_merchant if similar_merchant
+
     # It does not exist, create it
     merchant = Merchant.create(
       account_id: @account.id,
@@ -175,7 +179,61 @@ class PlaidService < BaseService
       merchant_name: transaction.merchant_name || transaction.name,
     )
 
+    # Suggest grouping after creation
+    suggest_merchant_grouping(merchant)
+
     return merchant
+  end
+
+  private def find_similar_merchant_in_groups(merchant_name)
+    return nil if merchant_name.blank?
+    
+    normalized_name = normalize_merchant_name(merchant_name)
+    
+    @account.merchants.joins(:merchant_group).each do |merchant|
+      normalized_existing = normalize_merchant_name(merchant.merchant_name)
+      if calculate_name_similarity(normalized_name, normalized_existing) > 0.8
+        return merchant
+      end
+    end
+    
+    nil
+  end
+
+  private def suggest_merchant_grouping(merchant)
+    grouping_service = MerchantGroupingService.new(account_id: @account.id)
+    suggestions = grouping_service.suggest_groups_for_merchant(merchant)
+    
+    # Log suggestions for manual review
+    if suggestions.any?
+      Rails.logger.info "Merchant grouping suggestions for #{merchant.merchant_name}:"
+      suggestions.each do |suggestion|
+        Rails.logger.info "  - #{suggestion[:merchant].merchant_name} (#{suggestion[:reason]}, confidence: #{suggestion[:confidence]})"
+      end
+    end
+  end
+
+  private def normalize_merchant_name(name)
+    return "" if name.blank?
+    
+    name.downcase
+        .gsub(/[^a-z0-9\s]/, '')
+        .gsub(/\s+/, ' ')
+        .strip
+  end
+
+  private def calculate_name_similarity(name1, name2)
+    return 0.0 if name1.blank? || name2.blank?
+    
+    words1 = name1.split(' ')
+    words2 = name2.split(' ')
+    
+    common_words = words1 & words2
+    total_words = (words1 + words2).uniq.length
+    
+    return 0.0 if total_words == 0
+    
+    common_words.length.to_f / total_words
   end
 
   def api_client

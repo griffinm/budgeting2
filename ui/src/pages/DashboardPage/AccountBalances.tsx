@@ -1,7 +1,6 @@
 import { AccountBalance } from "@/utils/types";
 import { Loading } from "@/components/Loading";
 import { getCurrentBalance } from "./accountBalanceUtils";
-import { Card } from "@mantine/core";
 
 export const AccountBalances = ({
   accountBalances,
@@ -12,8 +11,7 @@ export const AccountBalances = ({
 }) => {
 
   return (
-    <Card>
-      <h2 className="text-2xl mb-4">Account Balances</h2>
+    <>
       {loading ? (
         <Loading />
       ) : (
@@ -36,6 +34,6 @@ export const AccountBalances = ({
           ))}
       </div>
       )}
-    </Card>
+    </>
   );
 };

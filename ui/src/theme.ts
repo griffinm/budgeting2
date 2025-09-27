@@ -1,5 +1,5 @@
 import { Card, Container, createTheme, Paper, rem, Select } from "@mantine/core";
-import type { MantineThemeOverride } from "@mantine/core";
+import type { MantineColorsTuple, MantineThemeOverride } from "@mantine/core";
 
 const CONTAINER_SIZES: Record<string, string> = {
   xxs: rem("200px"),
@@ -11,7 +11,22 @@ const CONTAINER_SIZES: Record<string, string> = {
   xxl: rem("1600px"),
 };
 
-export const appTheme: MantineThemeOverride = createTheme({
+const myColor: MantineColorsTuple = [
+  '#ecf4ff',
+  '#dce4f5',
+  '#b9c7e2',
+  '#94a8d0',
+  '#748dc0',
+  '#5f7cb7',
+  '#5474b4',
+  '#44639f',
+  '#3a5890',
+  '#2c4b80'
+];
+
+export const theme: MantineThemeOverride = createTheme({
+  fontFamily: "Noto Sans, sans-serif",
+  fontFamilyMonospace: "Noto Sans Mono, monospace",
   fontSizes: {
     xs: rem("12px"),
     sm: rem("14px"),
@@ -34,7 +49,10 @@ export const appTheme: MantineThemeOverride = createTheme({
     "2xl": rem("28px"),
     "3xl": rem("32px"),
   },
-  primaryColor: "green",
+  primaryColor: "myColor",
+  colors: {
+    myColor,
+  },
   components: {
     /** Put your mantine component override here */
     Container: Container.extend({

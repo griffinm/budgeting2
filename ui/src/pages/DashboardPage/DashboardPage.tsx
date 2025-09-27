@@ -1,13 +1,14 @@
 import { useEffect } from 'react';
 import { urls } from '@/utils/urls';
-import { MonthlySpend } from '@/components/MonthlySpend';
 import { useTransactionTrends } from './useTransactionTrends';
 import { DashboardCard } from './DashboardCard';
 import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
 import { AccountBalances } from './AccountBalances';
-import { Card } from '@mantine/core';
+import { Card, Group, Text } from '@mantine/core';
+import { IconWallet, IconTrendingUp, IconCalculator, IconCalendar } from '@tabler/icons-react';
+import { MonthlyLineChart } from '@/components/MonthlySpend/MonthlyLineChart';
 
 export default function DashboardPage() {
   const { 
@@ -38,50 +39,83 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="mb-4">
-        <AccountBalances accountBalances={accountBalances} loading={accountBalancesLoading} />
+    <div className="h-full flex flex-col">
+      <div className="flex-shrink-0 mb-4">
+        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
       </div>
-      <Card className="border border-gray-200 rounded-md p-4 shadow-md mb-4">
-        <h2 className="text-2xl mb-4">Transaction Trends</h2>
-        <div className="flex flex-row gap-4">
-          <DashboardCard
-            currentMonthTransactions={currentMonthExpenses.transactions}
-            previousMonthTransactions={previousMonthExpenses.transactions}
-            transactionType="expense"
-            loading={loading}
+      
+      <div className="flex flex-col gap-4">
+        <Card>
+          <Group mb="md">
+            <IconWallet size={20} />
+            <Text fw={600}>Account Balances</Text>
+          </Group>
+          <AccountBalances accountBalances={accountBalances} loading={accountBalancesLoading} />
+        </Card>
+        
+        <Card>
+          <Group mb="md">
+            <IconTrendingUp size={20} />
+            <Text fw={600}>Transaction Trends</Text>
+          </Group>
+          <div className="flex flex-col md:flex-row gap-4">
+            <DashboardCard
+              currentMonthTransactions={currentMonthExpenses.transactions}
+              previousMonthTransactions={previousMonthExpenses.transactions}
+              transactionType="expense"
+              loading={loading}
+            />
+            <DashboardCard
+              currentMonthTransactions={currentMonthIncome.transactions}
+              previousMonthTransactions={previousMonthIncome.transactions}
+              transactionType="income"
+              loading={loading}
+            />
+          </div>
+        </Card>
+        
+        <Card>
+          <Group mb="md">
+            <IconCalculator size={20} />
+            <Text fw={600}>Profit & Loss</Text>
+          </Group>
+          <ProfitAndLoss
+            profitAndLoss={profitAndLoss}
+            monthsBack={monthsBack}
+            setMonthsBack={setProfitAndLossMonthsBack}
+            loading={profitAndLossLoading}
           />
-          <DashboardCard
+        </Card>
+
+        <Card>
+          <Group mb="md">
+            <IconCalendar size={20} />
+            <Text fw={600}>Monthly Spend</Text>
+          </Group>
+          <MonthlyLineChart
+          currentMonthTransactions={currentMonthExpenses.transactions}
+          previousMonthTransactions={previousMonthExpenses.transactions}
+          transactionType="expense"
+          average={averageExpense}
+          monthsBack={expenseMonthsBack}
+          onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'expense' })}
+        />
+        </Card>
+
+        <Card>
+          <Group mb="md">
+            <IconCalendar size={20} />
+            <Text fw={600}>Monthly Income</Text>
+          </Group>
+          <MonthlyLineChart
             currentMonthTransactions={currentMonthIncome.transactions}
             previousMonthTransactions={previousMonthIncome.transactions}
             transactionType="income"
-            loading={loading}
+            average={averageIncome}
+            monthsBack={incomeMonthsBack}
+            onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'income' })}
           />
-        </div>
-      </Card>
-      
-      <Card className="mb-4">
-        <ProfitAndLoss
-          profitAndLoss={profitAndLoss}
-          monthsBack={monthsBack}
-          setMonthsBack={setProfitAndLossMonthsBack}
-          loading={profitAndLossLoading}
-        />
-      </Card>
-
-      <div>
-        <MonthlySpend
-          currentMonthExpenses={currentMonthExpenses.transactions}
-          currentMonthIncome={currentMonthIncome.transactions}
-          previousMonthExpenses={previousMonthExpenses.transactions}
-          previousMonthIncome={previousMonthIncome.transactions}
-          loading={loading}
-          averageExpense={averageExpense}
-          averageIncome={averageIncome}
-          expenseMonthsBack={expenseMonthsBack}
-          incomeMonthsBack={incomeMonthsBack}
-          setMonthsBack={setMonthsBack}
-        />
+        </Card>
       </div>
     </div>
   );

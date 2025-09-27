@@ -181,10 +181,7 @@ export function ProfitAndLoss({
 
   return (
     <>
-      <div className="flex flex-row gap-2 justify-between mb-2">
-        <h2 className="text-2xl">
-          Profit and Loss
-        </h2>
+      <div className="flex flex-row gap-2 justify-end mb-2">
         <Select
           size="xs"
           data={[

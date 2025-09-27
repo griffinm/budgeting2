@@ -64,6 +64,28 @@ export interface Merchant {
   defaultTransactionType: TransactionType;
   defaultMerchantTagId?: number | null;
   defaultMerchantTag: MerchantTag | null;
+  merchantGroup?: MerchantGroup | null;
+}
+
+export interface MerchantGroup {
+  id: number;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+  primaryMerchant: Merchant;
+  merchants: Merchant[];
+  merchantCount?: number;
+}
+
+export interface MerchantGroupSuggestion {
+  merchant: {
+    id: number;
+    name: string;
+    customName: string | null;
+  };
+  reason: string;
+  confidence: number;
 }
 
 export interface Transaction {

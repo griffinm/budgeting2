@@ -87,7 +87,7 @@ function FullTableRow({
             {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
           </span>
         </div>
-        <div className="h-[50px] w-[50px] flex items-center mr-3">
+        <div className="h-[50px] w-[50px] items-center mr-3 hidden md:flex">
           <Logo merchant={transaction.merchant} />
         </div>
 
