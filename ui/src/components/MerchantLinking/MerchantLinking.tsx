@@ -21,6 +21,18 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
   const [groupName, setGroupName] = useState('');
   const [groupDescription, setGroupDescription] = useState('');
 
+  const loadSuggestions = useCallback(async () => {
+    setSuggestionsLoading(true);
+    try {
+      const suggestions = await fetchMerchantGroupSuggestions(merchant.id);
+      setSuggestions(suggestions);
+    } catch (error) {
+      console.error('Failed to load suggestions:', error);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  }, [merchant.id]);
+
   useEffect(() => {
     loadMerchantGroups();
     if (!merchant.merchantGroup) {
@@ -36,18 +48,6 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
       console.error('Failed to load merchant groups:', error);
     }
   };
-
-  const loadSuggestions = useCallback(async () => {
-    setSuggestionsLoading(true);
-    try {
-      const suggestions = await fetchMerchantGroupSuggestions(merchant.id);
-      setSuggestions(suggestions);
-    } catch (error) {
-      console.error('Failed to load suggestions:', error);
-    } finally {
-      setSuggestionsLoading(false);
-    }
-  }, [merchant.id]);
 
   const refreshMerchantData = async () => {
     try {

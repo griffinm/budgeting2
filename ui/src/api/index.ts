@@ -2,7 +2,6 @@ export * from './user-client';
 export * from './transaction-client';
 export * from './merchant-client';
 export * from './merchant-tags-client';
-export * from './merchant-groups-client';
 export * from './data-client';
 export * from './plaid-account-client';
 export * from './sync-event-client';
