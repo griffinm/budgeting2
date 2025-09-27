@@ -5,7 +5,7 @@ import { Merchant } from "@/utils/types";
 export function Logo({ merchant }: { merchant: Merchant }) {
   if (!merchant.logoUrl) {
     return (
-      <Avatar size="md" alt={merchant.name}>
+      <Avatar size="md" alt={merchant.name} name={merchant.name} color="initials">
         {getAvatarAlt(merchant)}
       </Avatar>
     )
