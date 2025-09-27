@@ -10,6 +10,14 @@ import {
   NavLink,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { 
+  IconDashboard, 
+  IconReceipt, 
+  IconBuildingStore, 
+  IconTag, 
+  IconUser, 
+  IconCreditCard 
+} from '@tabler/icons-react';
 import { MainNavLinks, urls } from '@/utils/urls';
 import { useContext } from 'react';
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
@@ -20,6 +28,25 @@ const isActive = (path: string, location: string) => {
     return location === path;
   }
   return location.startsWith(path);
+}
+
+const getNavIcon = (label: string) => {
+  switch (label) {
+    case 'Dashboard':
+      return IconDashboard;
+    case 'Transactions':
+      return IconReceipt;
+    case 'Merchants':
+      return IconBuildingStore;
+    case 'Categories':
+      return IconTag;
+    case 'Profile':
+      return IconUser;
+    case 'Accounts':
+      return IconCreditCard;
+    default:
+      return IconDashboard;
+  }
 }
 
 export default function MainLayout() {
@@ -68,14 +95,18 @@ export default function MainLayout() {
       </AppShell.Header>
 
       <AppShell.Navbar p={0} className="sidebar">
-        {MainNavLinks.map((link) => (
-          <NavLink
-            key={link.path()}
-            label={link.label}
-            onClick={() => handleNavigation(link.path())}
-            active={isActive(link.path(), location.pathname)}
-          />
-        ))}
+        {MainNavLinks.map((link) => {
+          const IconComponent = getNavIcon(link.label || '');
+          return (
+            <NavLink
+              key={link.path()}
+              label={link.label}
+              leftSection={<IconComponent size={20} />}
+              onClick={() => handleNavigation(link.path())}
+              active={isActive(link.path(), location.pathname)}
+            />
+          );
+        })}
       </AppShell.Navbar>
 
       <AppShell.Main style={{ maxWidth: '1400px' }} className="main-content">

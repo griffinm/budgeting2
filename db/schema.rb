@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_27_000445) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_27_010131) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -61,6 +61,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_000445) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "merchant_group_memberships", force: :cascade do |t|
+    t.bigint "merchant_group_id", null: false
+    t.bigint "merchant_id", null: false
+    t.boolean "is_primary", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_group_id", "merchant_id"], name: "index_merchant_group_memberships_unique", unique: true
+    t.index ["merchant_group_id"], name: "index_merchant_group_memberships_on_merchant_group_id"
+    t.index ["merchant_id"], name: "index_merchant_group_memberships_on_merchant_id"
+  end
+
+  create_table "merchant_groups", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.bigint "primary_merchant_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "name"], name: "index_merchant_groups_on_account_id_and_name", unique: true
+    t.index ["account_id"], name: "index_merchant_groups_on_account_id"
+    t.index ["primary_merchant_id"], name: "index_merchant_groups_on_primary_merchant_id"
+  end
+
   create_table "merchant_tags", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "user_id", null: false
@@ -95,7 +118,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_000445) do
     t.string "plaid_category_confidence_level"
     t.string "plaid_categories", default: [], array: true
     t.string "phone_number"
+    t.bigint "merchant_group_id"
     t.index ["account_id"], name: "index_merchants_on_account_id"
+    t.index ["merchant_group_id"], name: "index_merchants_on_merchant_group_id"
   end
 
   create_table "merchants_merchant_tags", force: :cascade do |t|
@@ -202,10 +227,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_000445) do
   end
 
   add_foreign_key "account_balances", "plaid_accounts"
+  add_foreign_key "merchant_group_memberships", "merchant_groups"
+  add_foreign_key "merchant_group_memberships", "merchants"
+  add_foreign_key "merchant_groups", "accounts"
+  add_foreign_key "merchant_groups", "merchants", column: "primary_merchant_id"
   add_foreign_key "merchant_tags", "accounts"
   add_foreign_key "merchant_tags", "merchant_tags", column: "parent_merchant_tag_id"
   add_foreign_key "merchant_tags", "users"
   add_foreign_key "merchants", "accounts"
+  add_foreign_key "merchants", "merchant_groups"
   add_foreign_key "merchants", "merchant_tags", column: "default_merchant_tag_id"
   add_foreign_key "merchants_merchant_tags", "merchant_tags"
   add_foreign_key "merchants_merchant_tags", "merchants"

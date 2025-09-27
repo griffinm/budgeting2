@@ -13,7 +13,6 @@ export function MonthlyLineChart({
   currentMonthTransactions,
   previousMonthTransactions,
   transactionType,
-  title,
   average,
   monthsBack: initialMonthsBack,
   onChangeMonthsBack,
@@ -21,7 +20,6 @@ export function MonthlyLineChart({
   currentMonthTransactions: Transaction[];
   previousMonthTransactions: Transaction[];
   transactionType: TransactionType;
-  title: string;
   average: number;
   monthsBack: number;
   onChangeMonthsBack: (monthsBack: number) => void;
@@ -50,9 +48,6 @@ export function MonthlyLineChart({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-2 justify-between mb-2">
-        <h2 className="text-2xl">
-          {title}
-        </h2>
         <div className="flex flex-row gap-2 items-center">
           <Select
             size="xs"

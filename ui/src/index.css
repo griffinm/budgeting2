@@ -1,13 +1,28 @@
 @import "tailwindcss";
 
+* {
+  font-family: "Noto Sans", sans-serif;
+}
+
 body, html {
   height: 100%;  
   background-color: var(--mantine-color-gray-0);
+  font-family: "Noto Sans", sans-serif;
+  font-optical-sizing: auto;
+  font-variation-settings: "wdth" 100;
 }
 
 #root {
   height: 100%;
   @apply bg-neutral-50;
+  font-family: "Noto Sans", sans-serif;
+}
+
+/* Ensure all Mantine components use Noto Sans */
+.mantine-root,
+.mantine-root *,
+[data-mantine-component] {
+  font-family: "Noto Sans", sans-serif !important;
 }
 
 .hover-bounce {
