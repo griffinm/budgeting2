@@ -1,34 +1,16 @@
 class AccountBalance < ApplicationRecord
-  belongs_to :plaid_account
+  belongs_to :plaid_accounts_user
+  has_one :plaid_account, through: :plaid_accounts_user
+  has_one :user, through: :plaid_accounts_user
   has_one :account, through: :plaid_account
 
   validates :current_balance, :available_balance, presence: true
   validates :limit, numericality: { allow_nil: true, greater_than_or_equal_to: 0 }
 
   scope :current, -> { order(created_at: :desc).first }
-
-  def self.current_for_account(account_id)
-    sql = <<-SQL
-    WITH most_recent_balances AS (
-        SELECT
-            ab.plaid_account_id AS plaid_account_id,
-            MAX(ab.created_at) AS balance_date
-          FROM
-            account_balances ab INNER JOIN plaid_accounts pa ON ab.plaid_account_id = pa.id
-          WHERE
-            pa.account_id = :account_id
-          GROUP BY
-            ab.plaid_account_id
-      )
-      SELECT
-            ab.*,
-            pa.plaid_type
-          FROM
-            account_balances ab INNER JOIN most_recent_balances mrb ON ab.created_at = mrb.balance_date
-          AND ab.plaid_account_id = mrb.plaid_account_id
-            INNER JOIN plaid_accounts pa ON pa.id = ab.plaid_account_id
-      SQL
-
-     AccountBalance.find_by_sql([sql, account_id: account_id])
-  end
+  
+  # Get the most recent account balance for each plaid_account using pure Active Record
+  scope :latest_per_account, -> {
+    where(id: select('MAX(account_balances.id)').group(:plaid_accounts_user_id))
+  }
 end

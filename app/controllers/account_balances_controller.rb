@@ -1,7 +1,8 @@
 class AccountBalancesController < ApplicationController
   
+  # GET /api/account_balances
   def index
-    @account_balances = AccountBalance.current_for_account(current_user.account.id)
-    @accounts = current_user.account.plaid_accounts
+    @account_balances = current_user.account_balances.latest_per_account.includes(:plaid_account)
   end
+  
 end

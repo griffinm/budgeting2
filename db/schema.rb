@@ -10,19 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_27_010131) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_30_205339) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "account_balances", force: :cascade do |t|
-    t.bigint "plaid_account_id", null: false
     t.decimal "current_balance", null: false
     t.decimal "available_balance", null: false
     t.decimal "limit"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["plaid_account_id"], name: "index_account_balances_on_plaid_account_id"
+    t.bigint "plaid_accounts_user_id", null: false
+    t.index ["plaid_accounts_user_id"], name: "index_account_balances_on_plaid_accounts_user_id"
   end
 
   create_table "accounts", force: :cascade do |t|
@@ -226,7 +226,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_27_010131) do
     t.index ["account_id"], name: "index_users_on_account_id"
   end
 
-  add_foreign_key "account_balances", "plaid_accounts"
+  add_foreign_key "account_balances", "plaid_accounts_users"
   add_foreign_key "merchant_group_memberships", "merchant_groups"
   add_foreign_key "merchant_group_memberships", "merchants"
   add_foreign_key "merchant_groups", "accounts"

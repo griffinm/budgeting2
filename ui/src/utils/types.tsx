@@ -173,6 +173,7 @@ export interface AccountBalance {
   availableBalance: number;
   limit: number;
   plaidAccount: PlaidAccount;
+  createdAt: string;
 }
 
 export interface Notification {

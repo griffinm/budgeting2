@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :plaid_accounts, through: :plaid_accounts_users
   has_many :merchant_tags, dependent: :destroy
   has_many :plaid_transactions, through: :plaid_accounts
+  has_many :account_balances, through: :plaid_accounts_users
   
   validates :email, presence: true, uniqueness: true
   validates :first_name, presence: true

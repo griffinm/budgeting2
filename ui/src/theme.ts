@@ -11,7 +11,7 @@ const CONTAINER_SIZES: Record<string, string> = {
   xxl: rem("1600px"),
 };
 
-const myColor: MantineColorsTuple = [
+const primary: MantineColorsTuple = [
   '#ecf4ff',
   '#dce4f5',
   '#b9c7e2',
@@ -49,9 +49,9 @@ export const theme: MantineThemeOverride = createTheme({
     "2xl": rem("28px"),
     "3xl": rem("32px"),
   },
-  primaryColor: "myColor",
+  primaryColor: "primary",
   colors: {
-    myColor,
+    primary,
   },
   components: {
     /** Put your mantine component override here */

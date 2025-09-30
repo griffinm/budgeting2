@@ -1,5 +1,19 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary-50: #ecf4ff;
+  --color-primary-100: #dce4f5;
+  --color-primary-200: #b9c7e2;
+  --color-primary-300: #94a8d0;
+  --color-primary-400: #748dc0;
+  --color-primary-500: #5f7cb7;
+  --color-primary-600: #5474b4;
+  --color-primary-700: #44639f;
+  --color-primary-800: #3a5890;
+  --color-primary-900: #2c4b80;
+  --color-primary-950: #2c4b80;
+}
+
 * {
   font-family: "Noto Sans", sans-serif;
 }

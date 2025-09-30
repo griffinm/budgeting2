@@ -16,11 +16,14 @@ export function Currency({
     'font-bold': useBold,
     'text-red-500': applyColor && isNegative,
     'text-green-500': applyColor && !isNegative,
+    'text-[#555]': !applyColor,
   });
+  const minFractionDigits = showCents ? 2 : 0;
+  const maxFractionDigits = showCents ? 2 : 0;
 
   return (
     <span className={classes}>
-      ${amount.toLocaleString('en-US', { minimumFractionDigits: showCents ? 2 : 0, maximumFractionDigits: showCents ? 2 : 0 })}
+      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: minFractionDigits, maximumFractionDigits: maxFractionDigits }).format(amount)}
     </span>
   )
 }
