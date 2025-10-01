@@ -1,15 +1,14 @@
 import { MerchantTag, Transaction } from "@/utils/types";
-import { Avatar, Button, Input } from "@mantine/core";
+import { Button, Input } from "@mantine/core";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { urls } from "@/utils/urls";
-import { Link } from "react-router-dom";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { useState } from "react";
-import { getAvatarAlt } from "./utils";
 import { Logo } from "./Logo";
+import { Link } from "@/components/Link";
 
 export function TableRow({
   transaction,
@@ -93,7 +92,7 @@ function FullTableRow({
         </div>
         <div className="flex flex-col w-1/3">
           <div className="text-sm">
-            <Link to={urls.merchant.path(transaction.merchant.id)} className="hover:underline cursor-pointer">
+            <Link href={urls.merchant.path(transaction.merchant.id)}>
               {merchantDisplayName(transaction.merchant)}
             </Link>
           </div>

@@ -62,3 +62,7 @@ a:hover {
   display: flex;
   flex-direction: column;
 }
+
+.sticky-header {
+  @apply sticky top-0 z-10 border-b bg-neutral-100 border-gray-300 py-2 px-3;
+}

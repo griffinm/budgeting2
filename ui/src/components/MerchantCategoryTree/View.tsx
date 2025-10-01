@@ -37,7 +37,7 @@ export const View = () => {
   useEffect(() => {
     setLoading(true);
     fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
-    .then((merchantTagSpendStats) => {
+    .then((merchantTagSpendStats) => {1
       setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
       setLoading(false);
     });

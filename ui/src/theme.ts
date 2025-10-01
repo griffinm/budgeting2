@@ -12,6 +12,7 @@ const CONTAINER_SIZES: Record<string, string> = {
 };
 
 export const appTheme: MantineThemeOverride = createTheme({
+  /** Put your mantine theme override here */
   fontSizes: {
     xs: rem("12px"),
     sm: rem("14px"),
@@ -34,7 +35,7 @@ export const appTheme: MantineThemeOverride = createTheme({
     "2xl": rem("28px"),
     "3xl": rem("32px"),
   },
-  primaryColor: "green",
+  primaryColor: "gray",
   components: {
     /** Put your mantine component override here */
     Container: Container.extend({
@@ -59,8 +60,8 @@ export const appTheme: MantineThemeOverride = createTheme({
 
     Card: Card.extend({
       defaultProps: {
-        p: "lg",
-        shadow: "sm",
+        p: "xl",
+        shadow: "xl",
         radius: "var(--mantine-radius-default)",
         withBorder: true,
       },
