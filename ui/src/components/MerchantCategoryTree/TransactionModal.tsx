@@ -39,18 +39,24 @@ export function TransactionModal({
         onClose={onClose}
         title={`Transactions for ${merchantTag?.name}`}
         size="xl"
+        padding={0}
       >
-        <TransactionsTable
-          transactions={transactions}
-          isLoading={isLoading}
-          error={error}
-          page={page}
-          updateTransaction={updateTransaction}
-          isLoadingMore={false}
-          hasMore={false}
-          loadMore={() => {}}
-          merchantTags={merchantTags}
-        />
+        <div className="flex flex-col h-[400px] bg-white">
+          <div className="mb-4 border border-gray-200 overflow-y-auto scrollbar-hide">
+            <TransactionsTable
+              transactions={transactions}
+              isLoading={isLoading}
+              error={error}
+              page={page}
+              updateTransaction={updateTransaction}
+              isLoadingMore={false}
+              hasMore={false}
+              loadMore={() => {}}
+              merchantTags={merchantTags}
+              condensed={true}
+            />
+          </div>
+        </div>
       </Modal>
     </div>
   )
