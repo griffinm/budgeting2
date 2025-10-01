@@ -32,6 +32,10 @@ class PlaidTransaction < ApplicationRecord
       .order(date: :desc)
   end
 
+  def is_check?
+    self.check_number.present?
+  end
+
   def has_default_merchant_tag?
     return false if self.merchant_tag_id.blank?
     self.merchant_tag_id == self.merchant.default_merchant_tag_id
