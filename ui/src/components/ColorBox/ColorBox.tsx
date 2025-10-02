@@ -9,7 +9,7 @@ export function ColorBox({
   popOnHover?: boolean;
   color?: 'primary',
 }) {
-  const classes = classNames('rounded-md', {
+  const classes = classNames('rounded-md w-full', {
     'bg-primary-50 border border-blue-200': color === 'primary',
     'hover-bounce': popOnHover,
   })

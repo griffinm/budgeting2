@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { urls } from '@/utils/urls';
 import { useTransactionTrends } from './useTransactionTrends';
-import { DashboardCard } from './DashboardCard';
 import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
 import { AccountBalances } from './AccountBalances';
 import { Card, Group, Text } from '@mantine/core';
-import { IconWallet, IconTrendingUp, IconCalculator, IconCalendar } from '@tabler/icons-react';
+import { IconWallet, IconCalculator, IconCalendar } from '@tabler/icons-react';
 import { MonthlyLineChart } from '@/components/MonthlySpend/MonthlyLineChart';
+import { MoMTrends } from './MoMTrends';
 
 export default function DashboardPage() {
   const { 
@@ -32,7 +32,7 @@ export default function DashboardPage() {
 
   const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
 
-  const loading = currentMonthExpenses.loading || currentMonthIncome.loading || previousMonthExpenses.loading || previousMonthIncome.loading;
+  
 
   useEffect(() => {
     document.title = urls.dashboard.title();
@@ -52,28 +52,14 @@ export default function DashboardPage() {
           </Group>
           <AccountBalances accountBalances={accountBalances} loading={accountBalancesLoading} />
         </Card>
-        
-        <Card>
-          <Group mb="md">
-            <IconTrendingUp size={20} />
-            <Text fw={600}>Transaction Trends</Text>
-          </Group>
-          <div className="flex flex-col md:flex-row gap-4">
-            <DashboardCard
-              currentMonthTransactions={currentMonthExpenses.transactions}
-              previousMonthTransactions={previousMonthExpenses.transactions}
-              transactionType="expense"
-              loading={loading}
-            />
-            <DashboardCard
-              currentMonthTransactions={currentMonthIncome.transactions}
-              previousMonthTransactions={previousMonthIncome.transactions}
-              transactionType="income"
-              loading={loading}
-            />
-          </div>
-        </Card>
-        
+
+        <MoMTrends
+          currentMonthExpenses={currentMonthExpenses}
+          previousMonthExpenses={previousMonthExpenses}
+          currentMonthIncome={currentMonthIncome}
+          previousMonthIncome={previousMonthIncome}
+        />
+
         <Card>
           <Group mb="md">
             <IconCalculator size={20} />
