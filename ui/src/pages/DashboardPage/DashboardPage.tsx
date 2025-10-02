@@ -54,6 +54,7 @@ export default function DashboardPage() {
         </Card>
 
         <MoMTrends
+          loading={currentMonthExpenses.transactions.length === 0 || previousMonthExpenses.transactions.length === 0 || currentMonthIncome.transactions.length === 0 || previousMonthIncome.transactions.length === 0}
           currentMonthExpenses={currentMonthExpenses}
           previousMonthExpenses={previousMonthExpenses}
           currentMonthIncome={currentMonthIncome}

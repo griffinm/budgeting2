@@ -87,5 +87,6 @@ export function getPercentChangeForCurrentDay({
   });
 
   const change = ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100;
-  return Math.round(change * 10) / 10;
+  const roundedChange = Math.round(change * 10) / 10;
+  return roundedChange || 0;
 }

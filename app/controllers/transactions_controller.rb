@@ -19,6 +19,7 @@ class TransactionsController < ApplicationController
           amount_equal_to: search_params[:amount_equal_to],
           has_no_category: search_params[:has_no_category],
           merchant_tag_id: search_params[:merchant_tag_id],
+          merchant_group_id: search_params[:merchant_group_id],
         ).call
       )
   end
@@ -69,6 +70,7 @@ class TransactionsController < ApplicationController
       :amount_equal_to,
       :has_no_category,
       :merchant_tag_id,
+      :merchant_group_id,
     )
   end
 

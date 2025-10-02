@@ -14,7 +14,8 @@ class TransactionSearchService < BaseService
     amount_less_than: nil,
     amount_equal_to: nil,
     has_no_category: nil,
-    merchant_tag_id: nil
+    merchant_tag_id: nil,
+    merchant_group_id: nil
   )
     @account_id = account_id
     @user_id = user_id
@@ -31,21 +32,32 @@ class TransactionSearchService < BaseService
     @amount_equal_to = amount_equal_to
     @has_no_category = has_no_category
     @merchant_tag_id = merchant_tag_id
+    @merchant_group_id = merchant_group_id
 
     @user = User.find(@user_id)
     @account = Account.find(@account_id)
   end
-
+  
   def call
     errors = check_params
     if errors.any?
       return { errors: errors }
     end
-
+    
     transactions = @user.plaid_transactions.joins(:plaid_account, :merchant)
       .includes(:plaid_account, :merchant, :merchant_tag, merchant: :default_merchant_tag)
       .order(date: :desc)
-
+      
+    if @merchant_group_id.present? || @merchant_id.present?
+      if @merchant_group_id.present?
+        # Group was passed, so ignore the merchant ID
+        transactions = transactions.where(merchant_id: Merchant.in_group(@merchant_group_id).pluck(:id))
+      else
+        # No group was passed, so use the merchant ID
+        transactions = transactions.where(merchant_id: @merchant_id)
+      end
+    end
+    
     if @merchant_tag_id.present?
       tag = MerchantTag.find(@merchant_tag_id)
       child_ids = tag.child_ids + [tag.id]
@@ -80,9 +92,6 @@ class TransactionSearchService < BaseService
       transactions = transactions.where(date: @start_date..@end_date)
     end
 
-    if @merchant_id.present?
-      transactions = transactions.where(merchant_id: @merchant_id)
-    end
 
     if @merchant_name.present?
       transactions = transactions.where(merchant_name: @merchant_name)
@@ -103,6 +112,7 @@ class TransactionSearchService < BaseService
     if @search_term.present?
       transactions = transactions.where("plaid_transactions.name ILIKE ? OR merchants.merchant_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")
     end
+
 
     transactions
   end

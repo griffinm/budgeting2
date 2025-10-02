@@ -1,5 +1,4 @@
 import { MerchantTag, Transaction } from "@/utils/types";
-import { Button, Input } from "@mantine/core";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
@@ -7,7 +6,6 @@ import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { urls } from "@/utils/urls";
 import { Link } from "@/components/Link";
 import { TransactionUpdateParams } from "@/api/transaction-client";
-import { useState } from "react";
 import { Logo } from "./Logo";
 
 export function TableRow({
@@ -139,41 +137,41 @@ function FullTableRow({
   )
 }
 
-function Note({
-  transaction,
-  updateTransaction,
-}: {
-  transaction: Transaction;
-  updateTransaction: (id: number, params: TransactionUpdateParams) => void;
-}) {
-  const [isEditingNote, setIsEditingNote] = useState(false);
-  const [note, setNote] = useState(transaction.note || '');
+// function Note({
+//   transaction,
+//   updateTransaction,
+// }: {
+//   transaction: Transaction;
+//   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
+// }) {
+//   const [isEditingNote, setIsEditingNote] = useState(false);
+//   const [note, setNote] = useState(transaction.note || '');
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    updateTransaction(transaction.id, { note });
-    setIsEditingNote(false);
-  };
+//   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+//     e.preventDefault();
+//     updateTransaction(transaction.id, { note });
+//     setIsEditingNote(false);
+//   };
 
-  if (isEditingNote) {
-    return (
-      <form onSubmit={handleSubmit} className="flex flex-row gap-2">
-        <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
-        <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
-        <Button type="submit">Save</Button>
-      </form>
-    )
-  }
+//   if (isEditingNote) {
+//     return (
+//       <form onSubmit={handleSubmit} className="flex flex-row gap-2">
+//         <Input value={note} onChange={(e) => setNote(e.target.value)} autoFocus className="flex-1" />
+//         <Button type="button" variant="outline" onClick={() => setIsEditingNote(false)}>Cancel</Button>
+//         <Button type="submit">Save</Button>
+//       </form>
+//     )
+//   }
 
-  return (
-    <div>
-      {
-        transaction.note ? (
-          <span className="text-sm text-gray-500 cursor-pointer" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
-        ) : (
-          <span className="text-sm text-gray-500 cursor-pointer" onClick={() => setIsEditingNote(true)}>Add Note</span>
-        )
-      }
-    </div>
-  )
-}
+//   return (
+//     <div>
+//       {
+//         transaction.note ? (
+//           <span className="text-sm text-gray-500 cursor-pointer" onClick={() => setIsEditingNote(true)}>{transaction.note}</span>
+//         ) : (
+//           <span className="text-sm text-gray-500 cursor-pointer" onClick={() => setIsEditingNote(true)}>Add Note</span>
+//         )
+//       }
+//     </div>
+//   )
+// }

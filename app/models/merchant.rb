@@ -13,8 +13,17 @@ class Merchant < ApplicationRecord
 
   after_save :apply_defaults
 
+  scope :in_group, -> (group_id) { where(merchant_group_id: group_id) }
+
   def full_address
     [address, city, state, zip].compact.join(', ')
+  end
+
+  def merchants_in_group
+    group_id = merchant_group_id
+    return [self] if group_id.blank?
+
+    return Merchant.where(merchant_group_id: group_id)
   end
 
   def apply_defaults
