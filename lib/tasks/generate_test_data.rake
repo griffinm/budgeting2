@@ -213,7 +213,12 @@ namespace :test_data do
         merchant_name: data[:name],
         default_merchant_tag_id: category_tag.id,
         default_transaction_type: data[:type],
-        plaid_entity_id: "entity_#{SecureRandom.hex(8)}"
+        plaid_entity_id: "entity_#{SecureRandom.hex(8)}",
+        phone_number: nil,
+        plaid_category_primary: infer_plaid_category(data[:category]),
+        plaid_category_detail: infer_plaid_category_detail(data[:category]),
+        plaid_category_confidence_level: "VERY_HIGH",
+        plaid_categories: [infer_plaid_category(data[:category]), infer_plaid_category_detail(data[:category])]
       )
       
       merchants[data[:name]] = {
@@ -455,6 +460,8 @@ namespace :test_data do
       pending: false,
       plaid_category_primary: infer_plaid_category(merchant.default_merchant_tag.name),
       plaid_category_detail: infer_plaid_category_detail(merchant.default_merchant_tag.name),
+      plaid_category_confidence_level: "VERY_HIGH",
+      plaid_categories: "#{infer_plaid_category(merchant.default_merchant_tag.name)},#{infer_plaid_category_detail(merchant.default_merchant_tag.name)}",
       payment_channel: ["online", "in_store", "other"].sample,
       transaction_type: transaction_type,
       note: nil,
@@ -551,8 +558,11 @@ namespace :test_data do
         balance = [balance, 1000].max # Minimum positive balance
       end
       
+      # Get the plaid_accounts_user record to associate with account balance
+      plaid_accounts_user = account.plaid_accounts_users.first
+      
       AccountBalance.create!(
-        plaid_account: account,
+        plaid_accounts_user: plaid_accounts_user,
         current_balance: balance,
         available_balance: type == :credit ? balance + 5000 : balance, # Credit limit
         limit: type == :credit ? 5000 : nil
