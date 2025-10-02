@@ -111,6 +111,7 @@ export interface Transaction {
   categoryPrimary: string | null;
   categoryDetail: string | null;
   categoryConfidenceLevel: string | null;
+  isCheck: boolean;
 }
 
 export interface MerchantTag {
