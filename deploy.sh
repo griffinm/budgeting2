@@ -114,8 +114,8 @@ run_remote_command $1 "rm -rf $DEPLOY_DIR/ui/dist/ui"
 print_info "Restarting API"
 run_remote_command $1 "sudo systemctl restart budgeting2-api.service"
 
-print_info "Restarting worker"
-run_remote_command $1 "sudo systemctl restart budgeting2-worker.service"
+# print_info "Restarting worker"
+# run_remote_command $1 "sudo systemctl restart budgeting2-worker.service"
 
 print_section "${GREEN}DEPLOYMENT COMPLETE${RESET}"
 print_success "All steps finished successfully!"
