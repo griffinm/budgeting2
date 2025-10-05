@@ -1,3 +1,5 @@
+require 'ostruct'
+
 namespace :plaid do
   desc "Enrich all PlaidTransactions with additional data from Plaid API"
   task :enrich_transactions, [:force] => :environment do |t, args|
