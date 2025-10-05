@@ -5,7 +5,8 @@ namespace :plaid do
   Rails.logger.info "PlaidEnrichment: Starting transaction enrichment process"
 
   # Get all accounts that have PlaidTransactions
-  accounts_with_transactions = Account.joins(:plaid_transactions).distinct
+  # accounts_with_transactions = Account.joins(:plaid_transactions).distinct
+  accounts_with_transactions = Account.where(id: 1)
   Rails.logger.info "PlaidEnrichment: Found #{accounts_with_transactions.count} accounts with transactions"
 
   accounts_with_transactions.each do |account|
