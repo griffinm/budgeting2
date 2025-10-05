@@ -1,5 +1,3 @@
-require 'ostruct'
-
 namespace :plaid do
   desc "Enrich all PlaidTransactions with additional data from Plaid API"
   task :enrich_transactions, [:force] => :environment do |t, args|
@@ -38,14 +36,14 @@ namespace :plaid do
         # Convert PlaidTransaction objects to the format expected by enrich_transactions
         # The enrich_transactions method expects Plaid API transaction objects
         plaid_transaction_objects = transaction_batch.map do |transaction|
-          # Create a mock object that mimics the Plaid API transaction structure
-          OpenStruct.new(
+          # Create a simple hash that mimics the Plaid API transaction structure
+          {
             transaction_id: transaction.plaid_id,
             amount: transaction.amount,
             merchant_name: transaction.name,
             name: transaction.name,
             iso_currency_code: transaction.currency_code
-          )
+          }
         end
         
         # Call the enrichment method directly to avoid the bug in the service method
@@ -78,11 +76,11 @@ def enrich_transactions_batch(plaid_service, db_transactions, plaid_transaction_
       account_type: "depository",
       transactions: plaid_transaction_objects.map do |transaction|
         {
-          id: transaction.transaction_id,
-          amount: transaction.amount.abs,
-          description: transaction.merchant_name || transaction.name,
-          iso_currency_code: transaction.iso_currency_code,
-          direction: transaction.amount > 0 ? "OUTFLOW" : "INFLOW",
+          id: transaction[:transaction_id],
+          amount: transaction[:amount].abs,
+          description: transaction[:merchant_name] || transaction[:name],
+          iso_currency_code: transaction[:iso_currency_code],
+          direction: transaction[:amount] > 0 ? "OUTFLOW" : "INFLOW",
         }
       end
     )
