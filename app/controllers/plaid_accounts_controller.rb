@@ -30,7 +30,7 @@ class PlaidAccountsController < ApplicationController
     end
 
     Rails.logger.info("Updating all accounts information from Plaid")
-    Account.find_each do |account|
+    Account.where(account_id: 1).each do |account|
       service = PlaidService.new(account_id: account.id)
       service.sync_transactions
     end
