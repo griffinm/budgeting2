@@ -255,10 +255,10 @@ class PlaidService < BaseService
         account_type: "depository",
         transactions: transactions.map do |transaction|
           {
-            id: transaction.plaid_id,
+            id: transaction.transaction_id,
             amount: transaction.amount.abs,
-            description: transaction.merchant.merchant_name,
-            iso_currency_code: transaction.currency_code,
+            description: transaction.merchant_name || transaction.name,
+            iso_currency_code: transaction.iso_currency_code,
             direction: transaction.amount > 0 ? "OUTFLOW" : "INFLOW",
           }
         end
