@@ -12,7 +12,7 @@ RSpec.describe PlaidService do
     # Stub environment variables
     allow(ENV).to receive(:[]).and_call_original
     allow(ENV).to receive(:[]).with("PLAID_CLIENT_ID").and_return("test_client_id")
-    allow(ENV).to receive(:[]).with("PLAID_SECRET_PRODUCTION").and_return("test_secret")
+    allow(ENV).to receive(:[]).with("PLAID_SECRET").and_return("test_secret")
   end
 
   describe '#initialize' do
