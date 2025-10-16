@@ -2,7 +2,11 @@ import axios from 'axios';
 import { urls } from '@/utils/urls';
 import { AUTH_TOKEN_STORAGE_KEY, AUTH_TOKEN_HEADER_KEY } from '@/utils/constants';
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+// In production, use /api which is proxied by nginx to the API service
+// In development, use the VITE_API_URL env var or default to localhost:3000
+const apiUrl = import.meta.env.PROD 
+  ? '/api' 
+  : (import.meta.env.VITE_API_URL || 'http://localhost:3000');
 
 const baseClient = axios.create({
   baseURL: apiUrl,

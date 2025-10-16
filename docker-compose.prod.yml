@@ -1,0 +1,54 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    image: budgeting2-api:latest
+    container_name: budgeting2-api
+    restart: always
+    ports:
+      - "11000:3000"
+    env_file:
+      - .env.production
+    environment:
+      DATABASE_URL: postgresql://griffin:griffin@postgres-prod:5432/budgeting2_production
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: griffin
+      DATABASE_PASSWORD: griffin
+      REDIS_URL: redis://redis:6379/0
+      RAILS_ENV: production
+      RAILS_SERVE_STATIC_FILES: "true"
+      RAILS_LOG_TO_STDOUT: "true"
+      RAILS_FORCE_SSL: "false"
+    networks:
+      - prod-network
+    volumes:
+      - ./storage:/rails/storage
+      # Uncomment the line below if you have a valid master.key that matches credentials.yml.enc
+      # For Docker deployment, using .env.production is recommended instead
+      # - ./config/master.key:/rails/config/master.key:ro
+
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    image: budgeting2-ui:latest
+    container_name: budgeting2-ui
+    restart: always
+    ports:
+      - "11100:80"
+    networks:
+      - prod-network
+
+networks:
+  prod-network:
+    name: prod-network
+    driver: bridge
+    external: true
+
+volumes:
+  postgres_data:
+    name: budgeting2-postgres-data
+  redis_data:
+    name: budgeting2-redis-data

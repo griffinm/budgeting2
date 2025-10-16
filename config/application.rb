@@ -19,6 +19,9 @@ module Budgeting2
   class Application < Rails::Application
     config.load_defaults 8.0
     config.autoload_lib(ignore: %w[assets tasks])
+    
+    # Don't require master key for production (use env vars instead)
+    config.require_master_key = false
 
     config.time_zone = "UTC"
     config.api_only = true
