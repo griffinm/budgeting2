@@ -13,11 +13,16 @@ class PlaidService < BaseService
         current = plaid_api_account.balances.current&.to_f
         available = plaid_api_account.balances.available&.to_f
         limit = plaid_api_account.balances.limit&.to_f
-        plaid_account.account_balances.create(
-          current_balance: current,
-          available_balance: available,
-          limit: limit,
-        )
+        
+        # Create account balance for each user associated with this plaid_account
+        plaid_account.plaid_accounts_users.each do |plaid_accounts_user|
+          plaid_accounts_user.account_balances.create(
+            current_balance: current,
+            available_balance: available,
+            limit: limit,
+          )
+        end
+        
         Rails.logger.info "Balance updated for account #{plaid_api_account.account_id}"
       end
     rescue => exception
@@ -80,7 +85,7 @@ class PlaidService < BaseService
         remove_transactions(removed_transactions, plaid_sync_event)
 
         # Enrich the transactions
-        enrich_transactions(transactions: added_transactions + modified_transactions)
+        # enrich_transactions(transactions: added_transactions + modified_transactions)
 
         plaid_sync_event.update(cursor: sync_response.next_cursor)
         access_token.update(next_cursor: sync_response.next_cursor)
