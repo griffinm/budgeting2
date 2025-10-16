@@ -1,6 +1,7 @@
 class PlaidAccount < ApplicationRecord
   acts_as_paranoid
-
+  audited
+  
   belongs_to :account
   has_many :plaid_accounts_users, dependent: :destroy
   has_many :users, through: :plaid_accounts_users

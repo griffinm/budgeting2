@@ -1,6 +1,4 @@
 class PlaidTransaction < ApplicationRecord
-  audited
-
   TRANSACTION_TYPES = {
     expense: 'expense',
     income: 'income',
