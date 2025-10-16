@@ -1,4 +1,6 @@
 class Account < ApplicationRecord
+  audited
+  
   has_many :users
   has_many :plaid_access_tokens, dependent: :destroy
   has_many :plaid_sync_events, dependent: :destroy

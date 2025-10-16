@@ -9,7 +9,12 @@ export function DayHeader({
   transactions: Transaction[];
 }) {
   const transactionCount = transactions.length;
-  const totalAmount = transactions.reduce((acc, transaction) => acc + (transaction.amount * -1), 0);
+  const filteredTransactions = transactions.filter((transaction) => {
+    const isNotTransfer = transaction.transactionType !== 'transfer';
+    const isNotPending = !transaction.pending;
+    return isNotTransfer && isNotPending;
+  });
+  const totalAmount = filteredTransactions.reduce((acc, transaction) => acc + (transaction.amount * -1), 0);
 
   return (
     <div className="sticky top-0 z-10 border-b bg-neutral-100 border-gray-300 py-2 px-3 flex flex-row justify-between">

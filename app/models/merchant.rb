@@ -1,4 +1,6 @@
 class Merchant < ApplicationRecord
+  audited
+
   belongs_to :account
   belongs_to :merchant_group, optional: true
   has_many :merchants_merchant_tags, dependent: :destroy

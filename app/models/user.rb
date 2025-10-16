@@ -1,5 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
+  audited except: [:password_digest]
+
   belongs_to :account
   has_many :plaid_accounts_users, dependent: :destroy
   has_many :plaid_accounts, through: :plaid_accounts_users
