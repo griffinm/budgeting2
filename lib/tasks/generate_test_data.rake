@@ -20,8 +20,8 @@ namespace :test_data do
       user = User.create!(
         account: account,
         email: email,
-        password: "password123",
-        password_confirmation: "password123",
+        password: "TestUser123!",
+        password_confirmation: "TestUser123!",
         first_name: "Test",
         last_name: "User",
         time_zone: "Eastern Time (US & Canada)"
