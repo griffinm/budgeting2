@@ -9,7 +9,7 @@ default: &default
 
 development:
   <<: *default
-  database: budgeting2_development
+  database: budgeting2_production
 
 test:
   <<: *default

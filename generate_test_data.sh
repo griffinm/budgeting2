@@ -56,7 +56,7 @@ if rails test_data:generate_account; then
     echo ""
     echo "🎯 You can now:"
     echo "   • Login with email: testuser_account_[ACCOUNT_ID]@example.com"
-    echo "   • Password: password123"
+    echo "   • Password: TestUser123!"
     echo "   • View transactions, merchants, and categories"
     echo "   • Test the budgeting features with realistic data"
     echo ""
