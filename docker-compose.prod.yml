@@ -5,7 +5,6 @@ services:
       context: .
       dockerfile: Dockerfile.api
     image: budgeting2-api:latest
-    container_name: budgeting2-api
     restart: always
     ports:
       - "10201:3000"
@@ -36,7 +35,6 @@ services:
       context: .
       dockerfile: Dockerfile.ui
     image: budgeting2-ui:latest
-    container_name: budgeting2-ui
     restart: always
     ports:
       - "10200:80"
