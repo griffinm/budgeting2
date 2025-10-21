@@ -12,7 +12,7 @@ services:
       - .env.production
     environment:
       DATABASE_URL: postgresql://griffin:griffin@postgres:5432/budgeting2_production
-      DATABASE_HOST: db
+      DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USERNAME: griffin
       DATABASE_PASSWORD: griffin
@@ -38,6 +38,28 @@ services:
     restart: always
     ports:
       - "10200:80"
+    networks:
+      - prod-network
+
+  postgres:
+    container_name: budgeting2-postgres
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: budgeting2_production
+      POSTGRES_USER: griffin
+      POSTGRES_PASSWORD: griffin
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - prod-network
+
+  redis:
+    container_name: budgeting2-redis
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
     networks:
       - prod-network
 
