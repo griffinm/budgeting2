@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: budgeting2-api
     build:
       context: .
       dockerfile: Dockerfile.api
@@ -30,6 +31,7 @@ services:
       # - ./config/master.key:/rails/config/master.key:ro
 
   ui:
+    container_name: budgeting2-ui
     build:
       context: .
       dockerfile: Dockerfile.ui
