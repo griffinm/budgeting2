@@ -7,7 +7,7 @@ set -e
 
 export PROJECT_NAME="prod_budgeting2"
 export NETWORK_NAME="prod_network"
-export DOCKER_COMPOSE_FILE="docker-compose.prod.yml"
+export DOCKER_COMPOSE_FILE="docker compose.prod.yml"
 export API_CONTAINER_NAME="budgeting2-api"
 export UI_CONTAINER_NAME="budgeting2-ui"
 
@@ -46,10 +46,10 @@ docker images | grep "$API_CONTAINER_NAME" | grep -v "latest" | awk '{print $3}'
 docker images | grep "$UI_CONTAINER_NAME" | grep -v "latest" | awk '{print $3}' | xargs -r docker rmi -f 2>/dev/null || true
 
 echo "🔨 Building Docker images..."
-docker-compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE build #--no-cache
+docker compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE build #--no-cache
 
 echo "🚀 Starting containers..."
-docker-compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE up -d
+docker compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE up -d
 
 echo "⏳ Waiting for API to be ready..."
 sleep 2
@@ -61,16 +61,16 @@ echo ""
 echo "✅ Deployment complete!"
 echo ""
 echo "📊 Container Status:"
-docker-compose -p prod -f docker-compose.prod.yml ps
+docker compose -p prod -f docker compose.prod.yml ps
 echo ""
 echo "🌐 Services are available at:"
 echo "   API: http://localhost:11000"
 echo "   UI:  http://localhost:11100"
 echo ""
 echo "📝 Useful commands:"
-echo "   View logs:        docker-compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE logs -f"
-echo "   Stop containers:  docker-compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE down"
-echo "   Restart:          docker-compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE restart"
+echo "   View logs:        docker compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE logs -f"
+echo "   Stop containers:  docker compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE down"
+echo "   Restart:          docker compose -p $PROJECT_NAME -f $DOCKER_COMPOSE_FILE restart"
 echo "   API logs:         docker logs -f $API_CONTAINER_NAME"
 echo "   UI logs:          docker logs -f $UI_CONTAINER_NAME"
 echo ""
