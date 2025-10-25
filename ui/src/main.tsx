@@ -11,7 +11,7 @@ import '@mantine/charts/styles.css';
 import './index.css' // Load this one last
 
 createRoot(document.getElementById('root')!).render(
-  <MantineProvider theme={theme}>
+  <MantineProvider theme={theme} forceColorScheme="light">
     <NotificationProvider>
       <StrictMode>
         <AppRoutes />

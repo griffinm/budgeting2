@@ -46,6 +46,8 @@ class PlaidService < BaseService
       )
       
       sync_request = Plaid::TransactionsSyncRequest.new(
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
         access_token: access_token.token,
         cursor: access_token.next_cursor,
       )
@@ -244,8 +246,6 @@ class PlaidService < BaseService
   def api_client
     configuration = Plaid::Configuration.new
     configuration.server_index = Plaid::Configuration::Environment["production"]
-    configuration.api_key["PLAID-CLIENT-ID"] = ENV["PLAID_CLIENT_ID"]
-    configuration.api_key["PLAID-SECRET"] = ENV["PLAID_SECRET"]
 
     api_client = Plaid::ApiClient.new(configuration)
 
@@ -257,6 +257,8 @@ class PlaidService < BaseService
     # The API call is limited to 100 transactions at a time
     transactions.slice(0, 99).each do |transaction|
       enrich_request = Plaid::TransactionsEnrichRequest.new(
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
         account_type: "depository",
         transactions: transactions.map do |transaction|
           {
