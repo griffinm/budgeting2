@@ -141,6 +141,11 @@ kubectl apply -f "$TEMP_DIR/api-deployment.yaml"
 kubectl apply -f "$TEMP_DIR/ui-deployment.yaml"
 log_success "Deployments applied"
 
+# Apply CronJobs
+log_info "Applying cronjobs..."
+kubectl apply -f "$TEMP_DIR/plaid-sync-cronjob.yaml"
+log_success "CronJobs applied"
+
 # Wait for rollout
 echo ""
 log_info "Waiting for deployments to be ready..."
@@ -173,6 +178,9 @@ echo ""
 echo "🔌 Services:"
 kubectl get services -n "$NAMESPACE" -l 'app in (budgeting2-api,budgeting2-ui)'
 echo ""
+echo "⏰ CronJobs:"
+kubectl get cronjobs -n "$NAMESPACE" -l component=plaid-sync
+echo ""
 echo "═══════════════════════════════════════════════════════════"
 echo ""
 echo "📝 Useful commands:"
@@ -183,5 +191,7 @@ echo "   Describe UI pod:      kubectl describe pod -n $NAMESPACE -l app=budgeti
 echo "   Shell into API:       kubectl exec -it -n $NAMESPACE deployment/budgeting2-api -- /bin/bash"
 echo "   Port forward API:     kubectl port-forward -n $NAMESPACE svc/budgeting2-api-service 3000:3000"
 echo "   Port forward UI:      kubectl port-forward -n $NAMESPACE svc/budgeting2-ui-service 8080:80"
+echo "   View CronJob logs:    kubectl logs -n $NAMESPACE -l component=plaid-sync --tail=100"
+echo "   Trigger CronJob now:  kubectl create job -n $NAMESPACE --from=cronjob/plaid-sync-cronjob manual-sync-\$(date +%s)"
 echo ""
 

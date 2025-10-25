@@ -20,6 +20,13 @@ The deployment consists of:
   - Image: `nas.malfin.com:10100/budgeting2-ui:[git-hash]`
   - Proxies `/api` requests to API service
 
+- **Plaid Sync CronJob**: Scheduled job for syncing transactions
+  - Namespace: `prod`
+  - Schedule: 6am and 6pm daily (UTC)
+  - Resources: 256Mi-512Mi memory, 0.5-1 CPU
+  - Image: `nas.malfin.com:10100/budgeting2-api:[git-hash]`
+  - Runs: `rails runner "PlaidService.new(account_id: 1).sync_transactions"`
+
 ## Prerequisites
 
 1. **Kubernetes cluster** with kubectl configured
@@ -83,7 +90,7 @@ This script will:
 3. Tag images with the git hash
 4. Push images to `nas.malfin.com:10100`
 5. Update Kubernetes manifests with the new image tags
-6. Apply manifests to the cluster
+6. Apply manifests to the cluster (including the Plaid sync CronJob)
 7. Wait for rollout to complete
 8. Display deployment status
 
@@ -105,6 +112,7 @@ docker push nas.malfin.com:10100/budgeting2-ui:${GIT_HASH}
 # Update manifests (replace GIT_SHORT_HASH with actual hash)
 sed -i "s/GIT_SHORT_HASH/${GIT_HASH}/g" k8s/api-deployment.yaml
 sed -i "s/GIT_SHORT_HASH/${GIT_HASH}/g" k8s/ui-deployment.yaml
+sed -i "s/GIT_SHORT_HASH/${GIT_HASH}/g" k8s/plaid-sync-cronjob.yaml
 
 # Apply manifests
 kubectl apply -f k8s/namespace.yaml
@@ -113,6 +121,7 @@ kubectl apply -f k8s/api-service.yaml
 kubectl apply -f k8s/api-deployment.yaml
 kubectl apply -f k8s/ui-service.yaml
 kubectl apply -f k8s/ui-deployment.yaml
+kubectl apply -f k8s/plaid-sync-cronjob.yaml
 ```
 
 ## Manifest Files
@@ -123,6 +132,7 @@ kubectl apply -f k8s/ui-deployment.yaml
 - `api-deployment.yaml` - API deployment with resource limits
 - `ui-service.yaml` - ClusterIP service for UI (port 80)
 - `ui-deployment.yaml` - UI deployment with resource limits
+- `plaid-sync-cronjob.yaml` - CronJob for scheduled Plaid transaction syncing
 
 Note: `api-pvc.yaml` is not currently used as the API logs to stdout.
 
@@ -153,8 +163,30 @@ kubectl logs -f -n prod -l app=budgeting2-api
 # UI logs
 kubectl logs -f -n prod -l app=budgeting2-ui
 
+# CronJob logs (last 100 lines)
+kubectl logs -n prod -l component=plaid-sync --tail=100
+
 # Specific pod
 kubectl logs -f -n prod <pod-name>
+```
+
+### CronJobs
+
+```bash
+# List cronjobs
+kubectl get cronjobs -n prod
+
+# Describe cronjob
+kubectl describe cronjob plaid-sync-cronjob -n prod
+
+# View cronjob history
+kubectl get jobs -n prod -l component=plaid-sync
+
+# Manually trigger cronjob (creates a job with timestamp)
+kubectl create job -n prod --from=cronjob/plaid-sync-cronjob manual-sync-$(date +%s)
+
+# Delete a specific job
+kubectl delete job -n prod <job-name>
 ```
 
 ### Debugging
