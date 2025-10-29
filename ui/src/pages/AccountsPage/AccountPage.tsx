@@ -6,9 +6,10 @@ import { AccountTable } from "@/components/AccountTable";
 import { useAccount, usePlaidAccount } from "@/hooks";
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
 import { Card } from "@mantine/core";
+import { ConnectPlaidAccount } from "@/components/ConnectPlaidAccount";
 
 export default function AccountsPage() {
-  const { plaidAccounts, isLoading } = usePlaidAccount();
+  const { plaidAccounts, isLoading, refreshAccounts, updateAccountAccess, updatePlaidAccountNickname } = usePlaidAccount();
   const setTitle = usePageTitle();
   const { user } = useContext(CurrentUserContext);
   const { 
@@ -16,7 +17,6 @@ export default function AccountsPage() {
     users: accountUsers,
     setAccountId,
   } = useAccount();
-  const { updateAccountAccess } = usePlaidAccount();
 
   useEffect(() => {
     if (user) {
@@ -28,13 +28,20 @@ export default function AccountsPage() {
     setTitle(urls.accounts.title());
   }, [setTitle]);
 
+  const handleConnectionSuccess = async () => {
+    await refreshAccounts();
+  };
+
   if (isLoading) {
     return <Loading />;
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-5">Connected Bank Accounts</h1>
+      <div className="flex justify-between items-center mb-5">
+        <h1 className="text-2xl font-bold">Connected Bank Accounts</h1>
+        <ConnectPlaidAccount onSuccess={handleConnectionSuccess} />
+      </div>
       <Card className="no-padding">
         <AccountTable
           plaidAccounts={plaidAccounts}
@@ -42,6 +49,7 @@ export default function AccountsPage() {
           accountUsersLoading={accountUsersLoading}
           currentUser={user!}
           onAccountAccessChange={updateAccountAccess}
+          onNicknameChange={updatePlaidAccountNickname}
         />
       </Card>
     </div>

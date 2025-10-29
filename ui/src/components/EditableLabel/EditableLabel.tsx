@@ -1,6 +1,6 @@
 import { Button, Input } from "@mantine/core";
 import classNames from "classnames";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import React from "react";
 
@@ -23,6 +23,11 @@ export function EditableLabel({
   const [newValue, setNewValue] = useState(value);
   const displayClasses = classNames('text-gray-500 hover:text-gray-700 cursor-pointer');
   
+  // Update newValue when value prop changes
+  useEffect(() => {
+    setNewValue(value);
+  }, [value]);
+  
   // Default to 'div' if no component is specified
   const ComponentType = component || 'div';
 
@@ -42,9 +47,9 @@ export function EditableLabel({
     <div className="rounded-md p-1">
       {isEditing ? (
         <form onSubmit={onSubmit} className="flex flex-row gap-2">
-          <Input value={newValue} onChange={(e) => setNewValue(e.target.value)} />
-          <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
-          <Button type="submit">Save</Button>
+          <Input value={newValue} size="xs" onChange={(e) => setNewValue(e.target.value)} />
+          <Button type="button" variant="outline" size="xs" onClick={() => setIsEditing(false)}>Cancel</Button>
+          <Button type="submit" size="xs">Save</Button>
         </form>
       ) : (
         <div className="flex flex-row gap-2">

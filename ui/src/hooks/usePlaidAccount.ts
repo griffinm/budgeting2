@@ -1,9 +1,10 @@
 import { PlaidAccount, User } from "@/utils/types";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 import { 
   fetchPlaidAccounts as fetchPlaidAccountsApi,
   addUserToPlaidAccount,
   removeUserFromPlaidAccount,
+  updatePlaidAccountNickname as updatePlaidAccountNicknameApi,
 } from "@/api";
 import { NotificationContext } from "@/providers";
 
@@ -12,6 +13,8 @@ interface PlaidAccountProps {
   isLoading: boolean;
   error: Error | null;
   updateAccountAccess: (props: ChangeAccountAccessProps) => Promise<void>;
+  updatePlaidAccountNickname: (id: number, nickname: string) => Promise<void>;
+  refreshAccounts: () => Promise<void>;
 }
 
 export interface ChangeAccountAccessProps {
@@ -26,17 +29,17 @@ export const usePlaidAccount = (): PlaidAccountProps => {
   const [plaidAccounts, setPlaidAccounts] = useState<PlaidAccount[]>([]);
   const { showNotification } = useContext(NotificationContext);
 
-  useEffect(() => {
-    const fetchPlaidAccounts = async () => {
-      setLoading(true);
-      fetchPlaidAccountsApi()
-        .then(setPlaidAccounts)
-        .catch((error: Error) => setError(error))
-        .finally(() => setLoading(false));
-    };
-
-    fetchPlaidAccounts();
+  const fetchPlaidAccounts = useCallback(async () => {
+    setLoading(true);
+    fetchPlaidAccountsApi()
+      .then(setPlaidAccounts)
+      .catch((error: Error) => setError(error))
+      .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchPlaidAccounts();
+  }, [fetchPlaidAccounts]);
 
   const updateAccountAccess = async ({ user, plaidAccount, isAuthorized }: ChangeAccountAccessProps) => {
     if (isAuthorized) {
@@ -54,10 +57,26 @@ export const usePlaidAccount = (): PlaidAccountProps => {
     });
   }
 
+  const updatePlaidAccountNickname = async (id: number, nickname: string) => {
+    await updatePlaidAccountNicknameApi({ plaidAccountId: id, nickname });
+    showNotification({
+      title: "Account nickname updated",
+      message: `Account nickname updated to "${nickname}"`,
+      type: "success",
+    });
+    await fetchPlaidAccounts();
+  };
+
+  const refreshAccounts = async () => {
+    await fetchPlaidAccounts();
+  };
+
   return {
     plaidAccounts,
     isLoading: loading,
     error,
     updateAccountAccess,
+    updatePlaidAccountNickname,
+    refreshAccounts,
   };
 };

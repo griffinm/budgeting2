@@ -48,8 +48,10 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :plaid_accounts, only: [:index] do
+    resources :plaid_accounts, only: [:index, :update] do
       collection do
+        post 'create_link_token', to: 'plaid_accounts#create_link_token'
+        post 'exchange_public_token', to: 'plaid_accounts#exchange_public_token'
         get 'update_all', to: 'plaid_accounts#update_all'
         get 'account_balance', to: 'account_balances#index'
       end

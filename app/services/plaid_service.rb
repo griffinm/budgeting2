@@ -110,7 +110,7 @@ class PlaidService < BaseService
         amount: transaction.amount,
         name: transaction.merchant_name || transaction.name,
         authorized_at: transaction.authorized_date,
-        date: transaction.date.in_time_zone(@account.users.first.time_zone).to_date + 12.hours,
+        date: transaction.datetime,
         check_number: transaction.check_number,
         currency_code: transaction.iso_currency_code,
         pending: transaction.pending,
@@ -141,7 +141,7 @@ class PlaidService < BaseService
         amount: transaction.amount,
         name: transaction.merchant_name || transaction.name,
         authorized_at: transaction.authorized_date,
-        date: transaction.date.in_time_zone(@account.user.time_zone).to_date + 12.hours,
+        date: transaction.datetime,
         check_number: transaction.check_number,
         currency_code: transaction.iso_currency_code,
         pending: transaction.pending,
@@ -169,27 +169,30 @@ class PlaidService < BaseService
   private def merchant_for_transaction(transaction, plaid_entity_id)
     # lookup by plaid id
     merchant = @account.merchants.where(plaid_entity_id: plaid_entity_id).where.not(plaid_entity_id: nil).first
+    update_merchant(merchant, transaction) if merchant
     return merchant if merchant
 
     # lookup by name
     merchant = Merchant.find_by(merchant_name: transaction.merchant_name || transaction.name)
+    update_merchant(merchant, transaction) if merchant
     return merchant if merchant
-
-    # Check for similar merchants in existing groups
-    similar_merchant = find_similar_merchant_in_groups(transaction.merchant_name || transaction.name)
-    return similar_merchant if similar_merchant
 
     # It does not exist, create it
     merchant = Merchant.create(
       account_id: @account.id,
       plaid_entity_id: plaid_entity_id,
       merchant_name: transaction.merchant_name || transaction.name,
+      logo_url: transaction.logo_url,
     )
 
-    # Suggest grouping after creation
-    suggest_merchant_grouping(merchant)
-
     return merchant
+  end
+
+  private def update_merchant(merchant, transaction)
+    merchant.update(
+      logo_url: transaction.logo_url,
+    )
+    merchant.save
   end
 
   private def find_similar_merchant_in_groups(merchant_name)
@@ -243,9 +246,55 @@ class PlaidService < BaseService
     common_words.length.to_f / total_words
   end
 
+  def create_link_token(user:)
+    request = Plaid::LinkTokenCreateRequest.new(
+      {
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
+        client_name: 'Budgeting App',
+        products: ['transactions'],
+        country_codes: ['US'],
+        language: 'en',
+        user: {
+          client_user_id: user.id.to_s,
+          legal_name: "#{user.first_name} #{user.last_name}",
+          email_address: user.email
+        }
+      }
+    )
+    
+    response = api_client.link_token_create(request)
+    response.link_token
+  end
+
+  def exchange_public_token(public_token)
+    request = Plaid::ItemPublicTokenExchangeRequest.new(
+      {
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
+        public_token: public_token
+      }
+    )
+    
+    api_client.item_public_token_exchange(request)
+  end
+
+  def get_accounts(access_token)
+    request = Plaid::AccountsGetRequest.new(
+      {
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
+        access_token: access_token
+      }
+    )
+    
+    api_client.accounts_get(request)
+  end
+
   def api_client
     configuration = Plaid::Configuration.new
-    configuration.server_index = Plaid::Configuration::Environment["production"]
+    plaid_env = ENV.fetch("PLAID_ENV", "production")
+    configuration.server_index = Plaid::Configuration::Environment[plaid_env]
 
     api_client = Plaid::ApiClient.new(configuration)
 

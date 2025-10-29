@@ -4,3 +4,4 @@ export * from './useMerchants';
 export * from './useMerchantTags';
 export * from './useAccount';
 export * from './usePlaidAccount';
+export * from './usePlaidLink';

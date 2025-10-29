@@ -5,6 +5,17 @@ export const queryStringFromObject = (obj: Record<string, string | number | bool
     .filter(([key]) => !PARAMS_TO_FILTER.includes(key));
 
   return filteredObj
-    .map(([key, value]) => `${key}=${value}`)
+    .flatMap(([key, value]) => {
+      // Handle arrays by creating multiple query params with the same key
+      if (Array.isArray(value)) {
+        return value.map(item => `${key}[]=${encodeURIComponent(item)}`);
+      }
+      // Handle undefined/null values
+      if (value === undefined || value === null) {
+        return [];
+      }
+      // Handle regular values
+      return [`${key}=${encodeURIComponent(String(value))}`];
+    })
     .join('&');
 };

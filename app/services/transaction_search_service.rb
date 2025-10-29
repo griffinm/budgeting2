@@ -15,7 +15,8 @@ class TransactionSearchService < BaseService
     amount_equal_to: nil,
     has_no_category: nil,
     merchant_tag_id: nil,
-    merchant_group_id: nil
+    merchant_group_id: nil,
+    plaid_account_ids: nil
   )
     @account_id = account_id
     @user_id = user_id
@@ -33,6 +34,7 @@ class TransactionSearchService < BaseService
     @has_no_category = has_no_category
     @merchant_tag_id = merchant_tag_id
     @merchant_group_id = merchant_group_id
+    @plaid_account_ids = plaid_account_ids
 
     @user = User.find(@user_id)
     @account = Account.find(@account_id)
@@ -113,6 +115,9 @@ class TransactionSearchService < BaseService
       transactions = transactions.where("plaid_transactions.name ILIKE ? OR merchants.merchant_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")
     end
 
+    if @plaid_account_ids.present? && @plaid_account_ids.is_a?(Array) && @plaid_account_ids.any?
+      transactions = transactions.where(plaid_account_id: @plaid_account_ids)
+    end
 
     transactions
   end

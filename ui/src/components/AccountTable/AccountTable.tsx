@@ -3,6 +3,7 @@ import { Checkbox, Table } from "@mantine/core";
 import "./styles.css";
 import { ChangeAccountAccessProps } from "@/hooks";
 import { useEffect, useState } from "react";
+import { EditableLabel } from "@/components/EditableLabel/EditableLabel";
 
 export function AccountTable({
   plaidAccounts,
@@ -10,12 +11,14 @@ export function AccountTable({
   accountUsersLoading,
   currentUser,
   onAccountAccessChange,
+  onNicknameChange,
 }: {
   plaidAccounts: PlaidAccount[];
   accountUsers: User[];
   accountUsersLoading: boolean;
   currentUser: User;
   onAccountAccessChange: (props: ChangeAccountAccessProps) => void;
+  onNicknameChange: (id: number, nickname: string) => Promise<void>;
 }) {
   return (
     <div className="w-full">
@@ -31,7 +34,13 @@ export function AccountTable({
         <Table.Tbody>
           {plaidAccounts.map((account) => (
             <Table.Tr key={account.id}>
-              <Table.Td>{account.nickname}</Table.Td>
+              <Table.Td>
+                <EditableLabel
+                  id={account.id}
+                  value={account.nickname || account.plaidOfficialName}
+                  onSave={onNicknameChange}
+                />
+              </Table.Td>
               <Table.Td>****{account.plaidMask}</Table.Td>
               <Table.Td>{account.plaidType}</Table.Td>
               <Table.Td>
