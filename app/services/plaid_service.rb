@@ -243,9 +243,55 @@ class PlaidService < BaseService
     common_words.length.to_f / total_words
   end
 
+  def create_link_token(user:)
+    request = Plaid::LinkTokenCreateRequest.new(
+      {
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
+        client_name: 'Budgeting App',
+        products: ['transactions'],
+        country_codes: ['US'],
+        language: 'en',
+        user: {
+          client_user_id: user.id.to_s,
+          legal_name: "#{user.first_name} #{user.last_name}",
+          email_address: user.email
+        }
+      }
+    )
+    
+    response = api_client.link_token_create(request)
+    response.link_token
+  end
+
+  def exchange_public_token(public_token)
+    request = Plaid::ItemPublicTokenExchangeRequest.new(
+      {
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
+        public_token: public_token
+      }
+    )
+    
+    api_client.item_public_token_exchange(request)
+  end
+
+  def get_accounts(access_token)
+    request = Plaid::AccountsGetRequest.new(
+      {
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
+        access_token: access_token
+      }
+    )
+    
+    api_client.accounts_get(request)
+  end
+
   def api_client
     configuration = Plaid::Configuration.new
-    configuration.server_index = Plaid::Configuration::Environment["production"]
+    plaid_env = ENV.fetch("PLAID_ENV", "production")
+    configuration.server_index = Plaid::Configuration::Environment[plaid_env]
 
     api_client = Plaid::ApiClient.new(configuration)
 
