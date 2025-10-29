@@ -177,11 +177,6 @@ class PlaidService < BaseService
     update_merchant(merchant, transaction) if merchant
     return merchant if merchant
 
-    # Check for similar merchants in existing groups
-    similar_merchant = find_similar_merchant_in_groups(transaction.merchant_name || transaction.name)
-    update_merchant(similar_merchant, transaction) if similar_merchant
-    return similar_merchant if similar_merchant
-
     # It does not exist, create it
     merchant = Merchant.create(
       account_id: @account.id,
@@ -189,9 +184,6 @@ class PlaidService < BaseService
       merchant_name: transaction.merchant_name || transaction.name,
       logo_url: transaction.logo_url,
     )
-
-    # Suggest grouping after creation
-    suggest_merchant_grouping(merchant)
 
     return merchant
   end
