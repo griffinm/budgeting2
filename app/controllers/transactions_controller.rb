@@ -20,6 +20,7 @@ class TransactionsController < ApplicationController
           has_no_category: search_params[:has_no_category],
           merchant_tag_id: search_params[:merchant_tag_id],
           merchant_group_id: search_params[:merchant_group_id],
+          plaid_account_ids: search_params[:plaid_account_ids],
         ).call
       )
   end
@@ -71,6 +72,7 @@ class TransactionsController < ApplicationController
       :has_no_category,
       :merchant_tag_id,
       :merchant_group_id,
+      plaid_account_ids: [],
     )
   end
 

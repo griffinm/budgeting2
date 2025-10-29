@@ -169,14 +169,17 @@ class PlaidService < BaseService
   private def merchant_for_transaction(transaction, plaid_entity_id)
     # lookup by plaid id
     merchant = @account.merchants.where(plaid_entity_id: plaid_entity_id).where.not(plaid_entity_id: nil).first
+    update_merchant(merchant, transaction) if merchant
     return merchant if merchant
 
     # lookup by name
     merchant = Merchant.find_by(merchant_name: transaction.merchant_name || transaction.name)
+    update_merchant(merchant, transaction) if merchant
     return merchant if merchant
 
     # Check for similar merchants in existing groups
     similar_merchant = find_similar_merchant_in_groups(transaction.merchant_name || transaction.name)
+    update_merchant(similar_merchant, transaction) if similar_merchant
     return similar_merchant if similar_merchant
 
     # It does not exist, create it
@@ -184,12 +187,20 @@ class PlaidService < BaseService
       account_id: @account.id,
       plaid_entity_id: plaid_entity_id,
       merchant_name: transaction.merchant_name || transaction.name,
+      logo_url: transaction.logo_url,
     )
 
     # Suggest grouping after creation
     suggest_merchant_grouping(merchant)
 
     return merchant
+  end
+
+  private def update_merchant(merchant, transaction)
+    merchant.update(
+      logo_url: transaction.logo_url,
+    )
+    merchant.save
   end
 
   private def find_similar_merchant_in_groups(merchant_name)

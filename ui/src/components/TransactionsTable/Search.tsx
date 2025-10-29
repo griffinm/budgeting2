@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useRef, useState, useEffect } from "react";
-import { Button, Card, Checkbox, Input, Select, TextInput } from "@mantine/core";
+import { Button, Card, Checkbox, Input, MultiSelect, Select, TextInput } from "@mantine/core";
 import { TransactionSearchParams } from "@/api/transaction-client";
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
-import { TransactionType } from "@/utils/types";
+import { PlaidAccount, TransactionType } from "@/utils/types";
 
 const SEARCH_TIMEOUT = 250;
 
@@ -13,10 +13,12 @@ export function Search({
   searchParams,
   onSetSearchParams,
   clearSearchParams,
+  plaidAccounts = [],
 }: {
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   clearSearchParams: () => void;
+  plaidAccounts?: PlaidAccount[];
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [search, setSearch] = useState('');
@@ -119,6 +121,22 @@ export function Search({
                   />
                 </div>
 
+              </div>
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-7 mt-2">
+                <div className="col-span-2">
+                  <MultiSelect
+                    label="Filter by Accounts"
+                    placeholder="Select accounts"
+                    value={(localParams.plaid_account_ids || []).map(String)}
+                    onChange={(values) => updateLocalParam('plaid_account_ids', values.map(Number))}
+                    data={plaidAccounts.map((account) => ({
+                      value: String(account.id),
+                      label: account.nickname || account.plaidOfficialName || `Account ${account.plaidMask}`,
+                    }))}
+                    searchable
+                    clearable
+                  />
+                </div>
               </div>
               <div className="mt-2">
                 <Button variant="subtle" size="xs" color="gray" onClick={() => clearSearchParams()}>Clear Search</Button>
