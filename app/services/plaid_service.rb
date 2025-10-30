@@ -162,34 +162,6 @@ class PlaidService < BaseService
     merchant.save
   end
 
-  private def find_similar_merchant_in_groups(merchant_name)
-    return nil if merchant_name.blank?
-    
-    normalized_name = normalize_merchant_name(merchant_name)
-    
-    @account.merchants.joins(:merchant_group).each do |merchant|
-      normalized_existing = normalize_merchant_name(merchant.merchant_name)
-      if calculate_name_similarity(normalized_name, normalized_existing) > 0.8
-        return merchant
-      end
-    end
-    
-    nil
-  end
-
-  private def suggest_merchant_grouping(merchant)
-    grouping_service = MerchantGroupingService.new(account_id: @account.id)
-    suggestions = grouping_service.suggest_groups_for_merchant(merchant)
-    
-    # Log suggestions for manual review
-    if suggestions.any?
-      Rails.logger.info "Merchant grouping suggestions for #{merchant.merchant_name}:"
-      suggestions.each do |suggestion|
-        Rails.logger.info "  - #{suggestion[:merchant].merchant_name} (#{suggestion[:reason]}, confidence: #{suggestion[:confidence]})"
-      end
-    end
-  end
-
   private def normalize_merchant_name(name)
     return "" if name.blank?
     
@@ -268,51 +240,4 @@ class PlaidService < BaseService
     return Plaid::PlaidApi.new(api_client)
   end
 
-  def enrich_transactions(transactions:)
-    Rails.logger.info "Enriching #{transactions.count} transactions for account #{@account.id}"
-    # The API call is limited to 100 transactions at a time
-    transactions.slice(0, 99).each do |transaction|
-      enrich_request = Plaid::TransactionsEnrichRequest.new(
-        client_id: ENV["PLAID_CLIENT_ID"],
-        secret: ENV["PLAID_SECRET"],
-        account_type: "depository",
-        transactions: transactions.map do |transaction|
-          {
-            id: transaction.transaction_id,
-            amount: transaction.amount.abs,
-            description: transaction.merchant_name || transaction.name,
-            iso_currency_code: transaction.iso_currency_code,
-            direction: transaction.amount > 0 ? "OUTFLOW" : "INFLOW",
-          }
-        end
-      )
-      result = api_client.transactions_enrich(enrich_request)
-
-      result.enriched_transactions.each do |enriched_transaction|
-        enrichments = enriched_transaction.enrichments
-        transaction = PlaidTransaction.find_by(plaid_id: enriched_transaction.id)
-        next unless transaction
-
-        begin
-          transaction.update(
-            plaid_category_primary: enrichments.personal_finance_category.primary,
-            plaid_category_detail: enrichments.personal_finance_category.detailed,
-            plaid_category_confidence_level: enrichments.personal_finance_category.confidence_level,
-            recurring: enrichments.recurrence.is_recurring,
-          )
-          transaction.merchant.update(
-            plaid_category_primary: enrichments.personal_finance_category.primary,
-            plaid_category_detail: enrichments.personal_finance_category.detailed,
-            plaid_category_confidence_level: enrichments.personal_finance_category.confidence_level,
-            phone_number: enrichments.phone_number,
-            website: enrichments.website,
-            logo_url: enrichments.logo_url,
-          )
-        rescue => exception
-          Rails.logger.error "Error updating transaction #{transaction.id}: #{exception.message}"
-          Rails.logger.error exception.backtrace.join("\n")
-        end # END try/catch
-      end # END result.enriched_transactions.each
-    end # END transactions.slice(0, 99).each
-  end # END enrich_transactions
 end
