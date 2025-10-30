@@ -15,6 +15,7 @@ if existing_user.nil?
   )
 
   puts "User #{email} created with account #{account.id}"
+  puts "Default merchant tags created: #{account.merchant_tags.count}"
 else
   puts "User #{email} already exists"
 end

@@ -32,7 +32,7 @@ namespace :test_data do
     
     # Create merchant tags (categories)
     puts "Creating merchant tags..."
-    merchant_tags = create_merchant_tags(account, user)
+    merchant_tags = DefaultMerchantTagsService.new(account, user).create_default_tags
     
     # Create merchants
     puts "Creating merchants..."
@@ -77,63 +77,6 @@ namespace :test_data do
   end
   
   private
-  
-  def create_merchant_tags(account, user)
-    tags = {}
-    
-    # Main categories
-    main_categories = [
-      { name: "Food & Dining", color: "#FF6B6B" },
-      { name: "Transportation", color: "#4ECDC4" },
-      { name: "Shopping", color: "#45B7D1" },
-      { name: "Entertainment", color: "#96CEB4" },
-      { name: "Bills & Utilities", color: "#FFEAA7" },
-      { name: "Healthcare", color: "#DDA0DD" },
-      { name: "Income", color: "#98D8C8" },
-      { name: "Savings & Investments", color: "#F7DC6F" },
-      { name: "Personal Care", color: "#BB8FCE" },
-      { name: "Education", color: "#85C1E9" }
-    ]
-    
-    main_categories.each do |category|
-      tag = MerchantTag.create!(
-        account_id: account.id,
-        user_id: user.id,
-        name: category[:name],
-        color: category[:color]
-      )
-      tags[category[:name]] = tag
-    end
-    
-    # Subcategories
-    subcategories = {
-      "Food & Dining" => ["Restaurants", "Groceries", "Coffee Shops", "Fast Food", "Delivery"],
-      "Transportation" => ["Gas", "Public Transit", "Rideshare", "Parking", "Car Maintenance"],
-      "Shopping" => ["Clothing", "Electronics", "Home & Garden", "Online Shopping", "Department Stores"],
-      "Entertainment" => ["Movies", "Streaming Services", "Sports", "Concerts", "Games"],
-      "Bills & Utilities" => ["Electric", "Water", "Internet", "Phone", "Insurance"],
-      "Healthcare" => ["Doctor Visits", "Pharmacy", "Dental", "Vision", "Emergency"],
-      "Income" => ["Salary", "Freelance", "Investment Returns", "Refunds", "Cashback"],
-      "Savings & Investments" => ["Emergency Fund", "Retirement", "Stocks", "Bonds", "Savings Account"],
-      "Personal Care" => ["Haircuts", "Skincare", "Gym", "Massage", "Beauty Products"],
-      "Education" => ["Tuition", "Books", "Online Courses", "Certifications", "Supplies"]
-    }
-    
-    subcategories.each do |parent_name, children|
-      parent_tag = tags[parent_name]
-      children.each do |child_name|
-        MerchantTag.create!(
-          account_id: account.id,
-          user_id: user.id,
-          name: child_name,
-          color: parent_tag.color,
-          parent_merchant_tag_id: parent_tag.id
-        )
-      end
-    end
-    
-    tags
-  end
   
   def create_merchants(account, merchant_tags)
     merchants = {}
