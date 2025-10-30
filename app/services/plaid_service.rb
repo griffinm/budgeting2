@@ -102,25 +102,8 @@ class PlaidService < BaseService
     transactions.each do |transaction|
       plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: @account.id)
       
-      new_transaction = PlaidTransaction.new(
-        account_id: @account.id,
-        plaid_sync_event_id: plaid_sync_event.id,
-        plaid_account_id: plaid_account.id,
-        plaid_id: transaction.transaction_id,
-        amount: transaction.amount,
-        name: transaction.merchant_name || transaction.name,
-        authorized_at: transaction.authorized_date,
-        date: DateTime.iso8601(transaction.datetime),
-        check_number: transaction.check_number,
-        currency_code: transaction.iso_currency_code,
-        pending: transaction.pending,
-        payment_channel: transaction.payment_channel,
-        transaction_type: "expense",
-        plaid_category_primary: transaction.personal_finance_category.primary,
-        plaid_category_detail: transaction.personal_finance_category.detailed,
-        plaid_category_confidence_level: transaction.personal_finance_category.confidence_level,
-        plaid_categories: transaction.category,
-      )
+      transaction_attrs = PlaidTransaction.parse_plaid_transaction(transaction, @account, plaid_account, plaid_sync_event)
+      new_transaction = PlaidTransaction.new(transaction_attrs)
 
       merchant = merchant_for_transaction(transaction, transaction.merchant_entity_id)
       new_transaction.merchant_id = merchant.id
@@ -133,25 +116,9 @@ class PlaidService < BaseService
     transactions.each do |transaction|
       existing_transaction = PlaidTransaction.find_by(plaid_id: transaction.transaction_id)
       plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: @account.id)
-      existing_transaction.update(
-        account_id: @account.id,
-        plaid_sync_event_id: plaid_sync_event.id,
-        plaid_account_id: plaid_account.id,
-        plaid_id: transaction.transaction_id,
-        amount: transaction.amount,
-        name: transaction.merchant_name || transaction.name,
-        authorized_at: transaction.authorized_date,
-        date: DateTime.iso8601(transaction.datetime),
-        check_number: transaction.check_number,
-        currency_code: transaction.iso_currency_code,
-        pending: transaction.pending,
-        payment_channel: transaction.payment_channel,
-        transaction_type: "expense",
-        plaid_category_primary: transaction.personal_finance_category.primary,
-        plaid_category_detail: transaction.personal_finance_category.detailed,
-        plaid_category_confidence_level: transaction.personal_finance_category.confidence_level,
-        plaid_categories: transaction.category,
-      )
+      
+      transaction_attrs = PlaidTransaction.parse_plaid_transaction(transaction, @account, plaid_account, plaid_sync_event)
+      existing_transaction.update(transaction_attrs)
     end
   end
 

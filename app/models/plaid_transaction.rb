@@ -54,6 +54,31 @@ class PlaidTransaction < ApplicationRecord
     end
   end
 
+  def self.parse_plaid_transaction(plaid_transaction, account, plaid_account, plaid_sync_event)
+    date_string = plaid_transaction.datetime || plaid_transaction.date
+    date_obj = plaid_transaction.datetime.present? ? Time.iso8601(date_string) : date_string
+    
+    {
+      account_id: account.id,
+      plaid_sync_event_id: plaid_sync_event.id,
+      plaid_account_id: plaid_account.id,
+      plaid_id: plaid_transaction.transaction_id,
+      amount: plaid_transaction.amount,
+      name: plaid_transaction.merchant_name || plaid_transaction.name,
+      authorized_at: plaid_transaction.authorized_date,
+      date: date_obj,
+      check_number: plaid_transaction.check_number,
+      currency_code: plaid_transaction.iso_currency_code,
+      pending: plaid_transaction.pending,
+      payment_channel: plaid_transaction.payment_channel,
+      transaction_type: "expense",
+      plaid_category_primary: plaid_transaction.personal_finance_category.primary,
+      plaid_category_detail: plaid_transaction.personal_finance_category.detailed,
+      plaid_category_confidence_level: plaid_transaction.personal_finance_category.confidence_level,
+      plaid_categories: plaid_transaction.category,
+    }
+  end
+
   def self.monthly_average_by_type(transaction_type, months_back = 1)
     
     if !TRANSACTION_TYPES.key?(transaction_type.to_sym)
@@ -80,6 +105,14 @@ class PlaidTransaction < ApplicationRecord
     end
 
     monthly_averages.reduce(:+) / monthly_averages.length.to_f
+  end
+
+  def self.get_transaction_date(plaid_transaction)
+    if plaid_transaction.datetime.present?
+      return Time.iso8601(plaid_transaction.datetime)
+    else
+      return Date.parse(plaid_transaction.date)
+    end
   end
 
 end 
