@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     get "health", to: "health#index"
     get "update_all", to: "util#update_all"
 
+    post "signup", to: "users#signup"
     post "users/login", to: "users#login"
     get "users/current", to: "users#current"
     patch "users/current", to: "users#update"

@@ -12,6 +12,7 @@ import { Notifications } from '@mantine/notifications';
 
 // Lazy load all pages
 const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage/SignupPage'));
 const MainLayout = lazy(() => import('./layouts/MainLayout/MainLayout'));
 const AuthLayout = lazy(() => import('./layouts/AuthLayout/AuthLayout'));
 const MerchantTagPage = lazy(() => import('./pages/MerchantTagPage/MerchantTagPage'));
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: WithSuspense(<LoginPage />),
+      },
+      {
+        path: 'signup',
+        element: WithSuspense(<SignupPage />),
       },
     ],
   }

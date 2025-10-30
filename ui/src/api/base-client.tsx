@@ -34,12 +34,13 @@ baseClient.interceptors.request.use((config) => {
 baseClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (window.location.pathname !== urls.login.path()) {
-      if (error.response.status === 401 || error.response.status === 403) {
-        localStorage.removeItem('token');
-        window.location.href = urls.login.path();
-      }
-      return Promise.reject(error);
+    // Don't redirect if already on auth pages (login or signup)
+    const isAuthPage = window.location.pathname === urls.login.path() || 
+                       window.location.pathname === urls.signup.path();
+    
+    if (!isAuthPage && (error.response?.status === 401 || error.response?.status === 403)) {
+      localStorage.removeItem('token');
+      window.location.href = urls.login.path();
     }
     return Promise.reject(error);
   }

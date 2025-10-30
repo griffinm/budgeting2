@@ -10,4 +10,7 @@ class Account < ApplicationRecord
   has_many :merchant_tags, dependent: :destroy
   has_many :merchant_groups, dependent: :destroy
   has_many :account_balances, through: :plaid_accounts
+
+  scope :demo_accounts, -> { where(is_demo: true) }
+  scope :live_accounts, -> { where(is_demo: false) }
 end

@@ -1,5 +1,6 @@
 export interface ErrorResponse {
   messages?: string[];
+  errors?: string[];
 }
 
 export interface Account {
@@ -31,6 +32,11 @@ export interface PageResponse<T> {
 }
 
 export interface LoginResponse {
+  user: User;
+  token: string;
+}
+
+export interface SignupResponse {
   user: User;
   token: string;
 }

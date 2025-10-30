@@ -15,7 +15,9 @@ export const CurrentUserProvider: React.FC<CurrentUserProviderProps> = ({ childr
   const [userLoading, setUserLoading] = useState(true);
 
   useEffect(() => {
-    if (window.location.pathname === urls.login.path()) {
+    // Skip fetching current user on auth pages (login, signup)
+    if (window.location.pathname === urls.login.path() || 
+        window.location.pathname === urls.signup.path()) {
       setUserLoading(false);
       return;
     }

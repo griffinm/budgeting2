@@ -14,6 +14,7 @@ const MerchantPage = lazy(() => import('@/pages/MerchantPage/MerchantPage'));
 const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTagsPage'));
 const MerchantTagPage = lazy(() => import('@/pages/MerchantTagPage/MerchantTagPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
+const SignupPage = lazy(() => import('@/pages/SignupPage/SignupPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage/ProfilePage'));
 const PlaidAccountsPage = lazy(() => import('@/pages/AccountsPage/AccountPage'));
 
@@ -46,6 +47,13 @@ export const urls: Record<string, Url> = {
     label: 'Login',
     title: () => 'Login' + TITLE_SUFFIX,
     component: LoginPage,
+    section: 'none',
+  },
+  signup: {
+    path: () =>'/auth/signup',
+    label: 'Sign Up',
+    title: () => 'Sign Up' + TITLE_SUFFIX,
+    component: SignupPage,
     section: 'none',
   },
   merchants: {

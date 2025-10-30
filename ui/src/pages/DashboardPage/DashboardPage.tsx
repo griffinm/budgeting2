@@ -1,16 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { urls } from '@/utils/urls';
 import { useTransactionTrends } from './useTransactionTrends';
 import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
 import { AccountBalances } from './AccountBalances';
-import { Card, Group, Text } from '@mantine/core';
-import { IconWallet, IconCalculator, IconCalendar } from '@tabler/icons-react';
+import { Card, Group, Text, Modal, Button, Stack } from '@mantine/core';
+import { IconWallet, IconCalculator, IconCalendar, IconBuildingBank } from '@tabler/icons-react';
 import { MonthlyLineChart } from '@/components/MonthlySpend/MonthlyLineChart';
 import { MoMTrends } from './MoMTrends';
+import { usePlaidAccount } from '@/hooks/usePlaidAccount';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
+  const navigate = useNavigate();
+  const { plaidAccounts, isLoading: plaidAccountsLoading } = usePlaidAccount();
+  const [showLinkAccountsModal, setShowLinkAccountsModal] = useState(false);
+
   const { 
     profitAndLoss,
     profitAndLossLoading,
@@ -32,14 +38,55 @@ export default function DashboardPage() {
 
   const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
 
-  
-
   useEffect(() => {
     document.title = urls.dashboard.title();
   }, []);
 
+  useEffect(() => {
+    // Show modal if user has no linked accounts and plaid accounts have finished loading
+    if (!plaidAccountsLoading && plaidAccounts.length === 0) {
+      setShowLinkAccountsModal(true);
+    }
+  }, [plaidAccounts, plaidAccountsLoading]);
+
+  const handleLinkAccounts = () => {
+    setShowLinkAccountsModal(false);
+    navigate(urls.accounts.path());
+  };
+
   return (
     <div className="h-full flex flex-col">
+      <Modal
+        opened={showLinkAccountsModal}
+        onClose={() => {}} // Non-dismissible - user must click the button
+        title="Welcome! Let's Get Started"
+        centered
+        size="md"
+        withCloseButton={false}
+        closeOnClickOutside={false}
+        closeOnEscape={false}
+      >
+        <Stack gap="md">
+          <div className="flex justify-center mb-3">
+            <IconBuildingBank size={64} stroke={1.5} />
+          </div>
+          <Text size="md" ta="center">
+            To start tracking your finances, you'll need to link your bank accounts.
+          </Text>
+          <Text size="sm" c="dimmed" ta="center">
+            Connect your accounts securely through Plaid to automatically import your transactions and see your financial overview.
+          </Text>
+          <Button 
+            fullWidth 
+            size="md" 
+            mt="md"
+            onClick={handleLinkAccounts}
+          >
+            Link Your Accounts
+          </Button>
+        </Stack>
+      </Modal>
+
       <div className="flex-shrink-0 mb-4">
         <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
       </div>

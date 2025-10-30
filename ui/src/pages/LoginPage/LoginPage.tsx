@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { urls } from '@/utils/urls';
-import { Card, Button, TextInput } from '@mantine/core';
+import { Card, Button, TextInput, Text, Anchor } from '@mantine/core';
 import { login } from '@/api';
 import { ErrorResponse, LoginResponse } from '@/utils/types';
 import { useNavigate } from 'react-router-dom';
@@ -62,6 +62,12 @@ export default function LoginPage() {
             <Button type="submit">Login</Button>
           </div>
         </form>
+        <Text size="sm" mt="md" ta="center">
+          Don't have an account?{' '}
+          <Anchor href={urls.signup.path()} underline="always">
+            Sign up
+          </Anchor>
+        </Text>
       </Card>
     </div>
   )

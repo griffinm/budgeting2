@@ -1,5 +1,5 @@
 import { baseClient } from './base-client';
-import { User, LoginResponse, ErrorResponse } from '@/utils/types';
+import { User, LoginResponse, SignupResponse, ErrorResponse } from '@/utils/types';
 import { AxiosResponse } from 'axios';
 
 type UserOmitFields = 'account' | 'createdAt' | 'updatedAt' | 'accountId' | 'id';
@@ -15,6 +15,27 @@ export const login = async ({
   password: string;
 }): Promise<AxiosResponse<LoginResponse | ErrorResponse>> => {
   return baseClient.post('/users/login', { email, password });
+};
+
+export const signup = async ({
+  email,
+  firstName,
+  lastName,
+  password,
+}: {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}): Promise<AxiosResponse<SignupResponse | ErrorResponse>> => {
+  return baseClient.post('/signup', { 
+    user: { 
+      email, 
+      first_name: firstName, 
+      last_name: lastName, 
+      password 
+    } 
+  });
 };
 
 export const fetchCurrentUser = async (): Promise<AxiosResponse<User>> => {
