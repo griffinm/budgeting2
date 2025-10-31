@@ -22,12 +22,14 @@ class User < ApplicationRecord
   end
 
   def as_json(options = {})
-    super(options).merge({
+    {
       id: id,
       email: email,
       firstName: first_name,
       lastName: last_name,
-      accountId: account_id
-    })
+      accountId: account_id,
+      createdAt: created_at,
+      linkedAccounts: plaid_accounts.count,
+    }
   end
 end

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { urls } from '@/utils/urls';
 import { useTransactionTrends } from './useTransactionTrends';
 import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
@@ -9,14 +9,14 @@ import { Card, Group, Text, Modal, Button, Stack } from '@mantine/core';
 import { IconWallet, IconCalculator, IconCalendar, IconBuildingBank } from '@tabler/icons-react';
 import { MonthlyLineChart } from '@/components/MonthlySpend/MonthlyLineChart';
 import { MoMTrends } from './MoMTrends';
-import { usePlaidAccount } from '@/hooks/usePlaidAccount';
 import { useNavigate } from 'react-router-dom';
+import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const { plaidAccounts, isLoading: plaidAccountsLoading } = usePlaidAccount();
-  const [showLinkAccountsModal, setShowLinkAccountsModal] = useState(false);
-
+  const { user } = useContext(CurrentUserContext);
+  const [showLinkAccountsModal, setShowLinkAccountsModal] = useState(user?.linkedAccounts === 0);
+  
   const { 
     profitAndLoss,
     profitAndLossLoading,
@@ -37,17 +37,10 @@ export default function DashboardPage() {
   } = useTransactionTrends();
 
   const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
-
+  
   useEffect(() => {
     document.title = urls.dashboard.title();
   }, []);
-
-  useEffect(() => {
-    // Show modal if user has no linked accounts and plaid accounts have finished loading
-    if (!plaidAccountsLoading && plaidAccounts.length === 0) {
-      setShowLinkAccountsModal(true);
-    }
-  }, [plaidAccounts, plaidAccountsLoading]);
 
   const handleLinkAccounts = () => {
     setShowLinkAccountsModal(false);

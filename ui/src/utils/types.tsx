@@ -18,6 +18,7 @@ export interface User {
   lastName: string;
   accountId: string;
   account: Account;
+  linkedAccounts: number;
 }
 
 export interface Page {
