@@ -5,7 +5,7 @@ require "active_record/railtie"
 require "action_controller/railtie" 
 #require "action_view/railtie"
 #require "action_mailer/railtie"
-require "active_job/railtie"
+# require "active_job/railtie"
 # require "action_cable/engine"
 #require "action_mailbox/engine"
 #require "action_text/engine"
@@ -22,6 +22,10 @@ module Budgeting2
     
     # Don't require master key for production (use env vars instead)
     config.require_master_key = false
+
+    # Do not use rails sessions
+    config.middleware.delete ActionDispatch::Cookies
+    config.middleware.delete ActionDispatch::Session::CookieStore
 
     config.time_zone = "UTC"
     config.api_only = true

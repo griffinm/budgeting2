@@ -1,7 +1,4 @@
 Rails.application.routes.draw do
-  require "sidekiq/web"
-  mount Sidekiq::Web => "/sidekiq"
-
   scope path: 'api' do
     get "health", to: "health#index"
     get "update_all", to: "util#update_all"

@@ -7,7 +7,6 @@ gem "jbuilder"
 gem "bcrypt", "~> 3.1.7"
 gem "bootsnap", require: false
 gem "rack-cors"
-gem "dotenv-rails"
 gem "jwt"
 gem "lograge"
 gem 'active_model_serializers'
@@ -16,11 +15,10 @@ gem "pagy"
 gem "acts_as_paranoid"
 gem "audited"
 gem "plaid"
-gem "sidekiq", "~> 8.0"
 gem "newrelic_rpm"
-gem "redis", "~> 5.4"
 
 group :development, :test do
+  gem "dotenv-rails"
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "brakeman", require: false
   gem "foreman"
