@@ -3,8 +3,9 @@ class UtilController < ApplicationController
   skip_before_action :require_authenticated_user!
 
   def update_all
-    Rails.logger.info("Updating all accounts information from Plaid")
-    Account.find_each do |account|
+    Rails.logger.info("Syncing transactions for all live accounts")
+    Account.live_accounts.find_each do |account|
+      Rails.logger.info("Syncing transactions for account #{account.id}")
       service = PlaidService.new(account_id: account.id)
       service.sync_transactions
     end
