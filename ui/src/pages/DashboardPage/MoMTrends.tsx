@@ -40,8 +40,8 @@ export function MoMTrends({
   const arrowSize = 40;
   const incomeArrow = incomeArrowDirection === 'up' ? <IconArrowUp size={arrowSize} color="green" /> : <IconArrowDown size={arrowSize} color="red" />;
   const expenseArrow = expenseArrowDirection === 'up' ? <IconArrowDown size={arrowSize} color="green" /> : <IconArrowUp size={arrowSize} color="red" />;
-  const incomeText = incomeChange > 0 ? 'Income is up' : 'Income is down';
-  const expenseText = expenseChange > 0 ? 'Expenses are up' : 'Expenses are down';
+  const incomeText = incomeChange > 0 ? 'Income: Up' : 'Income: Down';
+  const expenseText = expenseChange > 0 ? 'Expenses: Up' : 'Expenses: Down';
 
   return (  
     <Card>
