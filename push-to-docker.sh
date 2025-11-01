@@ -43,10 +43,23 @@ if ! docker info > /dev/null 2>&1; then
 fi
 print_new_line
 
+# Read and increment version number
+VERSION_FILE="current_version_number.txt"
+if [ ! -f "$VERSION_FILE" ]; then
+    log_error "Version file not found: $VERSION_FILE"
+    exit 1
+fi
+
+CURRENT_VERSION=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+NEW_VERSION=$((CURRENT_VERSION + 1))
+echo "$NEW_VERSION" > "$VERSION_FILE"
+log_info "Version incremented: $CURRENT_VERSION → $NEW_VERSION"
+
 GIT_HASH=$(git rev-parse --short HEAD)
-API_IMAGE="${REGISTRY}/${API_IMAGE_NAME}:${GIT_HASH}"
-UI_IMAGE="${REGISTRY}/${UI_IMAGE_NAME}:${GIT_HASH}"
+API_IMAGE="${REGISTRY}/${API_IMAGE_NAME}:${GIT_HASH}-${NEW_VERSION}"
+UI_IMAGE="${REGISTRY}/${UI_IMAGE_NAME}:${GIT_HASH}-${NEW_VERSION}"
 log_info "Revision for build: $GIT_HASH"
+log_info "Version for build: $NEW_VERSION"
 log_info "API imag name will be: $API_IMAGE"
 log_info "UI image name will be: $UI_IMAGE"
 
