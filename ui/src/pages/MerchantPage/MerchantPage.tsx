@@ -7,7 +7,8 @@ import { useTransactions } from "@/hooks";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading } from "@/components/Loading";
 import { MerchantLinking } from "@/components/MerchantLinking";
-import { Breadcrumbs, Card } from "@mantine/core";
+import { Breadcrumbs, Card, Tooltip } from "@mantine/core";
+import { IconInfoCircle } from "@tabler/icons-react";
 import { ColorBox } from "@/components/ColorBox";
 import { currentMonthSpend, lastMonthSpend } from "./utils";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
@@ -143,7 +144,36 @@ export default function MerchantPage() {
         </Card>
 
         <Card>
-          <h2 className="text-xl font-bold mb-4">Merchant Group</h2>
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-xl font-bold">Merchant Group</h2>
+            <Tooltip
+              label={
+                <div className="max-w-md">
+                  <p className="mb-2">
+                    A Merchant Group is a way to combine multiple merchants into one for easier tracking. Sometimes merchant names
+                    are different across transactions. In order for Budgeting to know these are the same merchants they need to be grouped together.
+                  </p>
+                  <p className="mb-2">
+                    For instance <strong>"Amazon"</strong> and <strong>"Amazon.com, Inc."</strong> are the same merchant.
+                    Similarly <strong>"Starbucks"</strong> and <strong>"Starbucks Corporation"</strong> are the same merchant.
+                  </p>
+                  <p className="mb-2">
+                    This is why we have Merchant Groups. You can create a group for these merchants and then all the transactions for
+                    these merchants will be grouped together.
+                  </p>
+                  <p>
+                    You can also add merchants to an existing group.
+                  </p>
+                </div>
+              }
+              multiline
+              withArrow
+              position="bottom-start"
+              w={400}
+            >
+              <IconInfoCircle size={20} className="text-gray-500 cursor-help" />
+            </Tooltip>
+          </div>
           
           {/* Merchant Linking Component */}
           <div className="mb-6">
