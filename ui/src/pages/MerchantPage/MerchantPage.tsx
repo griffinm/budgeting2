@@ -7,7 +7,8 @@ import { useTransactions } from "@/hooks";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading } from "@/components/Loading";
 import { MerchantLinking } from "@/components/MerchantLinking";
-import { Blockquote, Breadcrumbs, Card } from "@mantine/core";
+import { Breadcrumbs, Card } from "@mantine/core";
+import { ColorBox } from "@/components/ColorBox";
 import { currentMonthSpend, lastMonthSpend } from "./utils";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { urls } from "@/utils/urls";
@@ -254,16 +255,19 @@ function SpendSummaryCard({
   loading: boolean;
 }) {
   return (
-    <Blockquote
-      color="blue"
-      className="w-1/2"
-    >
-      <h2 className="text-xl text-gray-500 font-bold mb-4">{title}</h2>
-      {loading ? (
-        <Loading fullHeight={false} />
-      ) : (
-        <p className="text-3xl">${value.toLocaleString()}</p>
-      )}
-    </Blockquote>
+    <ColorBox>
+      <div className="flex flex-col justify-between h-full items-center p-4">
+        <div className="text-sm text-gray-500">
+          {title}
+        </div>
+        {loading ? (
+          <Loading fullHeight={false} />
+        ) : (
+          <div className="text-3xl font-bold mt-2">
+            ${value.toLocaleString()}
+          </div>
+        )}
+      </div>
+    </ColorBox>
   )
 }
