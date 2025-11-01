@@ -68,6 +68,8 @@ Rails.application.routes.draw do
         get "average_income", to: "data#average_income"
         get "average_expense", to: "data#average_expense"
         get "profit_and_loss", to: "data#profit_and_loss"
+        get "spend_moving_average", to: "data#spend_moving_average"
+        get "income_moving_average", to: "data#income_moving_average"
       end
     end
 

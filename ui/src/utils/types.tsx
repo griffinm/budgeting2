@@ -208,3 +208,10 @@ export interface PageRequestParams {
   page: number;
   perPage: number;
 }
+
+export interface MovingAverage {
+  dayOfMonth: number;
+  dayAverage: number;
+  cumulativeTotal: number;
+  cumulativeAveragePerDay: number;
+}

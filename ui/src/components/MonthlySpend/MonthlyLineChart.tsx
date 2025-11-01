@@ -1,4 +1,4 @@
-import { Transaction, TransactionType } from "@/utils/types";
+import { MovingAverage, Transaction, TransactionType } from "@/utils/types";
 import { LineChart } from "@mantine/charts";
 import { transactionArrayToDailySeries } from "@/utils/chartUtils";
 import { Select } from "@mantine/core";
@@ -11,14 +11,14 @@ export interface MonthlyLineChartProps {
 }
 export function MonthlyLineChart({
   currentMonthTransactions,
-  previousMonthTransactions,
+  transactionMovingAverage,
   transactionType,
   average,
   monthsBack: initialMonthsBack,
   onChangeMonthsBack,
 }: {
   currentMonthTransactions: Transaction[];
-  previousMonthTransactions: Transaction[];
+  transactionMovingAverage: MovingAverage[];
   transactionType: TransactionType;
   average: number;
   monthsBack: number;
@@ -38,12 +38,11 @@ export function MonthlyLineChart({
 
   const dailyTotals = transactionArrayToDailySeries({
     currentMonthTransactions,
-    previousMonthTransactions,
+    transactionMovingAverage,
     currentMonth,
     currentYear,
     transactionType,
   });
-
 
   return (
     <div className="flex flex-col gap-4">

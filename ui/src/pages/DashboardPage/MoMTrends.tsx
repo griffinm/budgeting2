@@ -1,36 +1,56 @@
 import { ColorBox } from "@/components/ColorBox";
 import { Card, Group, Text } from "@mantine/core";
 import { IconArrowUp, IconArrowDown, IconTrendingUp } from "@tabler/icons-react";
-import { getPercentChangeForCurrentDay } from "@/utils/chartUtils";
+import { getDailyRunningTotal, getPercentChangeForCurrentDay } from "@/utils/chartUtils";
 import { MonthlyTransactions } from "./useTransactionTrends";
+import { MovingAverage } from "@/utils/types";
+import { getAverageSpendOnCurrentDay } from "@/utils/movingAverageUtils";
+import { Currency } from "@/components/Currency";
 
 export function MoMTrends({
   currentMonthExpenses,
-  previousMonthExpenses,
   currentMonthIncome,
-  previousMonthIncome,
+  currentMonthIncomeMovingAverage,
+  currentMonthSpendMovingAverage,
+  currentMonthSpendMovingAverageLoading,
+  currentMonthIncomeMovingAverageLoading,
 }: {
   loading: boolean;
   currentMonthExpenses: MonthlyTransactions;
-  previousMonthExpenses: MonthlyTransactions;
   currentMonthIncome: MonthlyTransactions;
-  previousMonthIncome: MonthlyTransactions;
+  currentMonthIncomeMovingAverage: MovingAverage[];
+  currentMonthSpendMovingAverage: MovingAverage[];
+  currentMonthSpendMovingAverageLoading: boolean;
+  currentMonthIncomeMovingAverageLoading: boolean;
 }) {
-  const loading = currentMonthExpenses.loading || previousMonthExpenses.loading || currentMonthIncome.loading || previousMonthIncome.loading;
+  const loading = currentMonthExpenses.loading || 
+    currentMonthIncome.loading || 
+    currentMonthSpendMovingAverageLoading || 
+    currentMonthIncomeMovingAverageLoading;
 
   if (loading) {
     return;
   }
   const incomeChange = getPercentChangeForCurrentDay({
     transactionsThisMonth: currentMonthIncome.transactions,
-    transactionsLastMonth: previousMonthIncome.transactions,
+    averageSpendOnCurrentDay: getAverageSpendOnCurrentDay(currentMonthIncomeMovingAverage),
     currentDay: new Date().getDate(),
     transactionType: 'income',
   });
   const expenseChange = getPercentChangeForCurrentDay({
     transactionsThisMonth: currentMonthExpenses.transactions,
-    transactionsLastMonth: previousMonthExpenses.transactions,
+    averageSpendOnCurrentDay: getAverageSpendOnCurrentDay(currentMonthSpendMovingAverage),
     currentDay: new Date().getDate(),
+    transactionType: 'expense',
+  });
+  const currentIncome = getDailyRunningTotal({
+    transactions: currentMonthIncome.transactions,
+    toDay: new Date().getDate(),
+    transactionType: 'income',
+  });
+  const currentExpense = getDailyRunningTotal({
+    transactions: currentMonthExpenses.transactions,
+    toDay: new Date().getDate(),
     transactionType: 'expense',
   });
 
@@ -47,7 +67,7 @@ export function MoMTrends({
     <Card>
       <Group mb="md">
         <IconTrendingUp size={20} />
-        <Text fw={600}>Transaction Trends - Month over Month</Text>
+        <Text fw={600}>Transaction Trends</Text>
       </Group>
       <div className="grid grid-cols-2 gap-4 w-full sm:w-1/2">
         <ColorBox>
@@ -56,6 +76,12 @@ export function MoMTrends({
             <div className="text-3xl font-bold text-gray-500 flex flex-row gap-2">
               {expenseArrow} {expenseChange + '%'}
             </div>
+            <Text size="sm" c="dimmed" ta="center">
+              Average: <Currency amount={getAverageSpendOnCurrentDay(currentMonthSpendMovingAverage)} applyColor={false} useBold={false} showCents={false} />
+            </Text>
+            <Text size="sm" c="dimmed" ta="center">
+              Current: <Currency amount={currentExpense} applyColor={false} useBold={false} showCents={false} />
+            </Text>
           </div>
         </ColorBox>
         <ColorBox>
@@ -64,6 +90,12 @@ export function MoMTrends({
             <div className="text-3xl font-bold text-gray-500 flex flex-row gap-2">
               {incomeArrow} {incomeChange + '%'}
             </div>
+            <Text size="sm" c="dimmed" ta="center">
+              Average: <Currency amount={getAverageSpendOnCurrentDay(currentMonthIncomeMovingAverage)} applyColor={false} useBold={false} showCents={false} />
+            </Text>
+            <Text size="sm" c="dimmed" ta="center">
+              Current: <Currency amount={currentIncome} applyColor={false} useBold={false} showCents={false} />
+            </Text>
           </div>
         </ColorBox>
       </div>

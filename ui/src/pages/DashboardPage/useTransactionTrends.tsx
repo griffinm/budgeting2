@@ -4,8 +4,9 @@ import {
   subMonths,
 } from 'date-fns';
 import {
-  averageForMonthsBack,
+  getIncomeMovingAverage,
   getMonthlyTransactions,
+  getSpendMovingAverage,
 } from '@/api';
 import { Transaction, TransactionType } from '@/utils/types';
 
@@ -14,17 +15,26 @@ interface useTransactionTrendsReturn {
   currentMonthIncome: MonthlyTransactions;
   previousMonthExpenses: MonthlyTransactions;
   previousMonthIncome: MonthlyTransactions;
-  averageExpense: number;
-  averageIncome: number;
   expenseMonthsBack: number;
   incomeMonthsBack: number;
   setMonthsBack: ({ monthsBack, transactionType }: { monthsBack: number, transactionType: TransactionType }) => void;
+  currentMonthSpendMovingAverage: SpendMovingAverage[];
+  currentMonthSpendMovingAverageLoading: boolean;
+  currentMonthIncomeMovingAverage: SpendMovingAverage[];
+  currentMonthIncomeMovingAverageLoading: boolean;
 }
 
 export interface MonthlyTransactions {
   transactionType: TransactionType;
   transactions: Transaction[];
   loading: boolean;
+}
+
+export interface SpendMovingAverage {
+  dayOfMonth: number;
+  dayAverage: number;
+  cumulativeTotal: number;
+  cumulativeAveragePerDay: number;
 }
 
 const defaultMonthlyTransactions: MonthlyTransactions = {
@@ -38,10 +48,12 @@ export function useTransactionTrends(): useTransactionTrendsReturn {
   const [currentMonthIncome, setCurrentMonthIncome] = useState<MonthlyTransactions>(defaultMonthlyTransactions);
   const [previousMonthExpenses, setPreviousMonthExpenses] = useState<MonthlyTransactions>(defaultMonthlyTransactions);
   const [previousMonthIncome, setPreviousMonthIncome] = useState<MonthlyTransactions>(defaultMonthlyTransactions);
-  const [averageExpense, setAverageExpense] = useState<number>(0);
-  const [averageIncome, setAverageIncome] = useState<number>(0);
   const [expenseMonthsBack, setExpenseMonthsBack] = useState<number>(6);
   const [incomeMonthsBack, setIncomeMonthsBack] = useState<number>(6);
+  const [currentMonthSpendMovingAverage, setCurrentMonthSpendMovingAverage] = useState<SpendMovingAverage[]>([]);
+  const [currentMonthIncomeMovingAverage, setCurrentMonthIncomeMovingAverage] = useState<SpendMovingAverage[]>([]);
+  const [currentMonthSpendMovingAverageLoading, setCurrentMonthSpendMovingAverageLoading] = useState<boolean>(true);
+  const [currentMonthIncomeMovingAverageLoading, setCurrentMonthIncomeMovingAverageLoading] = useState<boolean>(true);
 
   const date = new Date();
   const currentMonth = parseInt(formatDate(date, 'M'));
@@ -68,6 +80,18 @@ export function useTransactionTrends(): useTransactionTrendsReturn {
       });
     });
 
+    // Current month spend moving average
+    getSpendMovingAverage().then((response) => {
+      setCurrentMonthSpendMovingAverage(response);
+      setCurrentMonthSpendMovingAverageLoading(false);
+    });
+
+    // Current month income moving average
+    getIncomeMovingAverage().then((response) => {
+      setCurrentMonthIncomeMovingAverage(response);
+      setCurrentMonthIncomeMovingAverageLoading(false);
+    });
+
     // Previous month expenses
     getMonthlyTransactions({ transactionType: 'expense', month: previousMonth, year: previousYear }).then((response) => {
       setPreviousMonthExpenses({
@@ -87,18 +111,6 @@ export function useTransactionTrends(): useTransactionTrendsReturn {
     });
   }, [currentMonth, currentYear, previousMonth, previousYear]);
 
-  useEffect(() => {
-    averageForMonthsBack({ monthsBack: expenseMonthsBack, transactionType: 'expense' }).then((response) => {
-      setAverageExpense(response);
-    });
-  }, [expenseMonthsBack]);
-
-  useEffect(() => {
-    averageForMonthsBack({ monthsBack: incomeMonthsBack, transactionType: 'income' }).then((response) => {
-      setAverageIncome(response);
-    });
-  }, [incomeMonthsBack]);
-
   const setMonthsBack = ({ monthsBack, transactionType }: { monthsBack: number, transactionType: TransactionType }) => {
     if (transactionType === 'expense') {
       setExpenseMonthsBack(monthsBack);
@@ -112,10 +124,12 @@ export function useTransactionTrends(): useTransactionTrendsReturn {
     currentMonthIncome,
     previousMonthExpenses,
     previousMonthIncome,
-    averageExpense,
-    averageIncome,
+    currentMonthSpendMovingAverage,
     expenseMonthsBack,
     incomeMonthsBack,
+    currentMonthIncomeMovingAverage,
+    currentMonthSpendMovingAverageLoading,
+    currentMonthIncomeMovingAverageLoading,
     setMonthsBack,
   };
 }

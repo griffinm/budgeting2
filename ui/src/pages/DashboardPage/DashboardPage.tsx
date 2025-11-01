@@ -29,10 +29,12 @@ export default function DashboardPage() {
     currentMonthIncome,
     previousMonthExpenses,
     previousMonthIncome,
-    averageExpense,
-    averageIncome,
     expenseMonthsBack,
     incomeMonthsBack,
+    currentMonthSpendMovingAverage,
+    currentMonthIncomeMovingAverage,
+    currentMonthSpendMovingAverageLoading,
+    currentMonthIncomeMovingAverageLoading,
     setMonthsBack,
   } = useTransactionTrends();
 
@@ -96,9 +98,11 @@ export default function DashboardPage() {
         <MoMTrends
           loading={currentMonthExpenses.transactions.length === 0 || previousMonthExpenses.transactions.length === 0 || currentMonthIncome.transactions.length === 0 || previousMonthIncome.transactions.length === 0}
           currentMonthExpenses={currentMonthExpenses}
-          previousMonthExpenses={previousMonthExpenses}
           currentMonthIncome={currentMonthIncome}
-          previousMonthIncome={previousMonthIncome}
+          currentMonthIncomeMovingAverage={currentMonthIncomeMovingAverage}
+          currentMonthSpendMovingAverage={currentMonthSpendMovingAverage}
+          currentMonthSpendMovingAverageLoading={currentMonthSpendMovingAverageLoading}
+          currentMonthIncomeMovingAverageLoading={currentMonthIncomeMovingAverageLoading}
         />
 
         <Card>
@@ -120,13 +124,12 @@ export default function DashboardPage() {
             <Text fw={600}>Monthly Spend</Text>
           </Group>
           <MonthlyLineChart
-          currentMonthTransactions={currentMonthExpenses.transactions}
-          previousMonthTransactions={previousMonthExpenses.transactions}
-          transactionType="expense"
-          average={averageExpense}
-          monthsBack={expenseMonthsBack}
-          onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'expense' })}
-        />
+            currentMonthTransactions={currentMonthExpenses.transactions}
+            previousMonthTransactions={currentMonthSpendMovingAverage}
+            transactionType="expense"
+            monthsBack={expenseMonthsBack}
+            onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'expense' })}
+          />
         </Card>
 
         <Card>
@@ -136,9 +139,8 @@ export default function DashboardPage() {
           </Group>
           <MonthlyLineChart
             currentMonthTransactions={currentMonthIncome.transactions}
-            previousMonthTransactions={previousMonthIncome.transactions}
+            previousMonthTransactions={currentMonthIncomeMovingAverage}
             transactionType="income"
-            average={averageIncome}
             monthsBack={incomeMonthsBack}
             onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'income' })}
           />

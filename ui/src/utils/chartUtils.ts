@@ -1,4 +1,4 @@
-import { Transaction, TransactionType } from "@/utils/types";
+import { MovingAverage, Transaction, TransactionType } from "@/utils/types";
 
 export interface DailyTotal {
   currentMonth: number;
@@ -8,13 +8,13 @@ export interface DailyTotal {
 
 export function transactionArrayToDailySeries({
   currentMonthTransactions,
-  previousMonthTransactions,
+  transactionMovingAverage,
   currentMonth,
   currentYear,
   transactionType,
 }: {
   currentMonthTransactions: Transaction[];
-  previousMonthTransactions: Transaction[];
+  transactionMovingAverage: MovingAverage[];
   currentMonth: number;
   currentYear: number;
   transactionType: TransactionType;
@@ -29,11 +29,7 @@ export function transactionArrayToDailySeries({
       transactionType,
     });
 
-    const previousMonthToDayTotal = getDailyRunningTotal({
-      transactions: previousMonthTransactions,
-      toDay: day,
-      transactionType,
-    });
+    const previousMonthToDayTotal = transactionMovingAverage?.find((item) => item.dayOfMonth === day)?.cumulativeTotal || 0;
 
     dailyTotals.push({
       currentMonth: currentMonthToDayTotal,
@@ -45,7 +41,7 @@ export function transactionArrayToDailySeries({
   return dailyTotals;
 }
 
-function getDailyRunningTotal({
+export function getDailyRunningTotal({
   transactions,
   toDay,
   transactionType,
@@ -66,12 +62,12 @@ function getDailyRunningTotal({
 
 export function getPercentChangeForCurrentDay({
   transactionsThisMonth,
-  transactionsLastMonth,
+  averageSpendOnCurrentDay,
   currentDay,
   transactionType,
 }: {
   transactionsThisMonth: Transaction[];
-  transactionsLastMonth: Transaction[];
+  averageSpendOnCurrentDay: number;
   currentDay: number;
   transactionType: TransactionType;
 }): number {
@@ -80,13 +76,8 @@ export function getPercentChangeForCurrentDay({
     toDay: currentDay,
     transactionType,
   });
-  const totalLastMonth = getDailyRunningTotal({
-    transactions: transactionsLastMonth,
-    toDay: currentDay,
-    transactionType,
-  });
 
-  const change = ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100;
+  const change = ((totalThisMonth - averageSpendOnCurrentDay) / averageSpendOnCurrentDay) * 100;
   const roundedChange = Math.round(change * 10) / 10;
   if (!isFinite(change)) {
     return 100;
