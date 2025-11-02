@@ -12,7 +12,6 @@ class TransactionsController < ApplicationController
           merchant_name: search_params[:merchant_name],
           transaction_type: search_params[:transaction_type],
           check_number: search_params[:check_number],
-          currency_code: search_params[:currency_code],
           search_term: search_params[:search_term],
           amount_greater_than: search_params[:amount_greater_than],
           amount_less_than: search_params[:amount_less_than],

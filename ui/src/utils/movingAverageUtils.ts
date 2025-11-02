@@ -1,7 +1,7 @@
 import { MovingAverage } from "./types";
 
-export function getAverageSpendOnCurrentDay(movingAverage: MovingAverage[]): number {
+export function getAverageForCurrentDay(movingAverage: MovingAverage[]): MovingAverage | undefined {
   const currentDay = new Date().getDate();
   const currentDayMovingAverage = movingAverage.find((item) => item.dayOfMonth === currentDay);
-  return currentDayMovingAverage?.dayAverage || 0;
+  return currentDayMovingAverage;
 }

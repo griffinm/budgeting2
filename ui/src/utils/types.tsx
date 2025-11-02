@@ -108,7 +108,6 @@ export interface Transaction {
   paymentChannel: string | null;
   transactionType: TransactionType;
   checkNumber: string | null;
-  currencyCode: string;
   merchant: Merchant;
   plaidAccount: PlaidAccount;
   merchantTag?: MerchantTag | null;
@@ -214,4 +213,11 @@ export interface MovingAverage {
   dayAverage: number;
   cumulativeTotal: number;
   cumulativeAveragePerDay: number;
+}
+
+export interface TotalForDateRange {
+  transactionType: TransactionType;
+  startDate: Date;
+  endDate: Date;
+  total: number;
 }

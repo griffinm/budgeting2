@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { urls } from '@/utils/urls';
-import { useTransactionTrends } from './useTransactionTrends';
+import { useCurrentMonthTransactions } from './useCurrentMonthTransactions';
+import { useMovingAverage } from './useMovingAverage';
 import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
@@ -24,14 +25,10 @@ export default function DashboardPage() {
     setMonthsBack: setProfitAndLossMonthsBack,
   } = useProfitAndLoss();
 
-  const {
-    currentMonthExpenses,
-    currentMonthIncome,
-    currentMonthSpendMovingAverage,
-    currentMonthIncomeMovingAverage,
-    currentMonthSpendMovingAverageLoading,
-    currentMonthIncomeMovingAverageLoading,
-  } = useTransactionTrends();
+  const currentMonthExpenses = useCurrentMonthTransactions('expense');
+  const currentMonthIncome = useCurrentMonthTransactions('income');
+  const { data: currentMonthSpendMovingAverage, loading: currentMonthSpendMovingAverageLoading } = useMovingAverage('expense');
+  const { data: currentMonthIncomeMovingAverage, loading: currentMonthIncomeMovingAverageLoading } = useMovingAverage('income');
 
   const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
   
@@ -91,7 +88,6 @@ export default function DashboardPage() {
         </Card>
 
         <MoMTrends
-          loading={currentMonthExpenses.transactions.length === 0 || currentMonthIncome.transactions.length === 0}
           currentMonthExpenses={currentMonthExpenses}
           currentMonthIncome={currentMonthIncome}
           currentMonthIncomeMovingAverage={currentMonthIncomeMovingAverage}

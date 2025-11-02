@@ -80,7 +80,7 @@ export function getPercentChangeForCurrentDay({
   const change = ((totalThisMonth - averageSpendOnCurrentDay) / averageSpendOnCurrentDay) * 100;
   const roundedChange = Math.round(change * 10) / 10;
   if (!isFinite(change)) {
-    return 100;
+    return 0;
   }
   return roundedChange || 0;
 }
