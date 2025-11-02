@@ -73,10 +73,6 @@ export default function DashboardPage() {
           </Button>
         </Stack>
       </Modal>
-
-      <div className="flex-shrink-0 mb-4">
-        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      </div>
       
       <div className="flex flex-col gap-4">
         <Card>
