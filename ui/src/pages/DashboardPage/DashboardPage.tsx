@@ -27,15 +27,10 @@ export default function DashboardPage() {
   const {
     currentMonthExpenses,
     currentMonthIncome,
-    previousMonthExpenses,
-    previousMonthIncome,
-    expenseMonthsBack,
-    incomeMonthsBack,
     currentMonthSpendMovingAverage,
     currentMonthIncomeMovingAverage,
     currentMonthSpendMovingAverageLoading,
     currentMonthIncomeMovingAverageLoading,
-    setMonthsBack,
   } = useTransactionTrends();
 
   const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
@@ -96,7 +91,7 @@ export default function DashboardPage() {
         </Card>
 
         <MoMTrends
-          loading={currentMonthExpenses.transactions.length === 0 || previousMonthExpenses.transactions.length === 0 || currentMonthIncome.transactions.length === 0 || previousMonthIncome.transactions.length === 0}
+          loading={currentMonthExpenses.transactions.length === 0 || currentMonthIncome.transactions.length === 0}
           currentMonthExpenses={currentMonthExpenses}
           currentMonthIncome={currentMonthIncome}
           currentMonthIncomeMovingAverage={currentMonthIncomeMovingAverage}
@@ -125,10 +120,8 @@ export default function DashboardPage() {
           </Group>
           <MonthlyLineChart
             currentMonthTransactions={currentMonthExpenses.transactions}
-            previousMonthTransactions={currentMonthSpendMovingAverage}
+            transactionMovingAverage={currentMonthSpendMovingAverage}
             transactionType="expense"
-            monthsBack={expenseMonthsBack}
-            onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'expense' })}
           />
         </Card>
 
@@ -139,10 +132,8 @@ export default function DashboardPage() {
           </Group>
           <MonthlyLineChart
             currentMonthTransactions={currentMonthIncome.transactions}
-            previousMonthTransactions={currentMonthIncomeMovingAverage}
+            transactionMovingAverage={currentMonthIncomeMovingAverage}
             transactionType="income"
-            monthsBack={incomeMonthsBack}
-            onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'income' })}
           />
         </Card>
       </div>

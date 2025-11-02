@@ -27,15 +27,6 @@ class DataController < ApplicationController
     render 'data/index'
   end
 
-  # GET /api/data/average_income
-  def average_income
-    months_back = params[:months_back] || 1
-    @average_income = MonthlySpendService.new(current_user.id)
-      .average_income_for_months_back(months_back: months_back)
-
-    render json: { average: @average_income }
-  end
-  
   # GET /api/data/spend_moving_average
   def spend_moving_average
     @spend_moving_average = MonthlySpendService.new(current_user.id).moving_average(months_back: 6, transaction_type: 'expense')
