@@ -60,14 +60,14 @@ API_IMAGE="${REGISTRY}/${API_IMAGE_NAME}:${GIT_HASH}-${NEW_VERSION}"
 UI_IMAGE="${REGISTRY}/${UI_IMAGE_NAME}:${GIT_HASH}-${NEW_VERSION}"
 log_info "Revision for build: $GIT_HASH"
 log_info "Version for build: $NEW_VERSION"
-log_info "API imag name will be: $API_IMAGE"
+log_info "API image name will be: $API_IMAGE"
 log_info "UI image name will be: $UI_IMAGE"
 
 print_new_line
 
 # Build the API Image
 log_info "Building API image..."
-docker build -t "$API_IMAGE" -f Dockerfile.api . #> /dev/null 2>&1
+docker build -t "$API_IMAGE" -f Dockerfile.api . > /dev/null 2>&1
 log_success "API image built"
 
 # Build the UI Image
