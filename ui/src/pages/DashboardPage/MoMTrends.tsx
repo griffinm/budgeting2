@@ -60,8 +60,8 @@ export function MoMTrends({
   const arrowSize = 40;
   const incomeArrow = incomeArrowDirection === 'up' ? <IconArrowUp size={arrowSize} color="green" /> : <IconArrowDown size={arrowSize} color="red" />;
   const expenseArrow = expenseArrowDirection === 'up' ? <IconArrowDown size={arrowSize} color="green" /> : <IconArrowUp size={arrowSize} color="red" />;
-  const incomeText = incomeChange > 0 ? 'Income: Up' : 'Income: Down';
-  const expenseText = expenseChange > 0 ? 'Expenses: Up' : 'Expenses: Down';
+  const incomeText = incomeChange > 0 ? 'Income Is Up' : 'Income Is Down';
+  const expenseText = expenseChange > 0 ? 'Expenses Are Up' : 'Expenses Are Down';
 
   return (  
     <Card>
@@ -69,7 +69,7 @@ export function MoMTrends({
         <IconTrendingUp size={20} />
         <Text fw={600}>Transaction Trends</Text>
       </Group>
-      <div className="grid grid-cols-2 gap-4 w-full sm:w-1/2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
         <ColorBox>
           <div className="flex flex-col gap-2 justify-between items-center p-4">
             <h2 className="text-lg text-gray-500">{expenseText}</h2>
@@ -77,7 +77,7 @@ export function MoMTrends({
               {expenseArrow} {expenseChange + '%'}
             </div>
             <Text size="sm" c="dimmed" ta="center">
-              Average: <Currency amount={getAverageSpendOnCurrentDay(currentMonthSpendMovingAverage)} applyColor={false} useBold={false} showCents={false} />
+              Average By This Day: <Currency amount={getAverageSpendOnCurrentDay(currentMonthSpendMovingAverage)} applyColor={false} useBold={false} showCents={false} />
             </Text>
             <Text size="sm" c="dimmed" ta="center">
               Current: <Currency amount={currentExpense} applyColor={false} useBold={false} showCents={false} />
@@ -91,7 +91,7 @@ export function MoMTrends({
               {incomeArrow} {incomeChange + '%'}
             </div>
             <Text size="sm" c="dimmed" ta="center">
-              Average: <Currency amount={getAverageSpendOnCurrentDay(currentMonthIncomeMovingAverage)} applyColor={false} useBold={false} showCents={false} />
+              Average By This Day: <Currency amount={getAverageSpendOnCurrentDay(currentMonthIncomeMovingAverage)} applyColor={false} useBold={false} showCents={false} />
             </Text>
             <Text size="sm" c="dimmed" ta="center">
               Current: <Currency amount={currentIncome} applyColor={false} useBold={false} showCents={false} />
