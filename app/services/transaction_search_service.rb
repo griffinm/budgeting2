@@ -45,7 +45,14 @@ class TransactionSearchService < BaseService
     end
     
     transactions = @user.plaid_transactions.joins(:plaid_account, :merchant)
-      .includes(:plaid_account, :merchant, :merchant_tag, merchant: :default_merchant_tag)
+      .includes(
+        :plaid_account, 
+        :merchant_tag, 
+        merchant: [
+          :default_merchant_tag,
+          { merchant_group: [:primary_merchant, :merchants] }
+        ]
+      )
       .order(date: :desc)
       
     if @merchant_group_id.present? || @merchant_id.present?
