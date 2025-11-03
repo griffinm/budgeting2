@@ -6,8 +6,9 @@ import {
   MerchantSearchParams,
   updateMerchant as updateMerchantApi,
   UpdateMerchantParams,
+  fetchMerchantSpendStats as fetchMerchantSpendStatsApi,
 } from '@/api';
-import { Page, Merchant } from '@/utils/types';
+import { Page, Merchant, MerchantSpendStats } from '@/utils/types';
 
 interface MerchantState {
   merchants: Merchant[];
@@ -18,6 +19,7 @@ interface MerchantState {
   page: Page;
   setPage: (page: number) => void;
   updateMerchant: (params: UpdateMerchantParams) => void;
+  fetchMerchantSpendStats: (params: { id: number; monthsBack: number }) => Promise<MerchantSpendStats>;
 }
 
 export const useMerchants = ({ 
@@ -38,6 +40,9 @@ export const useMerchants = ({
     },
     setPage: () => {},
     updateMerchant: () => {},
+    fetchMerchantSpendStats: async () => {
+      return {} as MerchantSpendStats;
+    },
   });
 
   const getMerchants = useCallback(async (searchParamsOverride?: MerchantSearchParams, pageOverride?: number) => {
@@ -72,6 +77,10 @@ export const useMerchants = ({
       }));
     }
   }, []);
+
+  const fetchMerchantSpendStats = async ({ id, monthsBack }: { id: number; monthsBack: number }): Promise<MerchantSpendStats> => {
+    return await fetchMerchantSpendStatsApi({ id, monthsBack });
+   };
 
   const setSearchParams = useCallback((newParams: MerchantSearchParams) => {
     const updatedSearchParams = { ...state.searchParams, ...newParams };
@@ -114,5 +123,6 @@ export const useMerchants = ({
     setSearchParams,
     setPage,
     updateMerchant,
+    fetchMerchantSpendStats,
   };
 }

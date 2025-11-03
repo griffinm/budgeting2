@@ -30,10 +30,12 @@ class MerchantsController < ApplicationController
   def spend_stats
     months_back = (params[:months_back] || 6).to_i
     merchant_id = params[:merchant_id]
-    merchant_service = MerchantSpendService.new(merchant_id: merchant_id, current_user: current_user)
+    merchant = current_user.account.merchants.find(merchant_id)
+    merchant_service = MerchantSpendService.new(merchant: merchant, current_user: current_user)
 
     render json: {
-      monthlySpend: merchant_service.monthly_spend(months_back: months_back),
+      monthsBack: months_back,
+      monthlySpend: merchant_service.monthly_spend(months_back: months_back, include_group: true),
       allTimeSpend: (merchant_service.all_time_spend || 0).abs,
     }
   end

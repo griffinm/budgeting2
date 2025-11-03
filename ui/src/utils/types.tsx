@@ -143,6 +143,7 @@ export interface MerchantSpendMonth {
 }
 
 export interface MerchantSpendStats {
+  monthsBack: number;
   monthlySpend: MerchantSpendMonth[];
   allTimeSpend: number;
 }
