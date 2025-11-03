@@ -11,8 +11,7 @@ export function DayHeader({
   const transactionCount = transactions.length;
   const filteredTransactions = transactions.filter((transaction) => {
     const isNotTransfer = transaction.transactionType !== 'transfer';
-    const isNotPending = !transaction.pending;
-    return isNotTransfer && isNotPending;
+    return isNotTransfer
   });
   const totalAmount = filteredTransactions.reduce((acc, transaction) => acc + (transaction.amount * -1), 0);
 
