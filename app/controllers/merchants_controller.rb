@@ -13,7 +13,7 @@ class MerchantsController < ApplicationController
 
   # GET /api/merchants/:id
   def show
-    @merchant = current_user.account.merchants.includes(:merchant_tags, merchant_group: :merchants).find(params[:id])
+    @merchant = current_user.account.merchants.includes(:merchant_tag, merchant_group: :merchants).find(params[:id])
   end
 
   # PATCH /api/merchants/:id
