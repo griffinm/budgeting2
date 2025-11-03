@@ -7,7 +7,7 @@ import { urls } from "@/utils/urls";
 import { Link } from "@/components/Link";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { Logo } from "./Logo";
-import { Badge, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
 import { IconClock } from "@tabler/icons-react";
 
 export function TableRow({
