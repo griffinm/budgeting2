@@ -33,13 +33,13 @@ export function MoMTrends({
   const currentDay = new Date().getDate();
   const incomeChange = getPercentChangeForCurrentDay({
     transactionsThisMonth: currentMonthIncome.transactions,
-    averageSpendOnCurrentDay: getAverageForCurrentDay(currentMonthIncomeMovingAverage)?.cumulativeAveragePerDay || 0,
+    averageSpendOnCurrentDay: getAverageForCurrentDay(currentMonthIncomeMovingAverage)?.cumulativeTotal || 0,
     currentDay: currentDay,
     transactionType: 'income',
   });
   const expenseChange = getPercentChangeForCurrentDay({
     transactionsThisMonth: currentMonthExpenses.transactions,
-    averageSpendOnCurrentDay: getAverageForCurrentDay(currentMonthSpendMovingAverage)?.cumulativeAveragePerDay || 0,
+    averageSpendOnCurrentDay: getAverageForCurrentDay(currentMonthSpendMovingAverage)?.cumulativeTotal || 0,
     currentDay: currentDay,
     transactionType: 'expense',
   });
@@ -63,8 +63,8 @@ export function MoMTrends({
   const expenseArrow = expenseArrowDirection === 'up' ? <IconArrowDown size={arrowSize} color="green" /> : <IconArrowUp size={arrowSize} color="red" />;
   const incomeText = incomeChange > 0 ? 'Income Is Up' : 'Income Is Down';
   const expenseText = expenseChange > 0 ? 'Expenses Are Up' : 'Expenses Are Down';
-  const expenseAverageForToday = getAverageForCurrentDay(currentMonthSpendMovingAverage)?.cumulativeAveragePerDay || 0;
-  const incomeAverageForToday = getAverageForCurrentDay(currentMonthIncomeMovingAverage)?.cumulativeAveragePerDay || 0;
+  const expenseAverageForToday = getAverageForCurrentDay(currentMonthSpendMovingAverage)?.cumulativeTotal || 0;
+  const incomeAverageForToday = getAverageForCurrentDay(currentMonthIncomeMovingAverage)?.cumulativeTotal || 0;
 
   return (  
     <Card>
