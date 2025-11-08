@@ -44,7 +44,9 @@ class TransactionSearchService < BaseService
       return { errors: errors }
     end
     
-    transactions = @user.plaid_transactions.joins(:plaid_account, :merchant)
+    transactions = @user.plaid_transactions
+      .not_pending
+      .joins(:plaid_account, :merchant)
       .includes(
         :plaid_account, 
         :merchant_tag, 
@@ -88,21 +90,10 @@ class TransactionSearchService < BaseService
     end
 
     if @start_date.present? || @end_date.present?
-      # Dates are stored in UTC but represent the user's timezone
-      # Convert the date range to UTC based on user's timezone
-      user_timezone = ActiveSupport::TimeZone[@user.time_zone] || Time.zone
-      
-      start_time = if @start_date.present?
-        user_timezone.parse(@start_date.to_s).beginning_of_day.utc
-      else
-        nil
-      end
-      
-      end_time = if @end_date.present?
-        user_timezone.parse(@end_date.to_s).end_of_day.utc
-      else
-        nil
-      end
+      # Simple date filtering without timezone conversion
+      # Dates are compared directly as stored in the database
+      start_time = @start_date.present? ? Date.parse(@start_date.to_s).beginning_of_day : nil
+      end_time = @end_date.present? ? Date.parse(@end_date.to_s).end_of_day : nil
       
       if start_time && end_time
         transactions = transactions.where(date: start_time..end_time)
@@ -132,10 +123,6 @@ class TransactionSearchService < BaseService
     if @plaid_account_ids.present? && @plaid_account_ids.is_a?(Array) && @plaid_account_ids.any?
       transactions = transactions.where(plaid_account_id: @plaid_account_ids)
     end
-
-    # Convert dates back to user's timezone without changing the actual time
-    # This re-interprets the UTC times as being in the user's local timezone
-    convert_transaction_dates_to_user_timezone(transactions)
     
     transactions
   end
@@ -155,39 +142,5 @@ class TransactionSearchService < BaseService
     end
 
     errors
-  end
-
-  private def convert_transaction_dates_to_user_timezone(transactions)
-    # Get user's timezone
-    user_timezone = ActiveSupport::TimeZone[@user.time_zone] || Time.zone
-    
-    # Convert each transaction's date to user's timezone without changing the time
-    transactions.each do |transaction|
-      if transaction.date.present?
-        utc_time = transaction.date.utc
-        # Re-interpret the UTC time as being in the user's timezone
-        # This keeps the same clock time but changes the zone
-        transaction.date = user_timezone.local(
-          utc_time.year,
-          utc_time.month,
-          utc_time.day,
-          utc_time.hour,
-          utc_time.min,
-          utc_time.sec
-        )
-      end
-      
-      if transaction.authorized_at.present?
-        utc_time = transaction.authorized_at.utc
-        transaction.authorized_at = user_timezone.local(
-          utc_time.year,
-          utc_time.month,
-          utc_time.day,
-          utc_time.hour,
-          utc_time.min,
-          utc_time.sec
-        )
-      end
-    end
   end
 end

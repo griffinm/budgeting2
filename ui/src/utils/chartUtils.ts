@@ -50,14 +50,31 @@ export function getDailyRunningTotal({
   toDay: number;
   transactionType: TransactionType;
 }): number {
+  // Get current month and year for validation
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // JavaScript months are 0-indexed
+  const currentYear = now.getFullYear();
+  
   const t = transactions
     .filter((transaction) => {
-      const transactionDay = parseInt(transaction.date.split("-")[2].split("T")[0])
-      return transactionDay <= toDay && transaction.transactionType === transactionType;
+      // Parse the date string to get year, month, and day
+      // Format could be "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS"
+      const dateParts = transaction.date.split("T")[0].split("-");
+      const transactionYear = parseInt(dateParts[0]);
+      const transactionMonth = parseInt(dateParts[1]);
+      const transactionDay = parseInt(dateParts[2]);
+      
+      // Ensure transaction is from current month/year and on or before toDay
+      return (
+        transactionYear === currentYear &&
+        transactionMonth === currentMonth &&
+        transactionDay <= toDay &&
+        transaction.transactionType === transactionType
+      );
     })
-    const total = t.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
-
-    return Math.round(total * 100) / 100;
+  
+  const total = t.reduce((sum, transaction) => sum + Math.abs(transaction.amount), 0);
+  return Math.round(total * 100) / 100;
 }
 
 export function getPercentChangeForCurrentDay({

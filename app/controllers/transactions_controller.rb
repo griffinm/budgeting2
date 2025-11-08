@@ -2,25 +2,33 @@ class TransactionsController < ApplicationController
 
   # GET /transactions
   def index
+      page_num = pagination_params[:page]
+      items_per_page = pagination_params[:per_page]
+      
+      transactions_query = TransactionSearchService.new(
+        account_id: current_user.account_id,
+        user_id: current_user.id,
+        start_date: search_params[:start_date],
+        end_date: search_params[:end_date],
+        merchant_id: search_params[:merchant_id],
+        merchant_name: search_params[:merchant_name],
+        transaction_type: search_params[:transaction_type],
+        check_number: search_params[:check_number],
+        search_term: search_params[:search_term],
+        amount_greater_than: search_params[:amount_greater_than],
+        amount_less_than: search_params[:amount_less_than],
+        amount_equal_to: search_params[:amount_equal_to],
+        has_no_category: search_params[:has_no_category],
+        merchant_tag_id: search_params[:merchant_tag_id],
+        merchant_group_id: search_params[:merchant_group_id],
+        plaid_account_ids: search_params[:plaid_account_ids],
+      ).call
+      
       @page, @transactions = pagy(
-        TransactionSearchService.new(
-          account_id: current_user.account_id,
-          user_id: current_user.id,
-          start_date: search_params[:start_date],
-          end_date: search_params[:end_date],
-          merchant_id: search_params[:merchant_id],
-          merchant_name: search_params[:merchant_name],
-          transaction_type: search_params[:transaction_type],
-          check_number: search_params[:check_number],
-          search_term: search_params[:search_term],
-          amount_greater_than: search_params[:amount_greater_than],
-          amount_less_than: search_params[:amount_less_than],
-          amount_equal_to: search_params[:amount_equal_to],
-          has_no_category: search_params[:has_no_category],
-          merchant_tag_id: search_params[:merchant_tag_id],
-          merchant_group_id: search_params[:merchant_group_id],
-          plaid_account_ids: search_params[:plaid_account_ids],
-        ).call
+        transactions_query,
+        items: items_per_page,
+        page: page_num,
+        limit: items_per_page
       )
   end
 
@@ -71,6 +79,8 @@ class TransactionsController < ApplicationController
       :has_no_category,
       :merchant_tag_id,
       :merchant_group_id,
+      :page,
+      :per_page,
       plaid_account_ids: [],
     )
   end

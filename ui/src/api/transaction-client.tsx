@@ -35,7 +35,9 @@ export const getTransactions = async ({
 }: {
   params: TransactionSearchParams;
 }): Promise<PageResponse<Transaction>> => {
-  const response = await baseClient.get(`/transactions?${queryStringFromObject({...params})}&page=${params.page || 1}`);
+  const queryString = queryStringFromObject({...params});
+  const url = `/transactions?${queryString}&page=${params.page || 1}`;
+  const response = await baseClient.get(url);
   return response.data;
 }; 
 

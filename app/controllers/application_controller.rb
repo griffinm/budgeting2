@@ -2,12 +2,14 @@ include Pagy::Backend
 
 class ApplicationController < ActionController::API
   before_action :require_authenticated_user!
-  before_action :set_pagination_params
 
   def pagination_params
+    page_value = params[:currentPage] || params[:page] || 1
+    per_page_value = params[:perPage] || params[:per_page] || 25
+    
     {
-      page: params[:page] || 1,
-      per_page: params[:per_page] || 25
+      page: page_value.to_i,
+      per_page: per_page_value.to_i
     }
   end
 
@@ -22,15 +24,6 @@ class ApplicationController < ActionController::API
     end
 
     return true
-  end
-  
-  def set_pagination_params
-    @page = params[:currentPage] || 1
-    @per_page = params[:perPage] || 25
-    request.params.delete(:currentPage)
-    request.params.delete(:perPage)
-    request.params[:page] = @page
-    request.params[:per_page] = @per_page
   end
 
   def get_user

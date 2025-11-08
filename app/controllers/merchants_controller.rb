@@ -7,7 +7,9 @@ class MerchantsController < ApplicationController
         search_term: params[:search_term],
         merchant_tag_id: params[:merchant_tag_id],
         merchant_group_id: params[:merchant_group_id],
-      ).call
+      ).call,
+      page: pagination_params[:page],
+      items: pagination_params[:per_page]
     )
   end
 
