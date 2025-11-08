@@ -22,7 +22,7 @@ export function MonthlyLineChart({
     currentYear,
     transactionType,
   });
-
+  console.log(dailyTotals);
   return (
     <div className="flex flex-col gap-4">
       <LineChart
@@ -31,7 +31,7 @@ export function MonthlyLineChart({
         data={dailyTotals}
         strokeWidth={3}
         dataKey="day"
-        curveType="step"
+        curveType="natural"
         withDots={false}
         yAxisLabel={transactionType === 'expense' ? 'Expenses' : 'Income'}
         xAxisLabel="Day of Month"

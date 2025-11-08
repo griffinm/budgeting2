@@ -1,7 +1,7 @@
 import { MovingAverage, Transaction, TransactionType } from "@/utils/types";
 
 export interface DailyTotal {
-  currentMonth: number;
+  currentMonth: number | null;
   previousMonth: number;
   day: number;
 }
@@ -21,13 +21,21 @@ export function transactionArrayToDailySeries({
 }): DailyTotal[] {
   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
   const dailyTotals: DailyTotal[] = [];
+  const today = new Date();
+  const currentDay = today.getDate();
+  const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
 
   for (let day = 1; day <= daysInMonth; day++) {
-    const currentMonthToDayTotal = getDailyRunningTotal({
-      transactions: currentMonthTransactions,
-      toDay: day,
-      transactionType,
-    });
+    // Only show current month data up to today
+    const shouldShowCurrentMonth = !isCurrentMonth || day <= currentDay;
+    
+    const currentMonthToDayTotal = shouldShowCurrentMonth 
+      ? getDailyRunningTotal({
+          transactions: currentMonthTransactions,
+          toDay: day,
+          transactionType,
+        })
+      : null;
 
     const previousMonthToDayTotal = transactionMovingAverage?.find((item) => item.dayOfMonth === day)?.cumulativeTotal || 0;
 
