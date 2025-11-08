@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { urls } from '@/utils/urls';
-import { useTransactionTrends } from './useTransactionTrends';
+import { useCurrentMonthTransactions } from './useCurrentMonthTransactions';
+import { useMovingAverage } from './useMovingAverage';
 import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
@@ -24,17 +25,10 @@ export default function DashboardPage() {
     setMonthsBack: setProfitAndLossMonthsBack,
   } = useProfitAndLoss();
 
-  const {
-    currentMonthExpenses,
-    currentMonthIncome,
-    previousMonthExpenses,
-    previousMonthIncome,
-    averageExpense,
-    averageIncome,
-    expenseMonthsBack,
-    incomeMonthsBack,
-    setMonthsBack,
-  } = useTransactionTrends();
+  const currentMonthExpenses = useCurrentMonthTransactions('expense');
+  const currentMonthIncome = useCurrentMonthTransactions('income');
+  const { data: currentMonthSpendMovingAverage, loading: currentMonthSpendMovingAverageLoading } = useMovingAverage('expense');
+  const { data: currentMonthIncomeMovingAverage, loading: currentMonthIncomeMovingAverageLoading } = useMovingAverage('income');
 
   const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
   
@@ -79,10 +73,6 @@ export default function DashboardPage() {
           </Button>
         </Stack>
       </Modal>
-
-      <div className="flex-shrink-0 mb-4">
-        <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-      </div>
       
       <div className="flex flex-col gap-4">
         <Card>
@@ -94,11 +84,12 @@ export default function DashboardPage() {
         </Card>
 
         <MoMTrends
-          loading={currentMonthExpenses.transactions.length === 0 || previousMonthExpenses.transactions.length === 0 || currentMonthIncome.transactions.length === 0 || previousMonthIncome.transactions.length === 0}
           currentMonthExpenses={currentMonthExpenses}
-          previousMonthExpenses={previousMonthExpenses}
           currentMonthIncome={currentMonthIncome}
-          previousMonthIncome={previousMonthIncome}
+          currentMonthIncomeMovingAverage={currentMonthIncomeMovingAverage}
+          currentMonthSpendMovingAverage={currentMonthSpendMovingAverage}
+          currentMonthSpendMovingAverageLoading={currentMonthSpendMovingAverageLoading}
+          currentMonthIncomeMovingAverageLoading={currentMonthIncomeMovingAverageLoading}
         />
 
         <Card>
@@ -120,13 +111,10 @@ export default function DashboardPage() {
             <Text fw={600}>Monthly Spend</Text>
           </Group>
           <MonthlyLineChart
-          currentMonthTransactions={currentMonthExpenses.transactions}
-          previousMonthTransactions={previousMonthExpenses.transactions}
-          transactionType="expense"
-          average={averageExpense}
-          monthsBack={expenseMonthsBack}
-          onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'expense' })}
-        />
+            currentMonthTransactions={currentMonthExpenses.transactions}
+            transactionMovingAverage={currentMonthSpendMovingAverage}
+            transactionType="expense"
+          />
         </Card>
 
         <Card>
@@ -136,11 +124,8 @@ export default function DashboardPage() {
           </Group>
           <MonthlyLineChart
             currentMonthTransactions={currentMonthIncome.transactions}
-            previousMonthTransactions={previousMonthIncome.transactions}
+            transactionMovingAverage={currentMonthIncomeMovingAverage}
             transactionType="income"
-            average={averageIncome}
-            monthsBack={incomeMonthsBack}
-            onChangeMonthsBack={(value) => setMonthsBack({ monthsBack: value, transactionType: 'income' })}
           />
         </Card>
       </div>

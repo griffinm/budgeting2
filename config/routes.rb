@@ -63,11 +63,10 @@ Rails.application.routes.draw do
 
     resources :data, only: [] do
       collection do
-        get "monthly_spend", to: "data#monthly_spend"
-        get "monthly_income", to: "data#monthly_income"
-        get "average_income", to: "data#average_income"
-        get "average_expense", to: "data#average_expense"
+        get "total_for_date_range", to: "data#total_for_date_range"
         get "profit_and_loss", to: "data#profit_and_loss"
+        get "spend_moving_average", to: "data#spend_moving_average"
+        get "income_moving_average", to: "data#income_moving_average"
       end
     end
 

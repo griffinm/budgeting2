@@ -1,6 +1,6 @@
 class MerchantSpendService < BaseService
-  def initialize(merchant_id:, current_user:)
-    @merchant = current_user.account.merchants.find(merchant_id)
+  def initialize(merchant:, current_user:)
+    @merchant = merchant
 
     if @merchant.nil?
       raise ActiveRecord::RecordNotFound, "Merchant not found"
@@ -11,12 +11,20 @@ class MerchantSpendService < BaseService
     @merchant.plaid_transactions.sum(:amount)
   end
 
-  def monthly_spend(months_back: 6)
-    data = @merchant.plaid_transactions
-      .where(date: months_back.months.ago..Time.current)
-      .group_by { |t| t.date.strftime('%Y-%m') }
-      .map { |month, transactions| [month, transactions.sum(&:amount)] }
-      .to_h
+  def monthly_spend(months_back: 6, include_group: false)
+    if include_group
+      data = @merchant.merchant_group.all_transactions
+        .where(date: months_back.months.ago..Time.current)
+        .group_by { |t| t.date.strftime('%Y-%m') }
+        .map { |month, transactions| [month, transactions.sum(&:amount)] }
+        .to_h
+    else
+      data = @merchant.group_transactions
+        .where(date: months_back.months.ago..Time.current)
+        .group_by { |t| t.date.strftime('%Y-%m') }
+        .map { |month, transactions| [month, transactions.sum(&:amount)] }
+        .to_h
+    end
 
     # Make sure all months are present
     start_month = months_back.months.ago.beginning_of_month

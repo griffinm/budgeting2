@@ -108,7 +108,6 @@ export interface Transaction {
   paymentChannel: string | null;
   transactionType: TransactionType;
   checkNumber: string | null;
-  currencyCode: string;
   merchant: Merchant;
   plaidAccount: PlaidAccount;
   merchantTag?: MerchantTag | null;
@@ -144,6 +143,7 @@ export interface MerchantSpendMonth {
 }
 
 export interface MerchantSpendStats {
+  monthsBack: number;
   monthlySpend: MerchantSpendMonth[];
   allTimeSpend: number;
 }
@@ -207,4 +207,18 @@ export interface MerchantTagSpendStats {
 export interface PageRequestParams {
   page: number;
   perPage: number;
+}
+
+export interface MovingAverage {
+  dayOfMonth: number;
+  dayAverage: number;
+  cumulativeTotal: number;
+  cumulativeAveragePerDay: number;
+}
+
+export interface TotalForDateRange {
+  transactionType: TransactionType;
+  startDate: Date;
+  endDate: Date;
+  total: number;
 }

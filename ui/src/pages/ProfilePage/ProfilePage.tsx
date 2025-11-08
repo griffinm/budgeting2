@@ -64,8 +64,6 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-5">Profile</h1>
-
       <Card className="max-w-sm">
         <Errors errors={error} />
         {success && <Alert color="green" title="Success">Profile updated successfully</Alert>}

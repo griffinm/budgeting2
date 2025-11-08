@@ -11,7 +11,7 @@ json.array! @merchant_groups do |group|
     json.customName group.primary_merchant.custom_name
   end
   
-  json.merchantCount group.merchants.count
+  json.merchantCount group.merchants.length
   
   json.merchants group.merchants do |merchant|
     json.id merchant.id

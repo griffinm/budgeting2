@@ -3,10 +3,9 @@ class Merchant < ApplicationRecord
 
   belongs_to :account
   belongs_to :merchant_group, optional: true
-  has_many :merchants_merchant_tags, dependent: :destroy
-  has_many :merchant_tags, through: :merchants_merchant_tags
   has_many :plaid_transactions
   belongs_to :default_merchant_tag, class_name: 'MerchantTag', optional: true
+  belongs_to :merchant_tag, optional: true
   
   # Merchant group relationships
   has_many :merchant_group_memberships, dependent: :destroy

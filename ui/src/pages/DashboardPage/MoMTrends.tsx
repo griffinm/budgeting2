@@ -1,37 +1,58 @@
 import { ColorBox } from "@/components/ColorBox";
 import { Card, Group, Text } from "@mantine/core";
 import { IconArrowUp, IconArrowDown, IconTrendingUp } from "@tabler/icons-react";
-import { getPercentChangeForCurrentDay } from "@/utils/chartUtils";
-import { MonthlyTransactions } from "./useTransactionTrends";
+import { getDailyRunningTotal, getPercentChangeForCurrentDay } from "@/utils/chartUtils";
+import { MovingAverage } from "@/utils/types";
+import { getAverageForCurrentDay } from "@/utils/movingAverageUtils";
+import { Currency } from "@/components/Currency";
+import { MonthlyTransactions } from "./useCurrentMonthTransactions";
 
 export function MoMTrends({
   currentMonthExpenses,
-  previousMonthExpenses,
   currentMonthIncome,
-  previousMonthIncome,
+  currentMonthIncomeMovingAverage,
+  currentMonthSpendMovingAverage,
+  currentMonthSpendMovingAverageLoading,
+  currentMonthIncomeMovingAverageLoading,
 }: {
-  loading: boolean;
   currentMonthExpenses: MonthlyTransactions;
-  previousMonthExpenses: MonthlyTransactions;
   currentMonthIncome: MonthlyTransactions;
-  previousMonthIncome: MonthlyTransactions;
+  currentMonthIncomeMovingAverage: MovingAverage[];
+  currentMonthSpendMovingAverage: MovingAverage[];
+  currentMonthSpendMovingAverageLoading: boolean;
+  currentMonthIncomeMovingAverageLoading: boolean;
 }) {
-  const loading = currentMonthExpenses.loading || previousMonthExpenses.loading || currentMonthIncome.loading || previousMonthIncome.loading;
+  const loading = currentMonthExpenses.loading || 
+    currentMonthIncome.loading || 
+    currentMonthSpendMovingAverageLoading || 
+    currentMonthIncomeMovingAverageLoading;
 
   if (loading) {
     return;
   }
+  const currentDay = new Date().getDate();
   const incomeChange = getPercentChangeForCurrentDay({
     transactionsThisMonth: currentMonthIncome.transactions,
-    transactionsLastMonth: previousMonthIncome.transactions,
-    currentDay: new Date().getDate(),
+    averageSpendOnCurrentDay: getAverageForCurrentDay(currentMonthIncomeMovingAverage)?.cumulativeTotal || 0,
+    currentDay: currentDay,
     transactionType: 'income',
   });
   const expenseChange = getPercentChangeForCurrentDay({
     transactionsThisMonth: currentMonthExpenses.transactions,
-    transactionsLastMonth: previousMonthExpenses.transactions,
-    currentDay: new Date().getDate(),
+    averageSpendOnCurrentDay: getAverageForCurrentDay(currentMonthSpendMovingAverage)?.cumulativeTotal || 0,
+    currentDay: currentDay,
     transactionType: 'expense',
+  });
+ 
+  const currentExpense = getDailyRunningTotal({
+    transactions: currentMonthExpenses.transactions,
+    toDay: currentDay,
+    transactionType: 'expense',
+  });
+  const currentIncome = getDailyRunningTotal({
+    transactions: currentMonthIncome.transactions,
+    toDay: currentDay,
+    transactionType: 'income',
   });
 
   const incomeArrowDirection = incomeChange > 0 ? 'up' : 'down';
@@ -40,30 +61,45 @@ export function MoMTrends({
   const arrowSize = 40;
   const incomeArrow = incomeArrowDirection === 'up' ? <IconArrowUp size={arrowSize} color="green" /> : <IconArrowDown size={arrowSize} color="red" />;
   const expenseArrow = expenseArrowDirection === 'up' ? <IconArrowDown size={arrowSize} color="green" /> : <IconArrowUp size={arrowSize} color="red" />;
-  const incomeText = incomeChange > 0 ? 'Income: Up' : 'Income: Down';
-  const expenseText = expenseChange > 0 ? 'Expenses: Up' : 'Expenses: Down';
+  const incomeText = incomeChange > 0 ? 'Income Is Up' : 'Income Is Down';
+  const expenseText = expenseChange > 0 ? 'Expenses Are Up' : 'Expenses Are Down';
+  const expenseAverageForToday = getAverageForCurrentDay(currentMonthSpendMovingAverage)?.cumulativeTotal || 0;
+  const incomeAverageForToday = getAverageForCurrentDay(currentMonthIncomeMovingAverage)?.cumulativeTotal || 0;
 
   return (  
     <Card>
       <Group mb="md">
         <IconTrendingUp size={20} />
-        <Text fw={600}>Transaction Trends - Month over Month</Text>
+        <Text fw={600}>Transaction Trends</Text>
       </Group>
-      <div className="grid grid-cols-2 gap-4 w-full sm:w-1/2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
         <ColorBox>
           <div className="flex flex-col gap-2 justify-between items-center p-4">
             <h2 className="text-lg text-gray-500">{expenseText}</h2>
             <div className="text-3xl font-bold text-gray-500 flex flex-row gap-2">
-              {expenseArrow} {expenseChange + '%'}
+              {expenseArrow} {Math.abs(expenseChange || 0) + '%'}
             </div>
+            <Text size="sm" c="dimmed" ta="center">
+              Average By This Day: <Currency amount={expenseAverageForToday} applyColor={false} useBold={false} showCents={false} />
+            </Text>
+            <Text size="sm" c="dimmed" ta="center">
+              Current: <Currency amount={currentExpense} applyColor={false} useBold={false} showCents={false} />
+            </Text>
           </div>
         </ColorBox>
+
         <ColorBox>
           <div className="flex flex-col gap-2 justify-between items-center p-4">
             <h2 className="text-lg text-gray-500">{incomeText}</h2>
             <div className="text-3xl font-bold text-gray-500 flex flex-row gap-2">
-              {incomeArrow} {incomeChange + '%'}
+              {incomeArrow} {Math.abs(incomeChange || 0) + '%'}
             </div>
+            <Text size="sm" c="dimmed" ta="center">
+              Average By This Day: <Currency amount={incomeAverageForToday} applyColor={false} useBold={false} showCents={false} />
+            </Text>
+            <Text size="sm" c="dimmed" ta="center">
+              Current: <Currency amount={currentIncome} applyColor={false} useBold={false} showCents={false} />
+            </Text>
           </div>
         </ColorBox>
       </div>

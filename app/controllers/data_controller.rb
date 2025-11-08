@@ -1,49 +1,40 @@
 class DataController < ApplicationController
   before_action :format_params
 
-  # GET /api/data/monthly_spend
-  def monthly_spend
-    month = params[:month] || Date.today.month
-    year = params[:year] || Date.today.year
+  # GET /api/data/total_for_date_range
+  def total_for_date_range
+    transaction_type = params[:transaction_type] || 'expense'
+    start_date = params[:start_date] || Date.today - 1.month
+    end_date = params[:end_date] || Date.today
 
-    @transactions = PlaidTransaction.base_query_for_api(current_user.account.id)
-      .expense
-      .in_month(month, year)
+    amount = PlaidTransaction.base_query_for_api(current_user.account.id)
+      .send(transaction_type)
+      .where(date: start_date..end_date)
       .all
+      .sum(:amount)
 
-    render 'data/index'
+    render json: {
+      transactionType: transaction_type,
+      startDate: start_date,
+      endDate: end_date,
+      total: amount,
+    }
   end
 
-  # GET /api/data/monthly_income
-  def monthly_income
-    month = params[:month] || Date.today.month
-    year = params[:year] || Date.today.year
+  # GET /api/data/spend_moving_average
+  def spend_moving_average
+    @spend_moving_average = MonthlySpendService.new(current_user.id).moving_average(months_back: 6, transaction_type: 'expense')
 
-    @transactions = PlaidTransaction.base_query_for_api(current_user.account.id)
-      .income
-      .in_month(month, year)
-      .all
-
-    render 'data/index'
+    render json: @spend_moving_average
   end
 
-  # GET /api/data/average_income
-  def average_income
-    months_back = params[:months_back] || 1
-    @average_income = MonthlySpendService.new(current_user.id)
-      .average_income_for_months_back(months_back: months_back)
+  # GET /api/data/income_moving_average
+  def income_moving_average
+    @income_moving_average = MonthlySpendService.new(current_user.id).moving_average(months_back: 6, transaction_type: 'income')
 
-    render json: { average: @average_income }
+    render json: @income_moving_average
   end
 
-  # GET /api/data/average_expense
-  def average_expense
-    months_back = params[:months_back] || 1
-    @average_expense = MonthlySpendService.new(current_user.id)
-      .average_expense_for_months_back(months_back: months_back)
-
-    render json: { average: @average_expense }
-  end
 
   # GET /api/data/profit_and_loss
   def profit_and_loss

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_30_131825) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_02_174633) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -124,16 +124,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_30_131825) do
     t.index ["merchant_group_id"], name: "index_merchants_on_merchant_group_id"
   end
 
-  create_table "merchants_merchant_tags", force: :cascade do |t|
-    t.bigint "merchant_id", null: false
-    t.bigint "merchant_tag_id", null: false
-    t.datetime "deleted_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["merchant_id"], name: "index_merchants_merchant_tags_on_merchant_id"
-    t.index ["merchant_tag_id"], name: "index_merchants_merchant_tags_on_merchant_tag_id"
-  end
-
   create_table "plaid_access_tokens", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "token", null: false
@@ -239,8 +229,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_30_131825) do
   add_foreign_key "merchants", "accounts"
   add_foreign_key "merchants", "merchant_groups"
   add_foreign_key "merchants", "merchant_tags", column: "default_merchant_tag_id"
-  add_foreign_key "merchants_merchant_tags", "merchant_tags"
-  add_foreign_key "merchants_merchant_tags", "merchants"
   add_foreign_key "plaid_access_tokens", "accounts"
   add_foreign_key "plaid_accounts", "accounts"
   add_foreign_key "plaid_accounts", "plaid_access_tokens"

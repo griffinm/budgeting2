@@ -7,6 +7,8 @@ import { urls } from "@/utils/urls";
 import { Link } from "@/components/Link";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { Logo } from "./Logo";
+import { Tooltip } from "@mantine/core";
+import { IconClock } from "@tabler/icons-react";
 
 export function TableRow({
   transaction,
@@ -83,6 +85,26 @@ function CondensedTableRow({
   );
 }
 
+function PendingBadge() {
+  return (
+    <div className="hidden md:block cursor-pointer">
+      <Tooltip
+        withArrow
+        position="top"
+        color="yellow"
+        label={
+          <div>
+            <p>This transaction is pending.</p>
+            <p>Pending transactions are not yet confirmed by the bank. The amount is still subject to change.</p>
+          </div>
+        }
+      >
+        <IconClock className="w-4 h-4 text-yellow-500" />
+      </Tooltip>
+    </div>
+  )
+}
+
 function FullTableRow({
   transaction,
   updateTransaction,
@@ -96,9 +118,10 @@ function FullTableRow({
     <div className="w-full relative border-b border-gray-300 pt-2 hover:bg-gray-100 transition-colors">
       <div className="px-3 flex flex-row">
         <div className="flex flex-col w-1/3">
-          <span className="text-lg">
+          <div className="text-md sm:text-lg flex flex-row gap-2 items-center">
             <TransactionAmount amount={transaction.amount} />
-          </span>
+            {transaction.pending && <PendingBadge />}
+          </div>
 
           <span className="text-sm text-gray-500">
             {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}

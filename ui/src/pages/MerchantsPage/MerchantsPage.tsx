@@ -69,9 +69,6 @@ export default function MerchantsPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-shrink-0 mb-4">
-        <h1 className="text-2xl font-bold">Merchants</h1>
-      </div>
       <div className="flex justify-between mb-5">
         <Search 
           searchParams={searchParams} 

@@ -40,6 +40,6 @@ json.merchantGroup do
       json.customName group_merchant.custom_name
     end
     
-    json.merchantCount merchant.merchant_group.merchants.count
+    json.merchantCount merchant.merchant_group.merchants.length
   end
 end

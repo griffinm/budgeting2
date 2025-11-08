@@ -55,8 +55,12 @@ class PlaidTransaction < ApplicationRecord
   end
 
   def self.parse_plaid_transaction(plaid_transaction, account, plaid_account, plaid_sync_event)
-    date_string = plaid_transaction.datetime || plaid_transaction.date
-    date_obj = plaid_transaction.datetime.present? ? Time.iso8601(date_string) : date_string
+    date_string = (plaid_transaction.datetime || plaid_transaction.date).to_s
+    date_obj = plaid_transaction.datetime.present? ? Time.iso8601(date_string) : Date.parse(date_string).to_time
+    # If the date object is at 00:00:00, add 12 hours to it
+    if date_obj.hour == 0 && date_obj.min == 0 && date_obj.sec == 0
+      date_obj = date_obj + 12.hours
+    end
     
     {
       account_id: account.id,

@@ -45,7 +45,6 @@ export default function TransactionsPage() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex flex-col md:flex-row justify-between mb-3 flex-shrink-0">
-        <h1 className="text-2xl font-bold mb-4">Transactions</h1>
         <div className="small-text flex items-center gap-2">
           <div>
             {isSyncEventLoading ? <div>Loading...</div> : latestSyncEvent ? (

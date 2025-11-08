@@ -1,10 +1,19 @@
 class MerchantGroupsController < ApplicationController
   def index
-    @merchant_groups = current_user.account.merchant_groups.includes(:primary_merchant, :merchants)
+    @merchant_groups = current_user
+      .account
+      .merchant_groups
+      .includes(:primary_merchant, :merchants)
+      .joins(:primary_merchant, :merchants)
   end
 
   def show
-    @merchant_group = current_user.account.merchant_groups.includes(:merchants, :primary_merchant).find(params[:id])
+    @merchant_group = current_user
+      .account
+      .merchant_groups
+      .includes(:merchants, :primary_merchant)
+      .joins(:merchants, :primary_merchant)
+      .find(params[:id])
   end
 
   def create
