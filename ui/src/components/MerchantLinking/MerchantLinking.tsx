@@ -63,7 +63,7 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
 
     setLoading(true);
     try {
-      const result = await createMerchantGroup(merchant.id, {
+      await createMerchantGroup(merchant.id, {
         groupName: groupName.trim(),
         description: groupDescription.trim() || undefined
       });
@@ -77,7 +77,6 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
       await refreshMerchantData();
       
       // Show success message
-      console.log('Group created:', result.message);
     } catch (error) {
       console.error('Failed to create group:', error);
     } finally {
@@ -91,7 +90,6 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
       await addMerchantToGroup(groupId, merchant.id);
       await loadMerchantGroups();
       await refreshMerchantData();
-      console.log('Merchant added to group');
     } catch (error) {
       console.error('Failed to add merchant to group:', error);
     } finally {
@@ -107,7 +105,6 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
       await removeMerchantFromGroup(merchant.merchantGroup.id, merchant.id);
       await loadMerchantGroups();
       await refreshMerchantData();
-      console.log('Merchant removed from group');
     } catch (error) {
       console.error('Failed to remove merchant from group:', error);
     } finally {
@@ -123,7 +120,6 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
       await setPrimaryMerchant(merchant.merchantGroup.id, merchant.id);
       await loadMerchantGroups();
       await refreshMerchantData();
-      console.log('Merchant set as primary');
     } catch (error) {
       console.error('Failed to set primary merchant:', error);
     } finally {
@@ -141,7 +137,6 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
       setSelectedGroupId(null);
       await loadMerchantGroups();
       await refreshMerchantData();
-      console.log('Merchant added to existing group');
     } catch (error) {
       console.error('Failed to add merchant to existing group:', error);
     } finally {
