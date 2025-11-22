@@ -15,6 +15,7 @@ import { DateInput } from "@mantine/dates";
 import { TransactionModal } from "./TransactionModal";
 import { Link } from "react-router-dom";
 import { urls } from "@/utils/urls";
+import { Budget } from "./Budget";
 
 const defaultStartDate = startOfMonth(new Date());
 const defaultEndDate = endOfMonth(new Date());
@@ -58,24 +59,15 @@ export const View = () => {
 
   const renderTable = () => {
     return (
-      <Table highlightOnHover>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th>Total Transaction Amount</Table.Th>
-            <Table.Th></Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {merchantTags.map((tag) => (
-            <MerchantTagRow
-              key={tag.id}
-              tag={tag}
-              onViewTransactions={onViewTransactions}
-            />
-          ))}
-        </Table.Tbody>
-      </Table>
+      <div className="w-full flex flex-col overflow-x-auto">
+        {merchantTags.map((tag) => (
+          <MerchantTagRow
+            key={tag.id}
+            tag={tag}
+            onViewTransactions={onViewTransactions}
+          />
+        ))}
+      </div>
     )
   }
 
@@ -136,9 +128,9 @@ function MerchantTagRow({
   });
   
   return (
-    <>
-      <Table.Tr>
-        <Table.Td>
+    <div className="w-full flex flex-col hover:bg-gray-100 transition-colors">
+      <div className="flex flex-row w-full border-b border-gray-200 py-2 items-center">
+        <div className="flex flex-col w-1/3">
           <div onClick={() => setExpanded(!expanded)} className="flex items-center gap-2">
             {!hasChildren && (
               <span style={{ width: `${(expandedLevel * 25) + 27}px` }}></span>
@@ -168,16 +160,19 @@ function MerchantTagRow({
                 <Link to={urls.merchantTag.path(tag.id)}>{tag.name}</Link>
               </div>
           </div>
-        </Table.Td>
-        <Table.Td>
-          <TransactionAmount amount={tag.totalTransactionAmount || 0} />
-        </Table.Td>
-        <Table.Td>
+        </div>
+
+        <div className="flex flex-col w-1/3">
+          <Budget merchantTag={tag} />
+        </div>
+
+        <div className="flex flex-col w-1/3">
           <Button size="xs" variant="transparent" onClick={() => onViewTransactions(tag)}>
             View Transactions
           </Button>
-        </Table.Td>
-      </Table.Tr>
+        </div>
+      </div>
+
       {expanded && (
         <>
           {tag.children?.map((child) => (
@@ -190,6 +185,6 @@ function MerchantTagRow({
           ))}
         </>
       )}
-    </>
+    </div>
   );
 }
