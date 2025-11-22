@@ -68,10 +68,10 @@ class MerchantTagsController < ApplicationController
   private
 
   def update_params
-    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id)
+    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id, :target_budget)
   end
 
   def create_params
-    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id)
+    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id, :target_budget)
   end
 end

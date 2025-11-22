@@ -129,6 +129,7 @@ export interface MerchantTag {
   updatedAt: string;
   totalTransactionAmount?: number;
   children: MerchantTag[];
+  targetBudget?: number | null;
 }
 
 export interface MantineTreeNode {

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_02_174633) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_22_193146) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -94,6 +94,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_02_174633) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_leaf", default: false
+    t.decimal "target_budget", precision: 10, scale: 2
     t.index ["account_id"], name: "index_merchant_tags_on_account_id"
     t.index ["parent_merchant_tag_id"], name: "index_merchant_tags_on_parent_merchant_tag_id"
     t.index ["user_id"], name: "index_merchant_tags_on_user_id"
