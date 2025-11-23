@@ -16,7 +16,7 @@ class MerchantTagsController < ApplicationController
     if @merchant_tag.save
       render :show
     else
-      render json: { errors: @merchant_tag.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @merchant_tag.errors.full_messages }, status: :bad_request
     end
   end
 
@@ -26,7 +26,7 @@ class MerchantTagsController < ApplicationController
     if @merchant_tag.update(update_params)
       render :show
     else
-      render json: { errors: @merchant_tag.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @merchant_tag.errors.full_messages }, status: :bad_request
     end
   end
 
@@ -36,7 +36,7 @@ class MerchantTagsController < ApplicationController
     if @merchant_tag.destroy
       render json: { message: 'Merchant tag deleted' }, status: :ok
     else
-      render json: { errors: @merchant_tag.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @merchant_tag.errors.full_messages }, status: :bad_request
     end
   end
 
@@ -68,10 +68,10 @@ class MerchantTagsController < ApplicationController
   private
 
   def update_params
-    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id)
+    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id, :target_budget)
   end
 
   def create_params
-    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id)
+    params.require(:merchant_tag).permit(:name, :parent_merchant_tag_id, :target_budget)
   end
 end

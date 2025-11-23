@@ -1,5 +1,21 @@
 import { MerchantTag } from "./types";
 
+export function totalSpendForChildren(merchantTag: MerchantTag): number {
+  if (merchantTag.isLeaf) {
+    return Number(merchantTag.totalTransactionAmount) || 0;
+  }
+
+  return merchantTag.children.reduce((acc, child) => acc + totalSpendForChildren(child), 0);
+}
+
+export function totalBudgetForChildren(merchantTag: MerchantTag): number {
+  if (merchantTag.isLeaf) {
+    return Number(merchantTag.targetBudget) || 0;
+  }
+
+  return merchantTag.children.reduce((acc, child) => acc + totalBudgetForChildren(child), 0);
+}
+
 export function formatMerchantTagsAsTree({ merchantTags }: { merchantTags: MerchantTag[] }): MerchantTag[] {
   if (!merchantTags || merchantTags.length === 0) {
     return [];
@@ -19,8 +35,9 @@ export function formatMerchantTagsAsTree({ merchantTags }: { merchantTags: Merch
   // Second pass: Build the tree structure by assigning children to parents
   // This supports arbitrary nesting levels because we process all relationships
   const rootTags: MerchantTag[] = [];
-  
-  merchantTags.forEach(tag => {
+  const sortedTags = merchantTags.sort((a, b) => a.name.localeCompare(b.name));
+
+  sortedTags.forEach(tag => {
     const currentTag = tagMap.get(tag.id);
     if (!currentTag) return; // Safety check
     

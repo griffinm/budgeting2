@@ -22,7 +22,7 @@ export function MonthlyLineChart({
     currentYear,
     transactionType,
   });
-  console.log(dailyTotals);
+
   return (
     <div className="flex flex-col gap-4">
       <LineChart

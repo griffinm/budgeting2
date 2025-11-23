@@ -2,7 +2,7 @@ class PlaidAccountsController < ApplicationController
   skip_before_action :require_authenticated_user!, only: [:update_all]
 
   def index
-    @plaid_accounts = current_user.plaid_accounts.includes(:users)
+    @plaid_accounts = current_user.plaid_accounts.includes(:users).order(nickname: :desc).order(plaid_official_name: :asc)
   end
 
   # PATCH /api/plaid_accounts/:id

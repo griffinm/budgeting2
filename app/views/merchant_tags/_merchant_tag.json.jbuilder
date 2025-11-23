@@ -4,3 +4,5 @@ json.parentMerchantTagId merchant_tag.parent_merchant_tag_id
 json.color merchant_tag.color
 json.createdAt merchant_tag.created_at
 json.updatedAt merchant_tag.updated_at
+json.targetBudget merchant_tag.target_budget || 0
+json.isLeaf merchant_tag.is_leaf? || false

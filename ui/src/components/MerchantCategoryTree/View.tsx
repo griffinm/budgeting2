@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { MerchantTag } from "@/utils/types";
-import { fetchMerchantTagSpendStats } from "@/api";
+import { 
+  fetchMerchantTagSpendStats,
+  updateMerchantTag,
+  UpdateMerchantTagRequest,
+} from "@/api";
 import { Loading } from "../Loading";
-import { Button, Table } from "@mantine/core";
-import { TransactionAmount } from "../TransactionAmount";
+import { Button } from "@mantine/core";
 import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
-import classNames from "classnames";
 import { 
   endOfMonth,
   startOfMonth,
@@ -13,8 +15,8 @@ import {
 } from "date-fns";
 import { DateInput } from "@mantine/dates";
 import { TransactionModal } from "./TransactionModal";
-import { Link } from "react-router-dom";
-import { urls } from "@/utils/urls";
+import { MerchantTagRow } from "./MerchantTagRow";
+import '@mantine/dates/styles.css';
 
 const defaultStartDate = startOfMonth(new Date());
 const defaultEndDate = endOfMonth(new Date());
@@ -34,11 +36,16 @@ export const View = () => {
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [selectedMerchantTag, setSelectedMerchantTag] = useState<MerchantTag | undefined>();
+  const [monthsBack, setMonthsBack] = useState(1);
+  const [currentLoadingMerchantTagId, setCurrentLoadingMerchantTagId] = useState<number | undefined>();
+
   useEffect(() => {
     setLoading(true);
     fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
     .then((merchantTagSpendStats) => {
       setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
+    })
+    .finally(() => {
       setLoading(false);
     });
   }, [startDate, endDate]);
@@ -49,6 +56,7 @@ export const View = () => {
   const setDates = (monthsBack: number) => {
     setStartDate(startOfMonth(subMonths(new Date(), monthsBack)));
     setEndDate(defaultEndDate);
+    setMonthsBack(monthsBack);
   }
 
   const onViewTransactions = (merchantTag: MerchantTag) => {
@@ -56,26 +64,38 @@ export const View = () => {
     setIsTransactionModalOpen(true);
   }
 
+    const onSaveBudget = (params: UpdateMerchantTagRequest) => {
+    setCurrentLoadingMerchantTagId(params.id);
+    updateMerchantTag({ data: params })
+      .then(() => {
+        setLoading(true);
+        fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
+        .then((merchantTagSpendStats) => {
+          setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+      })
+      .finally(() => {
+        setCurrentLoadingMerchantTagId(undefined);
+      });
+  }
+
   const renderTable = () => {
     return (
-      <Table highlightOnHover>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th>Total Transaction Amount</Table.Th>
-            <Table.Th></Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {merchantTags.map((tag) => (
-            <MerchantTagRow
-              key={tag.id}
-              tag={tag}
-              onViewTransactions={onViewTransactions}
-            />
-          ))}
-        </Table.Tbody>
-      </Table>
+      <div className="w-full flex flex-col overflow-x-auto">
+        {merchantTags.map((tag) => (
+          <MerchantTagRow
+            key={tag.id}
+            tag={tag}
+            onSave={onSaveBudget}
+            onViewTransactions={onViewTransactions}
+            monthsBack={monthsBack}
+            isSaving={currentLoadingMerchantTagId === tag.id}
+          />
+        ))}
+      </div>
     )
   }
 
@@ -113,83 +133,3 @@ export const View = () => {
     </div>
   );
 };
-
-function MerchantTagRow({ 
-  tag, 
-  expandedLevel = 0,
-  onViewTransactions,
-}: { 
-  tag: MerchantTag; 
-  expandedLevel?: number; 
-  onViewTransactions: (merchantTag: MerchantTag) => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const hasChildren = tag.children && tag.children.length > 0;
-  const rowClasses = classNames('mr-2', {
-    'ml-[25px]': expandedLevel === 1,
-    'ml-[50px]': expandedLevel === 2,
-    'ml-[75px]': expandedLevel === 3,
-    'ml-[100px]': expandedLevel === 4,
-    'ml-[125px]': expandedLevel === 5,
-    'ml-[150px]': expandedLevel === 6,
-    'ml-[175px]': expandedLevel === 7,
-  });
-  
-  return (
-    <>
-      <Table.Tr>
-        <Table.Td>
-          <div onClick={() => setExpanded(!expanded)} className="flex items-center gap-2">
-            {!hasChildren && (
-              <span style={{ width: `${(expandedLevel * 25) + 27}px` }}></span>
-            )}
-            {hasChildren && (expanded ? (
-              <span
-                className={classNames("cursor-pointer", rowClasses)}
-                onClick={() => setExpanded(!expanded)}
-              >
-                ▼
-              </span>
-            ) : (
-              <span
-                className={classNames("cursor-pointer", rowClasses)}
-                onClick={() => setExpanded(!expanded)}>
-                  ▶
-              </span>
-            ))}
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{
-                  backgroundColor: `#${tag.color}`,
-                }}
-              >
-              </div>
-              <div>
-                <Link to={urls.merchantTag.path(tag.id)}>{tag.name}</Link>
-              </div>
-          </div>
-        </Table.Td>
-        <Table.Td>
-          <TransactionAmount amount={tag.totalTransactionAmount || 0} />
-        </Table.Td>
-        <Table.Td>
-          <Button size="xs" variant="transparent" onClick={() => onViewTransactions(tag)}>
-            View Transactions
-          </Button>
-        </Table.Td>
-      </Table.Tr>
-      {expanded && (
-        <>
-          {tag.children?.map((child) => (
-            <MerchantTagRow
-              key={child.id}
-              tag={child}
-              expandedLevel={expandedLevel + 1}
-              onViewTransactions={(merchantTag) => onViewTransactions(merchantTag)}
-            />
-          ))}
-        </>
-      )}
-    </>
-  );
-}
