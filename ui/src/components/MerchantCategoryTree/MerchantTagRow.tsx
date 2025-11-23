@@ -27,7 +27,8 @@ export function MerchantTagRow({
   const [expanded, setExpanded] = useState(false);
   const hasChildren = tag.children && tag.children.length > 0;
   const [isEditingBudget, setIsEditingBudget] = useState(false);
-  
+  const paddingLeft = expandedLevel * 25 + 27;
+
   useEffect(() => {
     setIsEditingBudget(false);
   }, [tag]);
@@ -44,11 +45,11 @@ export function MerchantTagRow({
 
   return (
     <div className="w-full flex flex-col hover:bg-gray-100 transition-colors">
-      <div className="flex flex-row w-full border-b border-gray-200 py-2 items-center">
-        <div className="flex flex-col w-1/3">
+      <div className="flex flex-col sm:flex-row w-full border-b border-gray-200 py-2 items-center gap-2 sm:gap-0">
+        <div className="flex flex-col w-full sm:w-1/3">
           <div onClick={() => setExpanded(!expanded)} className="flex items-center gap-2">
             {!hasChildren && (
-              <span style={{ width: `${(expandedLevel * 25) + 27}px` }}></span>
+              <span style={{ width: `${paddingLeft}px` }}></span>
             )}
             {hasChildren && (expanded ? (
               <span
@@ -71,13 +72,13 @@ export function MerchantTagRow({
                 }}
               >
               </div>
-              <div>
+              <div className="text-xl sm:text-base">
                 <Link to={urls.merchantTag.path(tag.id)}>{tag.name}</Link>
               </div>
           </div>
         </div>
 
-        <div className="flex flex-col w-1/3">
+        <div className="flex flex-col w-full sm:w-1/3">
           {isEditingBudget ? (
             <EditBudget
               merchantTag={tag}
@@ -86,11 +87,13 @@ export function MerchantTagRow({
               isSaving={isSaving}
             />
           ) : (
-            <Budget merchantTag={tag} monthsBack={monthsBack || 1} />
+            <div style={{ paddingLeft: `${paddingLeft}px` }}>
+              <Budget merchantTag={tag} monthsBack={monthsBack || 1} />
+            </div>
           )}
         </div>
 
-        <div className="flex flex-row w-1/3 gap-2 justify-end">
+        <div className="flex flex-row w-full sm:w-1/3 gap-2 justify-end">
           <EditBudgetButton merchantTag={tag} onClick={() => setIsEditingBudget(true)} isEditing={isEditingBudget} />
           <Button size="xs" variant="subtle" onClick={() => onViewTransactions(tag)}>
             <IconEye size={16} />
