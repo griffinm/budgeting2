@@ -51,7 +51,7 @@ export const updateMerchantTag = async ({
 }: {
   data: UpdateMerchantTagRequest;
 }): Promise<MerchantTag> => {
-  const response = await baseClient.put(`/merchant_tags/${data.id}`, data);
+  const response = await baseClient.put(`/merchant_tags/${data.id}`, { merchant_tag: data.data });
   return response.data;
 };
 

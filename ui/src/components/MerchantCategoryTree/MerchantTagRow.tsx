@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@mantine/core";
 import { IconEye, IconPencil } from "@tabler/icons-react";
@@ -6,20 +6,32 @@ import { MerchantTag } from "@/utils/types";
 import { urls } from "@/utils/urls";
 import { Budget } from "./Budget";
 import classNames from "classnames";
+import { EditBudget } from "./EditBudget";
+import { UpdateMerchantTagRequest } from "@/api";
 
 export function MerchantTagRow({ 
   tag, 
   expandedLevel = 0,
   onViewTransactions,
+  monthsBack,
+  isSaving,
+  onSave,
 }: { 
   tag: MerchantTag; 
   expandedLevel?: number; 
   onViewTransactions: (merchantTag: MerchantTag) => void;
+  monthsBack: number;
+  isSaving: boolean;
+  onSave: (params: UpdateMerchantTagRequest) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const hasChildren = tag.children && tag.children.length > 0;
   const [isEditingBudget, setIsEditingBudget] = useState(false);
   
+  useEffect(() => {
+    setIsEditingBudget(false);
+  }, [tag]);
+
   const rowClasses = classNames('mr-2', {
     'ml-[25px]': expandedLevel === 1,
     'ml-[50px]': expandedLevel === 2,
@@ -29,7 +41,7 @@ export function MerchantTagRow({
     'ml-[150px]': expandedLevel === 6,
     'ml-[175px]': expandedLevel === 7,
   });
-  
+
   return (
     <div className="w-full flex flex-col hover:bg-gray-100 transition-colors">
       <div className="flex flex-row w-full border-b border-gray-200 py-2 items-center">
@@ -66,7 +78,16 @@ export function MerchantTagRow({
         </div>
 
         <div className="flex flex-col w-1/3">
-          <Budget merchantTag={tag} />
+          {isEditingBudget ? (
+            <EditBudget
+              merchantTag={tag}
+              onSave={onSave}
+              onCancel={() => setIsEditingBudget(false)}
+              isSaving={isSaving}
+            />
+          ) : (
+            <Budget merchantTag={tag} monthsBack={monthsBack || 1} />
+          )}
         </div>
 
         <div className="flex flex-row w-1/3 gap-2 justify-end">
@@ -86,6 +107,9 @@ export function MerchantTagRow({
               tag={child}
               expandedLevel={expandedLevel + 1}
               onViewTransactions={(merchantTag) => onViewTransactions(merchantTag)}
+              monthsBack={monthsBack}
+              isSaving={isSaving}
+              onSave={onSave}
             />
           ))}
         </>

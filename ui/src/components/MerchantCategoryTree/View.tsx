@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { MerchantTag } from "@/utils/types";
-import { fetchMerchantTagSpendStats } from "@/api";
+import { 
+  fetchMerchantTagSpendStats,
+  updateMerchantTag,
+  UpdateMerchantTagRequest,
+} from "@/api";
 import { Loading } from "../Loading";
 import { Button } from "@mantine/core";
 import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
@@ -12,6 +16,7 @@ import {
 import { DateInput } from "@mantine/dates";
 import { TransactionModal } from "./TransactionModal";
 import { MerchantTagRow } from "./MerchantTagRow";
+import '@mantine/dates/styles.css';
 
 const defaultStartDate = startOfMonth(new Date());
 const defaultEndDate = endOfMonth(new Date());
@@ -31,12 +36,16 @@ export const View = () => {
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [selectedMerchantTag, setSelectedMerchantTag] = useState<MerchantTag | undefined>();
+  const [monthsBack, setMonthsBack] = useState(1);
+  const [currentLoadingMerchantTagId, setCurrentLoadingMerchantTagId] = useState<number | undefined>();
 
   useEffect(() => {
     setLoading(true);
     fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
     .then((merchantTagSpendStats) => {
       setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
+    })
+    .finally(() => {
       setLoading(false);
     });
   }, [startDate, endDate]);
@@ -47,11 +56,30 @@ export const View = () => {
   const setDates = (monthsBack: number) => {
     setStartDate(startOfMonth(subMonths(new Date(), monthsBack)));
     setEndDate(defaultEndDate);
+    setMonthsBack(monthsBack);
   }
 
   const onViewTransactions = (merchantTag: MerchantTag) => {
     setSelectedMerchantTag(merchantTag);
     setIsTransactionModalOpen(true);
+  }
+
+    const onSaveBudget = (params: UpdateMerchantTagRequest) => {
+    setCurrentLoadingMerchantTagId(params.id);
+    updateMerchantTag({ data: params })
+      .then(() => {
+        setLoading(true);
+        fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
+        .then((merchantTagSpendStats) => {
+          setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+      })
+      .finally(() => {
+        setCurrentLoadingMerchantTagId(undefined);
+      });
   }
 
   const renderTable = () => {
@@ -61,7 +89,10 @@ export const View = () => {
           <MerchantTagRow
             key={tag.id}
             tag={tag}
+            onSave={onSaveBudget}
             onViewTransactions={onViewTransactions}
+            monthsBack={monthsBack}
+            isSaving={currentLoadingMerchantTagId === tag.id}
           />
         ))}
       </div>
