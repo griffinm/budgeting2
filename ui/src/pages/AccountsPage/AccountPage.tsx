@@ -5,7 +5,6 @@ import { Loading } from "@/components/Loading";
 import { AccountTable } from "@/components/AccountTable";
 import { useAccount, usePlaidAccount } from "@/hooks";
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
-import { Card } from "@mantine/core";
 import { ConnectPlaidAccount } from "@/components/ConnectPlaidAccount";
 
 export default function AccountsPage() {
@@ -42,16 +41,14 @@ export default function AccountsPage() {
         <h1 className="text-2xl font-bold">Connected Bank Accounts</h1>
         <ConnectPlaidAccount onSuccess={handleConnectionSuccess} />
       </div>
-      <Card className="no-padding">
-        <AccountTable
-          plaidAccounts={plaidAccounts}
-          accountUsers={accountUsers}
-          accountUsersLoading={accountUsersLoading}
-          currentUser={user!}
-          onAccountAccessChange={updateAccountAccess}
-          onNicknameChange={updatePlaidAccountNickname}
-        />
-      </Card>
+      <AccountTable
+        plaidAccounts={plaidAccounts}
+        accountUsers={accountUsers}
+        accountUsersLoading={accountUsersLoading}
+        currentUser={user!}
+        onAccountAccessChange={updateAccountAccess}
+        onNicknameChange={updatePlaidAccountNickname}
+      />
     </div>
   );
 }
