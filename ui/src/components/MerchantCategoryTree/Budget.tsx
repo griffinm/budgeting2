@@ -1,5 +1,6 @@
 import { MerchantTag } from "@/utils/types";
-import { Progress, TagsInput, TypographyStylesProvider } from "@mantine/core";
+import { Progress } from "@mantine/core";
+import { Currency } from "../Currency";
 
 export function Budget({
   merchantTag,
@@ -10,12 +11,15 @@ export function Budget({
   const totalTransactionAmount = merchantTag.totalTransactionAmount || 0;
   const remainingBudget = targetBudget - totalTransactionAmount;
   const isOverBudget = remainingBudget < 0;
-  let progressValue = Math.abs(totalTransactionAmount) / targetBudget * 100;
-  let progressColor = isOverBudget ? 'red' : 'green';
-  
+  const progressValue = Math.abs(totalTransactionAmount) / targetBudget * 100;
+  const progressColor = isOverBudget ? 'red' : 'green';
+
   if (!targetBudget) {
-    progressValue = 100;
-    progressColor = 'gray';
+    return (
+      <div>
+        <NoBudget merchantTag={merchantTag} />
+      </div>
+    )
   }
 
   const renderLabel = () => {
@@ -36,5 +40,22 @@ export function Budget({
         </Progress.Section>
       </Progress.Root>
     </>
+  )
+}
+
+function NoBudget({
+  merchantTag,
+}: {
+  merchantTag: MerchantTag;
+}) {
+  return (
+    <div>
+      <Currency
+        amount={merchantTag.totalTransactionAmount || 0}
+        applyColor={false}
+        showCents={false}
+        useBold={true}
+      />
+    </div>
   )
 }

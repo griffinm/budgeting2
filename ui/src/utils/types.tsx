@@ -130,6 +130,7 @@ export interface MerchantTag {
   totalTransactionAmount?: number;
   children: MerchantTag[];
   targetBudget?: number | null;
+  isLeaf: boolean;
 }
 
 export interface MantineTreeNode {

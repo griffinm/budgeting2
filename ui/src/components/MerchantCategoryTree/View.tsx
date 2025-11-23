@@ -2,10 +2,8 @@ import { useEffect, useState } from "react";
 import { MerchantTag } from "@/utils/types";
 import { fetchMerchantTagSpendStats } from "@/api";
 import { Loading } from "../Loading";
-import { Button, Table } from "@mantine/core";
-import { TransactionAmount } from "../TransactionAmount";
+import { Button } from "@mantine/core";
 import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
-import classNames from "classnames";
 import { 
   endOfMonth,
   startOfMonth,
@@ -13,9 +11,7 @@ import {
 } from "date-fns";
 import { DateInput } from "@mantine/dates";
 import { TransactionModal } from "./TransactionModal";
-import { Link } from "react-router-dom";
-import { urls } from "@/utils/urls";
-import { Budget } from "./Budget";
+import { MerchantTagRow } from "./MerchantTagRow";
 
 const defaultStartDate = startOfMonth(new Date());
 const defaultEndDate = endOfMonth(new Date());
@@ -35,6 +31,7 @@ export const View = () => {
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [selectedMerchantTag, setSelectedMerchantTag] = useState<MerchantTag | undefined>();
+
   useEffect(() => {
     setLoading(true);
     fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) })
@@ -105,86 +102,3 @@ export const View = () => {
     </div>
   );
 };
-
-function MerchantTagRow({ 
-  tag, 
-  expandedLevel = 0,
-  onViewTransactions,
-}: { 
-  tag: MerchantTag; 
-  expandedLevel?: number; 
-  onViewTransactions: (merchantTag: MerchantTag) => void;
-}) {
-  const [expanded, setExpanded] = useState(false);
-  const hasChildren = tag.children && tag.children.length > 0;
-  const rowClasses = classNames('mr-2', {
-    'ml-[25px]': expandedLevel === 1,
-    'ml-[50px]': expandedLevel === 2,
-    'ml-[75px]': expandedLevel === 3,
-    'ml-[100px]': expandedLevel === 4,
-    'ml-[125px]': expandedLevel === 5,
-    'ml-[150px]': expandedLevel === 6,
-    'ml-[175px]': expandedLevel === 7,
-  });
-  
-  return (
-    <div className="w-full flex flex-col hover:bg-gray-100 transition-colors">
-      <div className="flex flex-row w-full border-b border-gray-200 py-2 items-center">
-        <div className="flex flex-col w-1/3">
-          <div onClick={() => setExpanded(!expanded)} className="flex items-center gap-2">
-            {!hasChildren && (
-              <span style={{ width: `${(expandedLevel * 25) + 27}px` }}></span>
-            )}
-            {hasChildren && (expanded ? (
-              <span
-                className={classNames("cursor-pointer", rowClasses)}
-                onClick={() => setExpanded(!expanded)}
-              >
-                ▼
-              </span>
-            ) : (
-              <span
-                className={classNames("cursor-pointer", rowClasses)}
-                onClick={() => setExpanded(!expanded)}>
-                  ▶
-              </span>
-            ))}
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{
-                  backgroundColor: `#${tag.color}`,
-                }}
-              >
-              </div>
-              <div>
-                <Link to={urls.merchantTag.path(tag.id)}>{tag.name}</Link>
-              </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col w-1/3">
-          <Budget merchantTag={tag} />
-        </div>
-
-        <div className="flex flex-col w-1/3">
-          <Button size="xs" variant="transparent" onClick={() => onViewTransactions(tag)}>
-            View Transactions
-          </Button>
-        </div>
-      </div>
-
-      {expanded && (
-        <>
-          {tag.children?.map((child) => (
-            <MerchantTagRow
-              key={child.id}
-              tag={child}
-              expandedLevel={expandedLevel + 1}
-              onViewTransactions={(merchantTag) => onViewTransactions(merchantTag)}
-            />
-          ))}
-        </>
-      )}
-    </div>
-  );
-}
