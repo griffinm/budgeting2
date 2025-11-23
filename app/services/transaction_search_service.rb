@@ -45,7 +45,6 @@ class TransactionSearchService < BaseService
     end
     
     transactions = @user.plaid_transactions
-      .not_pending
       .joins(:plaid_account, :merchant)
       .includes(
         :plaid_account, 
