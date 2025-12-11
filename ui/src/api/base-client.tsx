@@ -2,12 +2,8 @@ import axios from 'axios';
 import { urls } from '@/utils/urls';
 import { AUTH_TOKEN_STORAGE_KEY, AUTH_TOKEN_HEADER_KEY } from '@/utils/constants';
 
-// In production, use /api which is proxied by nginx to the API service
-// In development, use /api which is proxied by Vite to the backend, or VITE_API_URL env var
-const apiUrl = import.meta.env.VITE_API_URL || '/api';
-
 const baseClient = axios.create({
-  baseURL: apiUrl,
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
