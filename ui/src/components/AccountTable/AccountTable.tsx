@@ -43,7 +43,6 @@ export function AccountTable({
 
 function AccountCard({
   account,
-  user,
   currentUser,
   accountUsersLoading,
   accountUsers,
