@@ -116,7 +116,13 @@ class TransactionSearchService < BaseService
     end
 
     if @search_term.present?
-      transactions = transactions.where("plaid_transactions.name ILIKE ? OR merchants.merchant_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")
+      if @search_term.to_f.to_s == @search_term
+        # If the search term is a number, search for the amount
+        transactions = transactions.where("plaid_transactions.amount = ?", @search_term.to_f)
+      else
+        # If the search term is not a number, search for the name or merchant name
+        transactions = transactions.where("plaid_transactions.name ILIKE ? OR merchants.merchant_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")
+      end
     end
 
     if @plaid_account_ids.present? && @plaid_account_ids.is_a?(Array) && @plaid_account_ids.any?

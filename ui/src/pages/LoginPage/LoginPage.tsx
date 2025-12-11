@@ -34,6 +34,23 @@ export default function LoginPage() {
           setErrors({ messages: ["An unknown error occurred"] });
         }
       })
+      .catch((error) => {
+        console.error('Login error:', error);
+        if (error.response) {
+          // Server responded with error status
+          if (error.response.status === 401) {
+            setErrors(error.response.data as ErrorResponse);
+          } else {
+            setErrors({ messages: ["An error occurred. Please try again."] });
+          }
+        } else if (error.request) {
+          // Request was made but no response received
+          setErrors({ messages: ["Unable to connect to server. Please check if the backend is running."] });
+        } else {
+          // Something else happened
+          setErrors({ messages: ["An unexpected error occurred. Please try again."] });
+        }
+      })
   }
 
   return (
