@@ -96,10 +96,24 @@ class TypesenseService
     end
 
     def delete_all_documents(collection_name)
-      client.collections[collection_name].documents.delete(filter_by: 'id:!=0')
+      # Use a filter that matches all documents (id is a string field)
+      client.collections[collection_name].documents.delete(filter_by: 'account_id:>=0')
+    rescue Typesense::Error::ObjectNotFound
+      Rails.logger.info "Collection '#{collection_name}' not found, nothing to delete"
+      nil
     rescue Typesense::Error => e
       Rails.logger.error "Typesense error deleting all documents: #{e.message}"
       nil
+    end
+
+    def ensure_collection_exists(schema)
+      return true if collection_exists?(schema[:name])
+      
+      create_collection(schema)
+      true
+    rescue Typesense::Error => e
+      Rails.logger.error "Typesense error ensuring collection exists: #{e.message}"
+      false
     end
 
     # Search

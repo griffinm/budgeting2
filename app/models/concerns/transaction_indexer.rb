@@ -84,6 +84,9 @@ module TransactionIndexer
     end
 
     def purge_and_rebuild_index(batch_size: 1000, &progress_block)
+      # Ensure collection exists before operations
+      TypesenseService.ensure_collection_exists(COLLECTION_SCHEMA)
+      
       # Delete all existing documents
       TypesenseService.delete_all_documents(COLLECTION_NAME)
 
@@ -103,6 +106,9 @@ module TransactionIndexer
     end
 
     def reindex_all(batch_size: 1000, &progress_block)
+      # Ensure collection exists before operations
+      TypesenseService.ensure_collection_exists(COLLECTION_SCHEMA)
+      
       total_count = count
       indexed_count = 0
 
