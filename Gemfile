@@ -16,6 +16,7 @@ gem "acts_as_paranoid"
 gem "audited"
 gem "plaid"
 gem "newrelic_rpm"
+gem 'typesense-rails', '~> 1.0.0.rc1'
 
 group :development, :test do
   gem "dotenv-rails"

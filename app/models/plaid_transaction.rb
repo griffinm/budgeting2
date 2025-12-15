@@ -1,4 +1,6 @@
 class PlaidTransaction < ApplicationRecord
+  include TransactionIndexer
+
   TRANSACTION_TYPES = {
     expense: 'expense',
     income: 'income',
