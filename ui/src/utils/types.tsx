@@ -43,9 +43,11 @@ export interface SignupResponse {
 }
 
 export type PlaidAccountType = 'checking' | 'savings' | 'credit' | 'loan' | 'other';
+export type AccountType = 'deposit' | 'credit' | 'loan' | 'investment';
 
 export interface PlaidAccount {
   id: number;
+  accountType: AccountType;
   plaidMask: string;
   plaidOfficialName: string;
   plaidType: PlaidAccountType;

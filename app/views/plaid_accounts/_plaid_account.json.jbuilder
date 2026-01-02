@@ -1,4 +1,5 @@
 json.id plaid_account.id
+json.accountType plaid_account.account_type
 json.plaidOfficialName plaid_account.plaid_official_name
 json.plaidType plaid_account.plaid_type
 json.plaidSubtype plaid_account.plaid_subtype
