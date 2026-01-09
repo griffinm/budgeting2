@@ -188,6 +188,14 @@ export interface AccountBalance {
   createdAt: string;
 }
 
+export interface AccountBalanceHistory {
+  id: number;
+  currentBalance: number;
+  createdAt: string;
+}
+
+export type TimeRange = '1m' | '3m' | '6m' | '12m' | 'all';
+
 export interface Notification {
   title: string;
   message: string;

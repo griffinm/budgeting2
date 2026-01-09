@@ -26,6 +26,21 @@ class PlaidAccount < ApplicationRecord
 
   scope :active, -> { where(deleted_at: nil) }
 
+  def self.types_for_category(category)
+    case category
+    when 'deposit'
+      DEPOSIT_ACCOUNT_TYPES
+    when 'credit'
+      CREDIT_ACCOUNT_TYPES
+    when 'loan'
+      LOAN_ACCOUNT_TYPES
+    when 'investment'
+      INVESTMENT_ACCOUNT_TYPES
+    else
+      []
+    end
+  end
+
   def account_type
     case plaid_type
     when *DEPOSIT_ACCOUNT_TYPES
