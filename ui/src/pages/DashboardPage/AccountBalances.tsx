@@ -37,7 +37,7 @@ export const AccountBalances = ({
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-start">
       {hasDepositAccounts && <BalanceCard title="Deposit" accountBalances={depositAccountBalances} accountType="deposit" isExpanded={expandedType === 'deposit'} onClick={() => handleCardClick('deposit')} />}
       {hasCreditAccounts && <BalanceCard title="Credit" accountBalances={creditAccountBalances} accountType="credit" isExpanded={expandedType === 'credit'} onClick={() => handleCardClick('credit')} />}
       {hasLoanAccounts && <BalanceCard title="Loan" accountBalances={loanAccountBalances} accountType="loan" isExpanded={expandedType === 'loan'} onClick={() => handleCardClick('loan')} />}
