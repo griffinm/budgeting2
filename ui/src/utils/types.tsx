@@ -100,6 +100,7 @@ export interface MerchantGroupSuggestion {
 export interface Tag {
   id: number;
   name: string;
+  color: string;
   userId: number;
   accountId: number;
   createdAt: string;

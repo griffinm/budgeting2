@@ -78,8 +78,9 @@ export function TransactionTags({
               {transaction.transactionTags.map((tt) => (
                 <Badge
                   key={tt.id}
-                  variant="light"
+                  variant="filled"
                   size="sm"
+                  style={{ backgroundColor: `#${tt.tag.color}` }}
                   rightSection={
                     <IconX
                       size={10}

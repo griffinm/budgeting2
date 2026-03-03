@@ -5,4 +5,12 @@ class Tag < ApplicationRecord
   has_many :plaid_transactions, through: :tag_plaid_transactions
   belongs_to :user
   belongs_to :account
+
+  before_create :initialize_color
+
+  private
+
+  def initialize_color
+    self.color = SecureRandom.hex(3)
+  end
 end
