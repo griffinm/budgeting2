@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Badge, Popover, TextInput } from "@mantine/core";
 import { IconX, IconPlus } from "@tabler/icons-react";
-import classNames from "classnames";
 import { Tag, Transaction } from "@/utils/types";
 
 export function TransactionTags({
