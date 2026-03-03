@@ -1,4 +1,5 @@
-import { MerchantTag, Transaction } from "@/utils/types";
+import { MerchantTag, Tag, Transaction } from "@/utils/types";
+import { TransactionTags } from "@/components/TransactionTags/TransactionTags";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
@@ -17,17 +18,25 @@ export function FullRow({
   transaction,
   updateTransaction,
   merchantTags,
+  allTags,
+  addTransactionTag,
+  removeTransactionTag,
+  createAndAddTag,
 }: {
   transaction: Transaction;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
+  allTags: Tag[];
+  addTransactionTag: (transactionId: number, tagId: number) => void;
+  removeTransactionTag: (transactionId: number, transactionTagId: number) => void;
+  createAndAddTag: (transactionId: number, name: string) => void;
 }) {
   const [isEditingNote, setIsEditingNote] = useState(false);
 
   return (
     <div className="w-full px-3 py-2 relative border-b border-gray-300 hover:bg-gray-100 transition-colors">
       <div className=" flex flex-row">
-        <div className="flex flex-col w-1/3">
+        <div className="flex flex-col w-1/4">
           <div className="text-md sm:text-lg flex flex-row gap-2 items-center">
             <TransactionAmount amount={transaction.amount} />
             {transaction.pending && <PendingBadge />}
@@ -38,12 +47,12 @@ export function FullRow({
           </span>
         </div>
 
-        
+
         <div className="h-[50px] w-[50px] items-center mr-3 hidden md:flex">
           <Logo merchant={transaction.merchant} isCheck={transaction.isCheck} />
         </div>
 
-        <div className="flex flex-col w-1/3">
+        <div className="flex flex-col w-1/4">
           <div className="text-sm">
             <Link to={urls.merchant.path(transaction.merchant.id)}>
               {merchantDisplayName(transaction.merchant)}
@@ -57,13 +66,23 @@ export function FullRow({
           </div>
         </div>
 
-        <div className="w-1/3 h-full">
+        <div className="w-1/4 h-full">
           <CategoryDisplay
             category={transaction.merchantTag}
             onSave={({ id, useDefaultCategory }) => {
               updateTransaction(transaction.id, { merchantTagId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
             }}
             allCategories={merchantTags}
+          />
+        </div>
+
+        <div className="w-1/4 h-full">
+          <TransactionTags
+            transaction={transaction}
+            allTags={allTags}
+            onAdd={addTransactionTag}
+            onRemove={removeTransactionTag}
+            onCreateAndAdd={createAndAddTag}
           />
         </div>
         <div className="flex-col items-center justify-center hidden md:flex">

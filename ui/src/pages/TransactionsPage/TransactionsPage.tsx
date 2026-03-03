@@ -6,12 +6,13 @@ import { MerchantTag } from '@/utils/types';
 import { fetchMerchantTags } from '@/api/merchant-tags-client';
 import { useSyncEvent } from '@/hooks/useSyncEvent';
 import { usePlaidAccount } from '@/hooks/usePlaidAccount';
+import { useTags } from '@/hooks/useTags';
 import { format as formatDate } from 'date-fns';
 import { Card } from '@mantine/core';
 import { Search } from '@/components/TransactionsTable/Search';
 
 export default function TransactionsPage() {
-  const { 
+  const {
     transactions,
     isLoading,
     isLoadingMore,
@@ -22,14 +23,22 @@ export default function TransactionsPage() {
     searchParams,
     setSearchParams,
     updateTransaction,
+    addTransactionTag,
+    removeTransactionTag,
     clearSearchParams,
   } = useTransactions();
-  const { 
+  const {
     latestSyncEvent,
     isLoading: isSyncEventLoading,
   } = useSyncEvent();
   const { plaidAccounts } = usePlaidAccount();
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
+  const { tags: allTags, createTag } = useTags();
+
+  const createAndAddTag = async (transactionId: number, name: string) => {
+    const newTag = await createTag(name);
+    addTransactionTag(transactionId, newTag.id);
+  };
   const setTitle = usePageTitle();
 
   useEffect(() => {
@@ -76,6 +85,10 @@ export default function TransactionsPage() {
           page={page}
           updateTransaction={updateTransaction}
           merchantTags={merchantTags}
+          allTags={allTags}
+          addTransactionTag={addTransactionTag}
+          removeTransactionTag={removeTransactionTag}
+          createAndAddTag={createAndAddTag}
         />
       </Card>
     </div>

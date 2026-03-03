@@ -4,3 +4,6 @@ json.plaidTransactionId transaction_tag.plaid_transaction_id
 json.userId transaction_tag.user_id
 json.createdAt transaction_tag.created_at
 json.updatedAt transaction_tag.updated_at
+json.tag do
+  json.partial! "tags/tag", tag: transaction_tag.tag
+end

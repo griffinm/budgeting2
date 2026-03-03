@@ -97,6 +97,21 @@ export interface MerchantGroupSuggestion {
   confidence: number;
 }
 
+export interface Tag {
+  id: number;
+  name: string;
+  userId: number;
+  accountId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransactionTag {
+  id: number;
+  tagId: number;
+  tag: Tag;
+}
+
 export interface Transaction {
   id: number;
   name: string;
@@ -120,6 +135,7 @@ export interface Transaction {
   categoryDetail: string | null;
   categoryConfidenceLevel: string | null;
   isCheck: boolean;
+  transactionTags: TransactionTag[];
 }
 
 export interface MerchantTag {
