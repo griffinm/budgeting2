@@ -1,0 +1,6 @@
+json.id transaction_tag.id
+json.tagId transaction_tag.tag_id
+json.plaidTransactionId transaction_tag.plaid_transaction_id
+json.userId transaction_tag.user_id
+json.createdAt transaction_tag.created_at
+json.updatedAt transaction_tag.updated_at

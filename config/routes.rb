@@ -75,5 +75,8 @@ Rails.application.routes.draw do
     resources :accounts, only: [:create] do
       resources :users, only: [:create]
     end
+
+    resources :tags, only: [:index, :show, :create, :update, :destroy]
+    resources :transaction_tags, only: [:create, :destroy]
   end
 end
