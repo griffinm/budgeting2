@@ -66,11 +66,12 @@ export default function TransactionsPage() {
       </div>
       
       <div className="flex-shrink-0 mb-3">
-        <Search 
-          searchParams={searchParams} 
-          onSetSearchParams={setSearchParams} 
+        <Search
+          searchParams={searchParams}
+          onSetSearchParams={setSearchParams}
           clearSearchParams={clearSearchParams}
           plaidAccounts={plaidAccounts}
+          tags={allTags}
         />
       </div>
       

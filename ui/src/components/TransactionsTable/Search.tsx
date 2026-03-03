@@ -5,7 +5,7 @@ import { Button, Card, Checkbox, Input, MultiSelect, Select, TextInput } from "@
 import { TransactionSearchParams } from "@/api/transaction-client";
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/dates/styles.css';
-import { PlaidAccount, TransactionType } from "@/utils/types";
+import { PlaidAccount, Tag, TransactionType } from "@/utils/types";
 
 const SEARCH_TIMEOUT = 250;
 
@@ -14,11 +14,13 @@ export function Search({
   onSetSearchParams,
   clearSearchParams,
   plaidAccounts = [],
+  tags = [],
 }: {
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   clearSearchParams: () => void;
   plaidAccounts?: PlaidAccount[];
+  tags?: Tag[];
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [search, setSearch] = useState('');
@@ -133,6 +135,17 @@ export function Search({
                       value: String(account.id),
                       label: account.nickname || account.plaidOfficialName || `Account ${account.plaidMask}`,
                     }))}
+                    searchable
+                    clearable
+                  />
+                </div>
+                <div className="col-span-2">
+                  <MultiSelect
+                    label="Filter by Tags"
+                    placeholder="Select tags"
+                    value={(localParams.tag_ids || []).map(String)}
+                    onChange={(values) => updateLocalParam('tag_ids', values.map(Number))}
+                    data={tags.map((tag) => ({ value: String(tag.id), label: tag.name }))}
                     searchable
                     clearable
                   />
