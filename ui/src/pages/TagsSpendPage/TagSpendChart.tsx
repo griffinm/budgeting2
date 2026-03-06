@@ -41,6 +41,7 @@ export function TagSpendChart({
       series={series}
       type="stacked"
       withLegend={true}
+      withYAxis={false}
       valueFormatter={(value: number) =>
         `$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`
       }

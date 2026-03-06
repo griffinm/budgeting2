@@ -16,7 +16,7 @@ export function formatSpendStatsForChart({
   const currentDate = new Date();
   const months = [];
 
-  for (let i = monthsBack; i >= 1; i--) {
+  for (let i = monthsBack - 1; i >= 0; i--) {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
     const year = date.getFullYear();
     const month = date.getMonth() + 1;

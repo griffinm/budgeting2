@@ -10,8 +10,11 @@ export const fetchTagSpendStats = async ({ tagIds, monthsBack }: {
   tagIds: number[];
   monthsBack?: number;
 }): Promise<TagSpendStats[]> => {
+  const params = new URLSearchParams();
+  tagIds.forEach(id => params.append('tag_ids[]', id.toString()));
+  if (monthsBack) params.append('months_back', monthsBack.toString());
   const response = await baseClient.get('/tags/spend_stats', {
-    params: { tag_ids: tagIds, months_back: monthsBack },
+    params,
   });
   return response.data;
 };

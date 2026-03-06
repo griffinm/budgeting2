@@ -11,8 +11,8 @@ class TagService < BaseService
   def spend_stats(tag_ids:, months_back: 6)
     return [] if tag_ids.blank?
 
-    end_date = Date.today.beginning_of_month
-    start_date = end_date - months_back.to_i.months
+    end_date = Date.today.end_of_day
+    start_date = Date.today.beginning_of_month - (months_back.to_i - 1).months
 
     sanitized_tag_ids = tag_ids.map(&:to_i).join(',')
 
@@ -30,7 +30,7 @@ class TagService < BaseService
         t.account_id = #{ActiveRecord::Base.connection.quote(@account.id)}
         AND tpt.tag_id IN (#{sanitized_tag_ids})
         AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
-        AND pt.date < #{ActiveRecord::Base.connection.quote(end_date)}
+        AND pt.date <= #{ActiveRecord::Base.connection.quote(end_date)}
       GROUP BY
         year, month, tag_id
       ORDER BY
