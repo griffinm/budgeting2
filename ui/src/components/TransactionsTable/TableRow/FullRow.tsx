@@ -35,30 +35,23 @@ export function FullRow({
 
   return (
     <div className="w-full px-3 py-2 relative border-b border-gray-300 hover:bg-gray-100 transition-colors">
-      <div className=" flex flex-row">
-        <div className="flex flex-col w-1/4">
-          <div className="text-md sm:text-lg flex flex-row gap-2 items-center">
-            <TransactionAmount amount={transaction.amount} />
-            {transaction.pending && <PendingBadge />}
-          </div>
-
-          <span className="text-sm text-gray-500">
-            {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
-          </span>
-        </div>
-
-
-        <div className="h-[50px] w-[50px] items-center mr-3 hidden md:flex">
+      <div className="flex flex-row items-center gap-3">
+        {/* Logo */}
+        <div className="h-[40px] w-[40px] flex-shrink-0 hidden md:flex items-center">
           <Logo merchant={transaction.merchant} isCheck={transaction.isCheck} />
         </div>
 
-        <div className="flex flex-col w-1/4">
-          <div className="text-sm">
+        {/* Merchant + account */}
+        <div className="flex flex-col min-w-0 w-[200px] flex-shrink-0">
+          <div className="text-sm font-medium truncate">
             <Link to={urls.merchant.path(transaction.merchant.id)}>
               {merchantDisplayName(transaction.merchant)}
             </Link>
           </div>
-          <div>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs text-gray-400 truncate">
+              {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
+            </span>
             <TransactionType
               transaction={transaction}
               onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
@@ -66,7 +59,8 @@ export function FullRow({
           </div>
         </div>
 
-        <div className="w-1/4 h-full">
+        {/* Category */}
+        <div className="min-w-0 w-[180px] flex-shrink-0">
           <CategoryDisplay
             category={transaction.merchantTag}
             onSave={({ id, useDefaultCategory }) => {
@@ -76,7 +70,8 @@ export function FullRow({
           />
         </div>
 
-        <div className="w-1/4 h-full">
+        {/* Tags */}
+        <div className="min-w-0 flex-1">
           <TransactionTags
             transaction={transaction}
             allTags={allTags}
@@ -85,7 +80,17 @@ export function FullRow({
             onCreateAndAdd={createAndAddTag}
           />
         </div>
-        <div className="flex-col items-center justify-center hidden md:flex">
+
+        {/* Amount — right-aligned */}
+        <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto pl-3">
+          {transaction.pending && <PendingBadge />}
+          <div className="text-right">
+            <TransactionAmount amount={transaction.amount} />
+          </div>
+        </div>
+
+        {/* Menu */}
+        <div className="flex-shrink-0 hidden md:flex items-center">
           <Menu>
             <Menu.Target>
               <ActionIcon variant="subtle" size="xs">
@@ -100,15 +105,15 @@ export function FullRow({
           </Menu>
         </div>
       </div>
-      <div>
-        <TransactionNote
-          transaction={transaction}
-          updateTransaction={updateTransaction}
-          isEditing={isEditingNote}
-          onCancel={() => setIsEditingNote(false)}
-          onEdit={() => setIsEditingNote(true)}
-        />
-      </div>
+
+      {/* Note row */}
+      <TransactionNote
+        transaction={transaction}
+        updateTransaction={updateTransaction}
+        isEditing={isEditingNote}
+        onCancel={() => setIsEditingNote(false)}
+        onEdit={() => setIsEditingNote(true)}
+      />
     </div>
   )
 }
