@@ -59,6 +59,8 @@ export default function TransactionsPage() {
           clearSearchParams={clearSearchParams}
           plaidAccounts={plaidAccounts}
           tags={allTags}
+          totalCount={page.totalCount}
+          isLoading={isLoading}
         />
       </div>
       
@@ -86,6 +88,8 @@ export default function TransactionsPage() {
         clearSearchParams={clearSearchParams}
         plaidAccounts={plaidAccounts}
         tags={allTags}
+        totalCount={page.totalCount}
+        isLoading={isLoading}
       />
     </div>
   );

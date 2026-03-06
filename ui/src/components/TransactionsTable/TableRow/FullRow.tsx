@@ -50,7 +50,7 @@ export function FullRow({
               {merchantDisplayName(transaction.merchant)}
             </Link>
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 pt-1">
             <span className="text-xs text-gray-400 truncate">
               {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
             </span>
@@ -73,7 +73,7 @@ export function FullRow({
         </div>
 
         {/* Tags */}
-        <div className="min-w-0 flex-1">
+        <div className="flex flex-1 justify-center">
           <TransactionTags
             transaction={transaction}
             allTags={allTags}
@@ -109,7 +109,7 @@ export function FullRow({
       </div>
 
       {/* Mobile layout */}
-      <div className="flex md:hidden flex-col">
+      <div className="flex md:hidden flex-col justify-between">
         {/* Collapsed: Merchant + Amount */}
         <div
           className="flex items-start justify-between cursor-pointer"
@@ -139,14 +139,14 @@ export function FullRow({
 
         {/* Expanded: Type + Category + Tags */}
         {isMobileExpanded && (
-          <div className="flex items-center gap-2 flex-wrap mt-1 ml-5">
-            <div className="flex-shrink-0">
+          <div className="flex items-center flex-wrap w-full">
+            <div className="w-1/4">
               <TransactionType
                 transaction={transaction}
                 onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
               />
             </div>
-            <div className="min-w-0">
+            <div className="text-center w-1/2 flex justify-center">
               <CategoryDisplay
                 category={transaction.merchantTag}
                 onSave={({ id, useDefaultCategory }) => {
@@ -155,7 +155,7 @@ export function FullRow({
                 allCategories={merchantTags}
               />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="w-1/4 text-right flex justify-end">
               <TransactionTags
                 transaction={transaction}
                 allTags={allTags}

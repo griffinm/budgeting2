@@ -1,24 +1,9 @@
-import { ActionIcon } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
 import { TransactionSearchParams } from "@/api/transaction-client";
 import { PlaidAccount, Tag } from "@/utils/types";
 import { SearchDrawer } from "./SearchDrawer";
-
-function hasActiveFilters(params: TransactionSearchParams): boolean {
-  return !!(
-    params.search_term ||
-    params.start_date ||
-    params.end_date ||
-    params.amount_greater_than ||
-    params.amount_less_than ||
-    params.amount_equal_to ||
-    params.transaction_type ||
-    params.has_no_category ||
-    (params.plaid_account_ids && params.plaid_account_ids.length > 0) ||
-    (params.tag_ids && params.tag_ids.length > 0)
-  );
-}
+import { countActiveFilters } from "./SearchFilters";
 
 export function FooterActionBar({
   searchParams,
@@ -26,15 +11,19 @@ export function FooterActionBar({
   clearSearchParams,
   plaidAccounts,
   tags,
+  totalCount,
+  isLoading,
 }: {
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   clearSearchParams: () => void;
   plaidAccounts?: PlaidAccount[];
   tags?: Tag[];
+  totalCount?: number;
+  isLoading?: boolean;
 }) {
   const [drawerOpened, { open, close }] = useDisclosure(false);
-  const filtersActive = hasActiveFilters(searchParams);
+  const activeCount = countActiveFilters(searchParams);
 
   return (
     <>
@@ -45,8 +34,8 @@ export function FooterActionBar({
             className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary-700 text-white text-sm font-medium shadow-lg active:scale-95 transition-transform"
           >
             <IconSearch size={18} />
-            Search
-            {filtersActive && (
+            {activeCount > 0 ? `${activeCount} Filter${activeCount !== 1 ? 's' : ''}` : 'Search'}
+            {activeCount > 0 && (
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
             )}
           </button>
@@ -61,6 +50,8 @@ export function FooterActionBar({
         tags={tags}
         opened={drawerOpened}
         onClose={close}
+        totalCount={totalCount}
+        isLoading={isLoading}
       />
     </>
   );
