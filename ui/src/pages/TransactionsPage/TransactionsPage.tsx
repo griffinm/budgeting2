@@ -6,12 +6,14 @@ import { MerchantTag } from '@/utils/types';
 import { fetchMerchantTags } from '@/api/merchant-tags-client';
 import { useSyncEvent } from '@/hooks/useSyncEvent';
 import { usePlaidAccount } from '@/hooks/usePlaidAccount';
+import { useTags } from '@/hooks/useTags';
 import { format as formatDate } from 'date-fns';
 import { Card } from '@mantine/core';
 import { Search } from '@/components/TransactionsTable/Search';
+import { FooterActionBar } from '@/components/TransactionsTable/FooterActionBar';
 
 export default function TransactionsPage() {
-  const { 
+  const {
     transactions,
     isLoading,
     isLoadingMore,
@@ -22,14 +24,19 @@ export default function TransactionsPage() {
     searchParams,
     setSearchParams,
     updateTransaction,
+    addTransactionTag,
+    removeTransactionTag,
     clearSearchParams,
   } = useTransactions();
-  const { 
-    latestSyncEvent,
-    isLoading: isSyncEventLoading,
-  } = useSyncEvent();
+
   const { plaidAccounts } = usePlaidAccount();
   const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
+  const { tags: allTags, createTag } = useTags();
+
+  const createAndAddTag = async (transactionId: number, name: string) => {
+    const newTag = await createTag(name);
+    addTransactionTag(transactionId, newTag.id);
+  };
   const setTitle = usePageTitle();
 
   useEffect(() => {
@@ -44,28 +51,20 @@ export default function TransactionsPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex flex-col md:flex-row justify-between mb-3 flex-shrink-0">
-        <div className="small-text flex items-center gap-2">
-          <div>
-            {isSyncEventLoading ? <div>Loading...</div> : latestSyncEvent ? (
-              <>Last updated at: <strong>{formatDate(latestSyncEvent.startedAt, 'MM/dd/yyyy h:mm a')}</strong></>
-            ) : (
-              <em>Transactions not yet synced</em>
-            )}
-          </div>
-        </div>
-      </div>
       
-      <div className="flex-shrink-0 mb-3">
-        <Search 
-          searchParams={searchParams} 
-          onSetSearchParams={setSearchParams} 
+      <div className="hidden md:block flex-shrink-0 mb-3">
+        <Search
+          searchParams={searchParams}
+          onSetSearchParams={setSearchParams}
           clearSearchParams={clearSearchParams}
           plaidAccounts={plaidAccounts}
+          tags={allTags}
+          totalCount={page.totalCount}
+          isLoading={isLoading}
         />
       </div>
       
-      <Card p={0} className="flex-1 min-h-0"> 
+      <Card p={0} className="flex-1 min-h-0 pb-16 md:pb-0 -mx-[var(--mantine-spacing-md)] md:mx-0 rounded-none md:rounded-lg">
         <TransactionsTable
           transactions={transactions}
           isLoading={isLoading}
@@ -76,8 +75,22 @@ export default function TransactionsPage() {
           page={page}
           updateTransaction={updateTransaction}
           merchantTags={merchantTags}
+          allTags={allTags}
+          addTransactionTag={addTransactionTag}
+          removeTransactionTag={removeTransactionTag}
+          createAndAddTag={createAndAddTag}
         />
       </Card>
+
+      <FooterActionBar
+        searchParams={searchParams}
+        onSetSearchParams={setSearchParams}
+        clearSearchParams={clearSearchParams}
+        plaidAccounts={plaidAccounts}
+        tags={allTags}
+        totalCount={page.totalCount}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

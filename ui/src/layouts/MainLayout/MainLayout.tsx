@@ -15,8 +15,9 @@ import {
   IconReceipt, 
   IconBuildingStore, 
   IconTag, 
-  IconUser, 
-  IconCreditCard 
+  IconUser,
+  IconCreditCard,
+  IconBookmarks
 } from '@tabler/icons-react';
 import { MainNavLinks, urls } from '@/utils/urls';
 import { useContext } from 'react';
@@ -40,6 +41,8 @@ const getNavIcon = (label: string) => {
       return IconBuildingStore;
     case 'Categories':
       return IconTag;
+    case 'Tags':
+      return IconBookmarks;
     case 'Profile':
       return IconUser;
     case 'Accounts':

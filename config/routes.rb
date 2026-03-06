@@ -75,5 +75,12 @@ Rails.application.routes.draw do
     resources :accounts, only: [:create] do
       resources :users, only: [:create]
     end
+
+    resources :tags, only: [:index, :show, :create, :update, :destroy] do
+      collection do
+        get 'spend_stats', to: 'tags#spend_stats'
+      end
+    end
+    resources :transaction_tags, only: [:create, :destroy]
   end
 end

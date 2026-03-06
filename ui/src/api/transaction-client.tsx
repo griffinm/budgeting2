@@ -18,6 +18,7 @@ export interface TransactionSearchParams {
   merchant_tag_id?: number;
   merchant_group_id?: number;
   plaid_account_ids?: number[];
+  tag_ids?: number[];
   page?: number;
   per_page?: number;
 }

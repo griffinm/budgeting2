@@ -10,6 +10,8 @@ class PlaidTransaction < ApplicationRecord
   belongs_to :plaid_account
   belongs_to :merchant
   belongs_to :merchant_tag, optional: true
+  has_many :tag_plaid_transactions
+  has_many :tags, through: :tag_plaid_transactions
   
   validates :transaction_type, presence: true, inclusion: { in: TRANSACTION_TYPES.values }
   validates :plaid_id,
@@ -25,7 +27,7 @@ class PlaidTransaction < ApplicationRecord
 
   def self.base_query_for_api(account_id)
     joins(:plaid_account, :merchant)
-      .includes(:plaid_account, :merchant_tag, merchant: [:default_merchant_tag])
+      .includes(:plaid_account, :merchant_tag, tag_plaid_transactions: :tag, merchant: [:default_merchant_tag])
       .where(plaid_transactions: { account_id: account_id })
       .order(date: :desc)
   end

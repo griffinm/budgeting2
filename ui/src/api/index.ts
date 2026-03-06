@@ -7,3 +7,5 @@ export * from './plaid-account-client';
 export * from './sync-event-client';
 export * from './account-balance-client';
 export * from './account-client';
+export * from './tags-client';
+export * from './transaction-tags-client';

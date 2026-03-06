@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_22_193146) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -206,6 +206,29 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_22_193146) do
     t.index ["merchant_tag_id"], name: "index_plaid_transactions_on_merchant_tag_id"
     t.index ["plaid_account_id"], name: "index_plaid_transactions_on_plaid_account_id"
     t.index ["plaid_sync_event_id"], name: "index_plaid_transactions_on_plaid_sync_event_id"
+  end
+
+  create_table "tag_plaid_transactions", force: :cascade do |t|
+    t.bigint "tag_id"
+    t.bigint "plaid_transaction_id"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["plaid_transaction_id"], name: "index_tag_plaid_transactions_on_plaid_transaction_id"
+    t.index ["tag_id"], name: "index_tag_plaid_transactions_on_tag_id"
+    t.index ["user_id"], name: "index_tag_plaid_transactions_on_user_id"
+  end
+
+  create_table "tags", force: :cascade do |t|
+    t.string "name"
+    t.bigint "account_id"
+    t.bigint "user_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "color", default: "ffffff", null: false
+    t.index ["account_id"], name: "index_tags_on_account_id"
+    t.index ["user_id"], name: "index_tags_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|

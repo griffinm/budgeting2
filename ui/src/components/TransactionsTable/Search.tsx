@@ -1,150 +1,74 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { useRef, useState, useEffect } from "react";
-import { Button, Card, Checkbox, Input, MultiSelect, Select, TextInput } from "@mantine/core";
+import { useState } from "react";
+import { ActionIcon, Badge, Collapse } from "@mantine/core";
 import { TransactionSearchParams } from "@/api/transaction-client";
-import { DatePickerInput } from '@mantine/dates';
-import '@mantine/dates/styles.css';
-import { PlaidAccount, TransactionType } from "@/utils/types";
-
-const SEARCH_TIMEOUT = 250;
+import { PlaidAccount, Tag } from "@/utils/types";
+import { IconFilter, IconFilterOff } from "@tabler/icons-react";
+import { SearchFilters, countActiveFilters } from "./SearchFilters";
 
 export function Search({
   searchParams,
   onSetSearchParams,
   clearSearchParams,
   plaidAccounts = [],
+  tags = [],
+  totalCount,
+  isLoading,
 }: {
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
   clearSearchParams: () => void;
   plaidAccounts?: PlaidAccount[];
+  tags?: Tag[];
+  totalCount?: number;
+  isLoading?: boolean;
 }) {
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [search, setSearch] = useState('');
-  const [localParams, setLocalParams] = useState<TransactionSearchParams>(searchParams);
-  const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Update local params when searchParams prop changes
-  useEffect(() => {
-    setLocalParams(searchParams);
-    setSearch(searchParams.search_term || '');
-  }, [searchParams]);
-
-  const debouncedSetSearchParams = (newParams: TransactionSearchParams) => {
-    if (searchTimeout.current) {
-      clearTimeout(searchTimeout.current);
-    }
-    searchTimeout.current = setTimeout(() => {
-      onSetSearchParams(newParams);
-    }, SEARCH_TIMEOUT);
-  };
-
-  const updateSearchTerm = (value: string) => {
-    setSearch(value);
-    const newParams = { ...localParams, search_term: value };
-    setLocalParams(newParams);
-    debouncedSetSearchParams(newParams);
-  };
-
-  const updateLocalParam = (key: keyof TransactionSearchParams, value: any) => {
-    const newParams = { ...localParams, [key]: value };
-    setLocalParams(newParams);
-    debouncedSetSearchParams(newParams);
-  };
+  const [showFilters, setShowFilters] = useState(false);
+  const activeCount = countActiveFilters(searchParams);
 
   return (
-    <div>
-      <div className="flex flex-row gap-2">
-        <div className="max-w-[200px]">
-          <Input
-            placeholder="Search"
-            value={search}
-            onChange={(e) => updateSearchTerm(e.target.value)}
-          />
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <ActionIcon
+            variant={showFilters ? "filled" : "light"}
+            color={activeCount > 0 ? "primary" : "gray"}
+            size="lg"
+            onClick={() => setShowFilters(!showFilters)}
+            aria-label="Toggle filters"
+          >
+            {showFilters ? <IconFilterOff size={18} /> : <IconFilter size={18} />}
+          </ActionIcon>
+          {activeCount > 0 && !showFilters && (
+            <Badge
+              size="xs"
+              circle
+              className="absolute -top-1.5 -right-1.5 pointer-events-none"
+              color="red"
+            >
+              {activeCount}
+            </Badge>
+          )}
         </div>
-        <div className="mt-2 text-sm text-gray-500 cursor-pointer" onClick={() => setShowAdvanced(!showAdvanced)}>
-          {showAdvanced ? '- Hide Advanced Search' : '+ Show Advanced Search'}
-        </div>
+        {activeCount > 0 && !showFilters && (
+          <span className="text-xs text-gray-400">
+            {activeCount} filter{activeCount !== 1 ? 's' : ''} active
+          </span>
+        )}
       </div>
 
-      {showAdvanced && (
-        <div className="mt-2">
-          <form>
-            <Card shadow="xs" radius="md" p="xs">
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-7">
-                <DatePickerInput
-                  label="Start Date"
-                  value={localParams.start_date}
-                  onChange={(date) => updateLocalParam('start_date', date)}
-                />
-                <DatePickerInput
-                  label="End Date"
-                  value={localParams.end_date}
-                  onChange={(date) => updateLocalParam('end_date', date)}
-                />
-
-                <TextInput
-                  label="Amount Greater Than"
-                  type="number"
-                  value={localParams.amount_greater_than || ''}
-                  onChange={(e) => updateLocalParam('amount_greater_than', e.target.value)}
-                />
-                <TextInput
-                  label="Amount Less Than"
-                  type="number"
-                  value={localParams.amount_less_than || ''}
-                  onChange={(e) => updateLocalParam('amount_less_than', e.target.value)}
-                />
-                <TextInput
-                  label="Amount Equal To"
-                  type="number"
-                  value={localParams.amount_equal_to || ''}
-                  onChange={(e) => updateLocalParam('amount_equal_to', e.target.value)}
-                />
-                <Select
-                  label="Transaction Type"
-                  value={localParams.transaction_type}
-                  onChange={(value) => updateLocalParam('transaction_type', value as TransactionType)}
-                  data={[
-                    { value: '', label: 'All' },
-                    { value: 'expense', label: 'Expense' },
-                    { value: 'income', label: 'Income' },
-                    { value: 'transfer', label: 'Transfer' },
-                  ]}
-                />
-                <div className="flex flex-row items-center pt-5">
-                  <Checkbox
-                    label="Has No Category"
-                    checked={localParams.has_no_category}
-                    onChange={(e) => updateLocalParam('has_no_category', e.target.checked)}
-                  />
-                </div>
-
-              </div>
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-7 mt-2">
-                <div className="col-span-2">
-                  <MultiSelect
-                    label="Filter by Accounts"
-                    placeholder="Select accounts"
-                    value={(localParams.plaid_account_ids || []).map(String)}
-                    onChange={(values) => updateLocalParam('plaid_account_ids', values.map(Number))}
-                    data={plaidAccounts.map((account) => ({
-                      value: String(account.id),
-                      label: account.nickname || account.plaidOfficialName || `Account ${account.plaidMask}`,
-                    }))}
-                    searchable
-                    clearable
-                  />
-                </div>
-              </div>
-              <div className="mt-2">
-                <Button variant="subtle" size="xs" color="gray" onClick={() => clearSearchParams()}>Clear Search</Button>
-              </div>
-            </Card>
-          </form>
+      <Collapse in={showFilters}>
+        <div className="pt-1 pb-2 max-w-xl">
+          <SearchFilters
+            searchParams={searchParams}
+            onSetSearchParams={onSetSearchParams}
+            clearSearchParams={clearSearchParams}
+            plaidAccounts={plaidAccounts}
+            tags={tags}
+            totalCount={totalCount}
+            isLoading={isLoading}
+          />
         </div>
-      )}
+      </Collapse>
     </div>
   );
 }

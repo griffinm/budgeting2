@@ -15,7 +15,8 @@ class TransactionSearchService < BaseService
     has_no_category: nil,
     merchant_tag_id: nil,
     merchant_group_id: nil,
-    plaid_account_ids: nil
+    plaid_account_ids: nil,
+    tag_ids: nil
   )
     @account_id = account_id
     @user_id = user_id
@@ -33,6 +34,7 @@ class TransactionSearchService < BaseService
     @merchant_tag_id = merchant_tag_id
     @merchant_group_id = merchant_group_id
     @plaid_account_ids = plaid_account_ids
+    @tag_ids = tag_ids
 
     @user = User.find(@user_id)
     @account = Account.find(@account_id)
@@ -128,7 +130,13 @@ class TransactionSearchService < BaseService
     if @plaid_account_ids.present? && @plaid_account_ids.is_a?(Array) && @plaid_account_ids.any?
       transactions = transactions.where(plaid_account_id: @plaid_account_ids)
     end
-    
+
+    if @tag_ids.present? && @tag_ids.is_a?(Array) && @tag_ids.any?
+      transactions = transactions.where(
+        id: TagPlaidTransaction.where(tag_id: @tag_ids).select(:plaid_transaction_id)
+      )
+    end
+
     transactions
   end
 

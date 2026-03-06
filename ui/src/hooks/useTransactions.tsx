@@ -1,11 +1,16 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { 
+import { useState, useEffect, useCallback, useRef, useContext } from 'react';
+import {
   getTransactions,
   TransactionSearchParams,
   TransactionUpdateParams,
   updateTransaction as updateTransactionApi,
 } from '@/api/transaction-client';
+import {
+  createTransactionTag as createTransactionTagApi,
+  deleteTransactionTag as deleteTransactionTagApi,
+} from '@/api/transaction-tags-client';
 import { Page, Transaction } from '@/utils/types';
+import { NotificationContext } from '@/providers/Notification/NotificationContext';
 
 const SEARCH_PARAMS_KEY = "transactionSearch";
 
@@ -40,6 +45,8 @@ interface TransactionsState {
   page: Page;
   hasMore: boolean;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
+  addTransactionTag: (transactionId: number, tagId: number) => void;
+  removeTransactionTag: (transactionId: number, transactionTagId: number) => void;
 }
 
 export const useTransactions = ({
@@ -47,6 +54,7 @@ export const useTransactions = ({
 }: {
   initialSearchParams?: TransactionSearchParams;
 } = {}) => {
+  const { showNotification } = useContext(NotificationContext);
   const [state, setState] = useState<TransactionsState>({
     searchParams: getSearchFromLocalStorage() || initialSearchParams || {},
     setSearchParams: () => {},
@@ -55,6 +63,8 @@ export const useTransactions = ({
     isLoadingMore: false,
     error: null,
     updateTransaction: () => {},
+    addTransactionTag: () => {},
+    removeTransactionTag: () => {},
     hasMore: true,
     page: {
       currentPage: 1, // Always start from page 1 with infinite scroll
@@ -188,6 +198,47 @@ export const useTransactions = ({
     });
   }, []);
 
+  const addTransactionTag = useCallback((transactionId: number, tagId: number) => {
+    createTransactionTagApi({ tagId, plaidTransactionId: transactionId })
+      .then((newTransactionTag) => {
+        setState(prev => ({
+          ...prev,
+          transactions: prev.transactions.map(transaction =>
+            transaction.id === transactionId
+              ? { ...transaction, transactionTags: [...transaction.transactionTags, newTransactionTag] }
+              : transaction
+          ),
+        }));
+        showNotification({ title: 'Tag added', message: `"${newTransactionTag.tag.name}" added to transaction.`, type: 'success' });
+      })
+      .catch(() => {
+        showNotification({ title: 'Error', message: 'Failed to add tag.', type: 'error' });
+      });
+  }, [showNotification]);
+
+  const removeTransactionTag = useCallback((transactionId: number, transactionTagId: number) => {
+    const tagName = state.transactions
+      .find(t => t.id === transactionId)
+      ?.transactionTags.find(tt => tt.id === transactionTagId)
+      ?.tag.name;
+
+    deleteTransactionTagApi({ id: transactionTagId })
+      .then(() => {
+        setState(prev => ({
+          ...prev,
+          transactions: prev.transactions.map(transaction =>
+            transaction.id === transactionId
+              ? { ...transaction, transactionTags: transaction.transactionTags.filter(tt => tt.id !== transactionTagId) }
+              : transaction
+          ),
+        }));
+        showNotification({ title: 'Tag removed', message: `"${tagName}" removed from transaction.`, type: 'success' });
+      })
+      .catch(() => {
+        showNotification({ title: 'Error', message: 'Failed to remove tag.', type: 'error' });
+      });
+  }, [showNotification, state.transactions]);
+
   const clearSearchParams = () => {
     clearSearchFromLocalStorage();
     setState(prev => {
@@ -221,6 +272,8 @@ export const useTransactions = ({
     loadMore,
     setSearchParams,
     updateTransaction,
+    addTransactionTag,
+    removeTransactionTag,
     clearSearchParams,
   };
 }; 

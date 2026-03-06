@@ -48,6 +48,7 @@ export function SpendSummary({
       setmerchantSpendStatsAllTime(data);
       setmerchantSpendStatsAllTimeLoading(false);
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [merchant.id]);
 
 

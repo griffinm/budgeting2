@@ -30,3 +30,11 @@ end
 json.merchantTag do
   json.partial! "merchant_tags/merchant_tag", merchant_tag: transaction.merchant_tag if transaction.merchant_tag
 end
+
+json.transactionTags transaction.tag_plaid_transactions do |tpt|
+  json.id tpt.id
+  json.tagId tpt.tag_id
+  json.tag do
+    json.partial! "tags/tag", tag: tpt.tag
+  end
+end

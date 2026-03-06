@@ -13,6 +13,7 @@ const MerchantsPage = lazy(() => import('@/pages/MerchantsPage/MerchantsPage'));
 const MerchantPage = lazy(() => import('@/pages/MerchantPage/MerchantPage'));
 const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTagsPage'));
 const MerchantTagPage = lazy(() => import('@/pages/MerchantTagPage/MerchantTagPage'));
+const TagsSpendPage = lazy(() => import('@/pages/TagsSpendPage/TagsSpendPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
 const SignupPage = lazy(() => import('@/pages/SignupPage/SignupPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage/ProfilePage'));
@@ -75,6 +76,13 @@ export const urls: Record<string, Url> = {
     label: 'Categories',
     title: () => 'Categories' + TITLE_SUFFIX,
     component: MerchantTagsPage,
+    section: 'main',
+  },
+  tags: {
+    path: () => '/tags',
+    label: 'Tags',
+    title: () => 'Tags' + TITLE_SUFFIX,
+    component: TagsSpendPage,
     section: 'main',
   },
   merchantTag: {
