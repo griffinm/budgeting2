@@ -107,6 +107,13 @@ export interface Tag {
   updatedAt: string;
 }
 
+export interface TagSpendStats {
+  month: number;
+  year: number;
+  tagId: number;
+  totalAmount: number;
+}
+
 export interface TransactionTag {
   id: number;
   tagId: number;
