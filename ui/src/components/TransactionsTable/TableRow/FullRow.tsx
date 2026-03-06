@@ -11,7 +11,7 @@ import { Logo } from "../Logo";
 import { PendingBadge } from "./PendingBadge";
 import { TransactionNote } from "./TransactionNote";
 import { ActionIcon, Menu } from "@mantine/core";
-import { IconDotsVertical, IconPencil } from "@tabler/icons-react";
+import { IconChevronDown, IconDotsVertical, IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 
 export function FullRow({
@@ -32,12 +32,14 @@ export function FullRow({
   createAndAddTag: (transactionId: number, name: string) => void;
 }) {
   const [isEditingNote, setIsEditingNote] = useState(false);
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
 
   return (
     <div className="w-full px-3 py-2 relative border-b border-gray-300 hover:bg-gray-100 transition-colors">
-      <div className="flex flex-row items-center gap-3">
+      {/* Desktop layout */}
+      <div className="hidden md:flex flex-row items-center gap-3">
         {/* Logo */}
-        <div className="h-[40px] w-[40px] flex-shrink-0 hidden md:flex items-center">
+        <div className="h-[40px] w-[40px] flex-shrink-0 flex items-center">
           <Logo merchant={transaction.merchant} isCheck={transaction.isCheck} />
         </div>
 
@@ -90,7 +92,7 @@ export function FullRow({
         </div>
 
         {/* Menu */}
-        <div className="flex-shrink-0 hidden md:flex items-center">
+        <div className="flex-shrink-0 flex items-center">
           <Menu>
             <Menu.Target>
               <ActionIcon variant="subtle" size="xs">
@@ -104,6 +106,66 @@ export function FullRow({
             </Menu.Dropdown>
           </Menu>
         </div>
+      </div>
+
+      {/* Mobile layout */}
+      <div className="flex md:hidden flex-col">
+        {/* Collapsed: Merchant + Amount */}
+        <div
+          className="flex items-start justify-between cursor-pointer"
+          onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+        >
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <IconChevronDown
+              size={14}
+              className={`flex-shrink-0 text-gray-400 transition-transform ${isMobileExpanded ? "rotate-0" : "-rotate-90"}`}
+            />
+            <div className="min-w-0">
+              <div className="text-sm font-medium truncate">
+                <Link to={urls.merchant.path(transaction.merchant.id)} onClick={(e) => e.stopPropagation()}>
+                  {merchantDisplayName(transaction.merchant)}
+                </Link>
+              </div>
+              <span className="text-xs text-gray-400">
+                {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 flex-shrink-0 pl-3">
+            {transaction.pending && <PendingBadge />}
+            <TransactionAmount amount={transaction.amount} />
+          </div>
+        </div>
+
+        {/* Expanded: Type + Category + Tags */}
+        {isMobileExpanded && (
+          <div className="flex items-center gap-2 flex-wrap mt-1 ml-5">
+            <div className="flex-shrink-0">
+              <TransactionType
+                transaction={transaction}
+                onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
+              />
+            </div>
+            <div className="min-w-0">
+              <CategoryDisplay
+                category={transaction.merchantTag}
+                onSave={({ id, useDefaultCategory }) => {
+                  updateTransaction(transaction.id, { merchantTagId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
+                }}
+                allCategories={merchantTags}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <TransactionTags
+                transaction={transaction}
+                allTags={allTags}
+                onAdd={addTransactionTag}
+                onRemove={removeTransactionTag}
+                onCreateAndAdd={createAndAddTag}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Note row */}

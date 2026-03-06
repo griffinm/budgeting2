@@ -75,7 +75,7 @@ export default function TransactionsPage() {
         />
       </div>
       
-      <Card p={0} className="flex-1 min-h-0"> 
+      <Card p={0} className="flex-1 min-h-0 -mx-[var(--mantine-spacing-md)] md:mx-0 rounded-none md:rounded-lg">
         <TransactionsTable
           transactions={transactions}
           isLoading={isLoading}
