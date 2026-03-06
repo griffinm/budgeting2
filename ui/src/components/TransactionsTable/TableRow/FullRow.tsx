@@ -26,10 +26,10 @@ export function FullRow({
   transaction: Transaction;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
-  allTags: Tag[];
-  addTransactionTag: (transactionId: number, tagId: number) => void;
-  removeTransactionTag: (transactionId: number, transactionTagId: number) => void;
-  createAndAddTag: (transactionId: number, name: string) => void;
+  allTags?: Tag[];
+  addTransactionTag?: (transactionId: number, tagId: number) => void;
+  removeTransactionTag?: (transactionId: number, transactionTagId: number) => void;
+  createAndAddTag?: (transactionId: number, name: string) => void;
 }) {
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
@@ -73,15 +73,17 @@ export function FullRow({
         </div>
 
         {/* Tags */}
-        <div className="flex flex-1 justify-center">
-          <TransactionTags
-            transaction={transaction}
-            allTags={allTags}
-            onAdd={addTransactionTag}
-            onRemove={removeTransactionTag}
-            onCreateAndAdd={createAndAddTag}
-          />
-        </div>
+        {allTags && addTransactionTag && removeTransactionTag && createAndAddTag && (
+          <div className="flex flex-1 justify-center">
+            <TransactionTags
+              transaction={transaction}
+              allTags={allTags}
+              onAdd={addTransactionTag}
+              onRemove={removeTransactionTag}
+              onCreateAndAdd={createAndAddTag}
+            />
+          </div>
+        )}
 
         {/* Amount — right-aligned */}
         <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto pl-3">
@@ -155,15 +157,17 @@ export function FullRow({
                 allCategories={merchantTags}
               />
             </div>
-            <div className="w-1/4 text-right flex justify-end">
-              <TransactionTags
-                transaction={transaction}
-                allTags={allTags}
-                onAdd={addTransactionTag}
-                onRemove={removeTransactionTag}
-                onCreateAndAdd={createAndAddTag}
-              />
-            </div>
+            {allTags && addTransactionTag && removeTransactionTag && createAndAddTag && (
+              <div className="w-1/4 text-right flex justify-end">
+                <TransactionTags
+                  transaction={transaction}
+                  allTags={allTags}
+                  onAdd={addTransactionTag}
+                  onRemove={removeTransactionTag}
+                  onCreateAndAdd={createAndAddTag}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

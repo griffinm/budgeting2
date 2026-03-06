@@ -17,10 +17,10 @@ export function TableRow({
   condensed?: boolean;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
   merchantTags: MerchantTag[];
-  allTags: Tag[];
-  addTransactionTag: (transactionId: number, tagId: number) => void;
-  removeTransactionTag: (transactionId: number, transactionTagId: number) => void;
-  createAndAddTag: (transactionId: number, name: string) => void;
+  allTags?: Tag[];
+  addTransactionTag?: (transactionId: number, tagId: number) => void;
+  removeTransactionTag?: (transactionId: number, transactionTagId: number) => void;
+  createAndAddTag?: (transactionId: number, name: string) => void;
 }) {
   return (
     <>

@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 
-export function Link({ children, to }: { children: React.ReactNode, to: string }) {
+export function Link({ children, to, onClick }: { children: React.ReactNode, to: string, onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void }) {
   const navigate = useNavigate();
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
+    if (onClick) onClick(e);
     navigate(to);
   }
 
