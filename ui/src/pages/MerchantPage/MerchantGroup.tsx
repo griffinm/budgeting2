@@ -2,7 +2,7 @@ import { MerchantLinking } from "@/components/MerchantLinking";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { Merchant } from "@/utils/types";
 import { urls } from "@/utils/urls";
-import { Card, Tooltip } from "@mantine/core";
+import { Tooltip } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 
@@ -15,9 +15,8 @@ export function MerchantGroupCard({
   setMerchant: (merchant: Merchant) => void;
 }) {
   return (
-    <Card>
+    <div>
       <div className="flex items-center gap-2 mb-4">
-        <h2 className="text-xl font-bold">Merchant Group</h2>
         <Tooltip
           label={
             <div className="max-w-md">
@@ -112,6 +111,6 @@ export function MerchantGroupCard({
           </div>
         </div>
       )}
-    </Card>
+    </div>
   )
 }

@@ -1,7 +1,7 @@
 import { Loading } from "@/components/Loading";
 import { MerchantSpendStats } from "@/utils/types";
 import { BarChart } from "@mantine/charts";
-import { Select } from "@mantine/core";
+import { Group, Select, Text } from "@mantine/core";
 
 export function TrendChart({
   merchantSpendStats,
@@ -23,14 +23,17 @@ export function TrendChart({
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex-0 flex flex-row gap-6 justify-end mb-6">
+      <Group justify="space-between" align="flex-end" mb="md">
+        <Text size="lg" fw={600}>Spending Trend</Text>
         <Select
           value={monthsBack.toString()}
           onChange={(value) => onChangeMonthsBack(parseInt(value || '6'))}
           data={['1', '3', '6', '12', '24']}
           label="Months Back"
+          size="xs"
+          w={100}
         />
-      </div>
+      </Group>
       <div className="flex-1">
         <BarChart
           title="Trend Chart"
@@ -46,12 +49,12 @@ export function TrendChart({
           withLegend={false}
           referenceLines={averageSpendForChart ? [{
             y: averageSpendForChart,
-            label: `Average: $${averageSpendForChart.toLocaleString()}`,
+            label: `Average: $${averageSpendForChart.toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
             color: 'red',
             strokeWidth: 2,
             strokeDasharray: '3 3',
           }] : []}
-          valueFormatter={(value: number) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`}
+          valueFormatter={(value: number) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
         />
       </div>
     </div>

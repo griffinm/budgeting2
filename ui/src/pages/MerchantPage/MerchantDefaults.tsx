@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Badge, Button, Card, Modal, Popover, TextInput } from "@mantine/core";
+import { Badge, Button, Modal, Popover, TextInput } from "@mantine/core";
 import { IconPlus, IconX } from "@tabler/icons-react";
 import { Merchant, MerchantCategory, Tag } from "@/utils/types";
 import { updateMerchant } from "@/api/merchant-client";
@@ -106,26 +106,24 @@ export function MerchantDefaults({
 
   return (
     <>
-      <Card>
-        <h2 className="text-xl font-bold mb-4">Defaults</h2>
-        <div className="flex flex-col gap-4">
-          <DefaultCategory
-            merchant={merchant}
-            allCategories={allCategories}
-            categoryEditOpen={categoryEditOpen}
-            setCategoryEditOpen={setCategoryEditOpen}
-            onCategoryChange={handleCategoryChange}
-            onClear={handleClearCategory}
-          />
-          <DefaultTags
-            merchant={merchant}
-            allTags={allTags}
-            onAdd={handleAddTag}
-            onRemove={handleRemoveTag}
-            onCreateAndAdd={handleCreateAndAddTag}
-          />
-        </div>
-      </Card>
+      <div className="flex flex-row flex-wrap items-stretch gap-8">
+        <DefaultCategory
+          merchant={merchant}
+          allCategories={allCategories}
+          categoryEditOpen={categoryEditOpen}
+          setCategoryEditOpen={setCategoryEditOpen}
+          onCategoryChange={handleCategoryChange}
+          onClear={handleClearCategory}
+        />
+        <div className="w-px bg-gray-200 self-stretch" />
+        <DefaultTags
+          merchant={merchant}
+          allTags={allTags}
+          onAdd={handleAddTag}
+          onRemove={handleRemoveTag}
+          onCreateAndAdd={handleCreateAndAddTag}
+        />
+      </div>
 
       <Modal
         opened={confirmModal.open}
@@ -174,7 +172,7 @@ function DefaultCategory({
 }) {
   return (
     <div>
-      <div className="text-sm font-medium text-gray-500 mb-1">Default Category</div>
+      <div className="text-sm font-semibold text-gray-700 mb-1">Default Category</div>
       <div className="flex items-center gap-2">
         <Display
           tag={merchant.defaultMerchantTag}
@@ -237,7 +235,7 @@ function DefaultTags({
 
   return (
     <div>
-      <div className="text-sm font-medium text-gray-500 mb-1">Default Tags</div>
+      <div className="text-sm font-semibold text-gray-700 mb-1">Default Tags</div>
       <div className="flex flex-wrap gap-1 items-center">
         {merchant.defaultTags.map((tag) => (
           <Badge
