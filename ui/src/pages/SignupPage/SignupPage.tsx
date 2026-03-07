@@ -1,11 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { urls } from '@/utils/urls';
-import { Card, Button, TextInput, Text, Anchor } from '@mantine/core';
+import { Button, TextInput, PasswordInput, Text, Anchor, Paper, SimpleGrid } from '@mantine/core';
 import { signup } from '@/api';
 import { ErrorResponse, SignupResponse } from '@/utils/types';
 import { useNavigate } from 'react-router-dom';
 import { Errors } from '@/components/Errors/Errors';
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
+import { IconMail, IconLock, IconUser } from '@tabler/icons-react';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,7 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setToken, setUser } = useContext(CurrentUserContext);
 
@@ -25,7 +27,6 @@ export default function SignupPage() {
     e.preventDefault();
     setErrors([]);
 
-    // Client-side validation
     if (password !== confirmPassword) {
       setErrors(['Passwords do not match']);
       return;
@@ -36,6 +37,7 @@ export default function SignupPage() {
       return;
     }
 
+    setLoading(true);
     signup({ email, firstName, lastName, password })
       .then((response) => {
         if (response.status === 201) {
@@ -57,69 +59,80 @@ export default function SignupPage() {
           setErrors(['An error occurred during signup']);
         }
       })
+      .finally(() => setLoading(false));
   }
 
   return (
-    <div className='flex flex-col items-center justify-center mt-10'>
-      <Card shadow='sm' padding='lg' radius='md' withBorder miw={400}>
-        <Text size="xl" fw={700} mb="md">Create your account</Text>
-        <Errors errors={errors} />
-        <form onSubmit={handleSubmit}>
+    <Paper shadow="xl" radius="lg" p="xl" withBorder={false}
+      className="dark:bg-[var(--mantine-color-dark-7)]"
+    >
+      <Text size="xl" fw={700} mb={4}>Create your account</Text>
+      <Text size="sm" c="dimmed" mb="lg">Start tracking your finances today</Text>
+
+      <Errors errors={errors} />
+
+      <form onSubmit={handleSubmit}>
+        <SimpleGrid cols={2}>
           <TextInput
-            label='First Name'
-            placeholder='John'
-            mt="md"
+            label="First Name"
+            placeholder="John"
             required
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
+            leftSection={<IconUser size={16} />}
+            size="md"
           />
           <TextInput
-            label='Last Name'
-            placeholder='Doe'
-            mt="md"
+            label="Last Name"
+            placeholder="Doe"
             required
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
+            size="md"
           />
-          <TextInput
-            label='Email'
-            placeholder='john@example.com'
-            type="email"
-            mt="md"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <TextInput
-            label='Password'
-            placeholder='At least 8 characters'
-            mt="md"
-            required
-            value={password}
-            type="password"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <TextInput
-            label='Confirm Password'
-            placeholder='Re-enter your password'
-            mt="md"
-            required
-            value={confirmPassword}
-            type="password"
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-          <div className="flex justify-end mt-5">
-            <Button type="submit">Sign Up</Button>
-          </div>
-        </form>
-        <Text size="sm" mt="md" ta="center">
-          Already have an account?{' '}
-          <Anchor href={urls.login.path()} underline="always">
-            Log in
-          </Anchor>
-        </Text>
-      </Card>
-    </div>
+        </SimpleGrid>
+        <TextInput
+          label="Email"
+          placeholder="you@example.com"
+          type="email"
+          mt="md"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          leftSection={<IconMail size={16} />}
+          size="md"
+        />
+        <PasswordInput
+          label="Password"
+          placeholder="At least 8 characters"
+          mt="md"
+          required
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          leftSection={<IconLock size={16} />}
+          size="md"
+        />
+        <PasswordInput
+          label="Confirm Password"
+          placeholder="Re-enter your password"
+          mt="md"
+          required
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          leftSection={<IconLock size={16} />}
+          size="md"
+        />
+        <Button type="submit" fullWidth mt="xl" size="md" loading={loading}>
+          Create account
+        </Button>
+      </form>
+
+      <Text size="sm" mt="lg" ta="center" c="dimmed">
+        Already have an account?{' '}
+        <Anchor href={urls.login.path()} underline="hover" fw={600}>
+          Sign in
+        </Anchor>
+      </Text>
+    </Paper>
   )
 }
-
