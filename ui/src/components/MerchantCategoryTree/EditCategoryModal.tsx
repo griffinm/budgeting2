@@ -3,6 +3,7 @@ import { Button, Modal, NumberInput, Select, TextInput } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons-react";
 import { MerchantTag } from "@/utils/types";
 import { CreateMerchantTagRequest, UpdateMerchantTagRequest } from "@/api";
+import { Errors } from "@/components/Errors/Errors";
 
 function getDescendantIds(tag: MerchantTag): number[] {
   const ids: number[] = [tag.id];
@@ -20,6 +21,7 @@ export function EditCategoryModal({
   onSave,
   onCreate,
   isSaving,
+  errors,
 }: {
   merchantTag?: MerchantTag;
   allMerchantTags: MerchantTag[];
@@ -28,6 +30,7 @@ export function EditCategoryModal({
   onSave: (params: UpdateMerchantTagRequest) => void;
   onCreate: (params: CreateMerchantTagRequest) => void;
   isSaving: boolean;
+  errors: string[];
 }) {
   const isEditing = !!merchantTag;
   const [name, setName] = useState(merchantTag?.name || "");
@@ -73,6 +76,7 @@ export function EditCategoryModal({
       size="md"
     >
       <div className="flex flex-col gap-4">
+        <Errors errors={errors} />
         <TextInput
           label="Name"
           value={name}

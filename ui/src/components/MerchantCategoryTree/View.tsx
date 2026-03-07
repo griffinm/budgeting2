@@ -9,7 +9,7 @@ import {
   UpdateMerchantTagRequest,
 } from "@/api";
 import { Loading } from "../Loading";
-import { Button } from "@mantine/core";
+import { Button, Select, SegmentedControl } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
 import {
@@ -41,7 +41,7 @@ export const View = () => {
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
   const [selectedMerchantTag, setSelectedMerchantTag] = useState<MerchantTag | undefined>();
-  const [monthsBack, setMonthsBack] = useState(1);
+  const [monthsBack, setMonthsBack] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingMerchantTag, setEditingMerchantTag] = useState<MerchantTag | undefined>();
   const [rawMerchantTags, setRawMerchantTags] = useState<MerchantTag[]>([]);
@@ -66,15 +66,6 @@ export const View = () => {
     refreshData();
   }, [startDate, endDate]);
 
-  const startDateValue = startDate ? new Date(startDate) : new Date(defaultStartDate);
-  const endDateValue = endDate ? new Date(endDate) : new Date(defaultEndDate);
-
-  const setDates = (monthsBack: number) => {
-    setStartDate(startOfMonth(subMonths(new Date(), monthsBack)));
-    setEndDate(defaultEndDate);
-    setMonthsBack(monthsBack);
-  }
-
   const onViewTransactions = (merchantTag: MerchantTag) => {
     setSelectedMerchantTag(merchantTag);
     setIsTransactionModalOpen(true);
@@ -85,13 +76,19 @@ export const View = () => {
     setIsEditModalOpen(true);
   };
 
+  const [editErrors, setEditErrors] = useState<string[]>([]);
+
   const onSaveEdit = (params: UpdateMerchantTagRequest) => {
     setIsSaving(true);
+    setEditErrors([]);
     updateMerchantTag({ data: params })
       .then(() => {
         setIsEditModalOpen(false);
         setEditingMerchantTag(undefined);
         refreshData();
+      })
+      .catch((error) => {
+        setEditErrors(error.response?.data?.errors || ["Something went wrong"]);
       })
       .finally(() => {
         setIsSaving(false);
@@ -100,10 +97,14 @@ export const View = () => {
 
   const onCreateCategory = (params: CreateMerchantTagRequest) => {
     setIsSaving(true);
+    setEditErrors([]);
     createMerchantTag({ data: params })
       .then(() => {
         setIsEditModalOpen(false);
         refreshData();
+      })
+      .catch((error) => {
+        setEditErrors(error.response?.data?.errors || ["Something went wrong"]);
       })
       .finally(() => {
         setIsSaving(false);
@@ -128,32 +129,19 @@ export const View = () => {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row gap-2 mb-5 sm:items-end justify-between">
-        <div className="flex flex-col sm:flex-row gap-2 sm:items-end">
-          <div className="flex flex-row gap-2 w-full sm:w-auto">
-            <DateInput
-              size="xs"
-              value={startDateValue}
-              onChange={(date) => setStartDate(date ? new Date(date) : null)}
-              label="Start Date"
-            />
-            <DateInput
-              size="xs"
-              value={endDateValue}
-              onChange={(date) => setEndDate(date ? new Date(date) : null)}
-              label="End Date"
-            />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-            {quickOptions.map((option) => (
-              <Button size="xs" variant="outline" key={option.label} onClick={() => setDates(option.monthsBack)}>
-                {option.label}
-              </Button>
-            ))}
-          </div>
+      <div className="flex flex-col sm:flex-row gap-3 mb-5 sm:items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <DateFields
+            onChange={({ startDate, endDate, monthsBack }) => {
+              setStartDate(startDate);
+              setEndDate(endDate);
+              setMonthsBack(monthsBack);
+            }}
+          />
         </div>
+
         <Button
-          size="xs"
+          size="sm"
           variant="outline"
           leftSection={<IconPlus size={16} />}
           onClick={() => {
@@ -164,6 +152,9 @@ export const View = () => {
           New Category
         </Button>
       </div>
+
+      <div className="border border-b border-gray-200 border-1 mb-3" />
+
       {loading ? <Loading /> : renderTable()}
       <TransactionModal
         merchantTag={selectedMerchantTag}
@@ -177,11 +168,93 @@ export const View = () => {
         onClose={() => {
           setIsEditModalOpen(false);
           setEditingMerchantTag(undefined);
+          setEditErrors([]);
         }}
         onSave={onSaveEdit}
         onCreate={onCreateCategory}
         isSaving={isSaving}
+        errors={editErrors}
       />
     </div>
+  );
+};
+
+interface DateFieldsProps {
+  onChange: (params: { startDate: Date; endDate: Date; monthsBack: number }) => void;
+}
+
+const DateFields = ({ onChange }: DateFieldsProps) => {
+  const [selectedOption, setSelectedOption] = useState('0');
+  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
+  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
+
+  const segmentData = [
+    ...quickOptions.map((option) => ({
+      label: option.label,
+      value: String(option.monthsBack),
+    })),
+    { label: "Custom", value: "custom" },
+  ];
+
+  const handleSegmentChange = (value: string) => {
+    setSelectedOption(value);
+    if (value !== 'custom') {
+      const monthsBack = Number(value);
+      const newStart = startOfMonth(subMonths(new Date(), monthsBack));
+      const newEnd = defaultEndDate;
+      setStartDate(newStart);
+      setEndDate(newEnd);
+      onChange({ startDate: newStart, endDate: newEnd, monthsBack });
+    }
+  };
+
+  return (
+    <>
+      <div className="hidden sm:block">
+        <SegmentedControl
+          size="sm"
+          value={selectedOption}
+          onChange={handleSegmentChange}
+          data={segmentData}
+        />
+      </div>
+      <div className="sm:hidden">
+        <Select
+          size="sm"
+          value={selectedOption}
+          onChange={(value) => value && handleSegmentChange(value)}
+          data={segmentData}
+        />
+      </div>
+      {selectedOption === 'custom' && (
+        <div className="flex gap-2 items-center">
+          <DateInput
+            size="sm"
+            value={startDate}
+            onChange={(date) => {
+              const d = date ? new Date(date) : null;
+              setStartDate(d);
+              if (d && endDate) {
+                onChange({ startDate: d, endDate, monthsBack: 0 });
+              }
+            }}
+            placeholder="Start date"
+          />
+          <span>—</span>
+          <DateInput
+            size="sm"
+            value={endDate}
+            onChange={(date) => {
+              const d = date ? new Date(date) : null;
+              setEndDate(d);
+              if (startDate && d) {
+                onChange({ startDate, endDate: d, monthsBack: 0 });
+              }
+            }}
+            placeholder="End date"
+          />
+        </div>
+      )}
+    </>
   );
 };
