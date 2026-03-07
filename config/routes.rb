@@ -81,6 +81,7 @@ Rails.application.routes.draw do
         get 'spend_stats', to: 'tags#spend_stats'
       end
     end
+    resources :tag_reports, only: [:index, :show, :create, :update, :destroy]
     resources :transaction_tags, only: [:create, :destroy]
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_07_192835) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_202021) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -231,6 +231,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_192835) do
     t.index ["user_id"], name: "index_tag_plaid_transactions_on_user_id"
   end
 
+  create_table "tag_report_tags", force: :cascade do |t|
+    t.bigint "tag_report_id", null: false
+    t.bigint "tag_id", null: false
+    t.string "role", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tag_id"], name: "index_tag_report_tags_on_tag_id"
+    t.index ["tag_report_id", "tag_id"], name: "index_tag_report_tags_on_tag_report_id_and_tag_id", unique: true
+    t.index ["tag_report_id"], name: "index_tag_report_tags_on_tag_report_id"
+  end
+
+  create_table "tag_reports", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.bigint "account_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_tag_reports_on_account_id"
+    t.index ["user_id"], name: "index_tag_reports_on_user_id"
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "name"
     t.bigint "account_id"
@@ -281,5 +304,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_07_192835) do
   add_foreign_key "plaid_transactions", "merchants"
   add_foreign_key "plaid_transactions", "plaid_accounts"
   add_foreign_key "plaid_transactions", "plaid_sync_events"
+  add_foreign_key "tag_report_tags", "tag_reports"
+  add_foreign_key "tag_report_tags", "tags"
+  add_foreign_key "tag_reports", "accounts"
+  add_foreign_key "tag_reports", "users"
   add_foreign_key "users", "accounts"
 end

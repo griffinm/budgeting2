@@ -115,6 +115,18 @@ export interface TagSpendStats {
   totalAmount: number;
 }
 
+export interface TagReport {
+  id: number;
+  name: string;
+  description: string | null;
+  userId: number;
+  accountId: number;
+  includedTagIds: number[];
+  omittedTagIds: number[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface TransactionTag {
   id: number;
   tagId: number;

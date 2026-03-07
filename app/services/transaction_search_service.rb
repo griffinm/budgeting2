@@ -51,10 +51,12 @@ class TransactionSearchService < BaseService
     transactions = @user.plaid_transactions
       .joins(:plaid_account, :merchant)
       .includes(
-        :plaid_account, 
-        :merchant_tag, 
+        :plaid_account,
+        :merchant_tag,
+        { tag_plaid_transactions: :tag },
         merchant: [
           :default_merchant_tag,
+          :merchant_default_tags,
           { merchant_group: [:primary_merchant, :merchants] }
         ]
       )

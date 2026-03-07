@@ -9,3 +9,4 @@ export * from './account-balance-client';
 export * from './account-client';
 export * from './tags-client';
 export * from './transaction-tags-client';
+export * from './tag-reports-client';

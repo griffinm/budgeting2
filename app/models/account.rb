@@ -10,6 +10,7 @@ class Account < ApplicationRecord
   has_many :merchant_tags, dependent: :destroy
   has_many :merchant_groups, dependent: :destroy
   has_many :tags, dependent: :destroy
+  has_many :tag_reports, dependent: :destroy
   has_many :tag_plaid_transactions, through: :tags
   has_many :account_balances, through: :plaid_accounts
 
