@@ -8,13 +8,23 @@ class TagService < BaseService
     end
   end
 
-  def spend_stats(tag_ids:, months_back: 6)
+  def spend_stats(tag_ids:, months_back: 6, omit_tag_ids: nil)
     return [] if tag_ids.blank?
 
     end_date = Date.today.end_of_day
     start_date = Date.today.beginning_of_month - (months_back.to_i - 1).months
 
     sanitized_tag_ids = tag_ids.map(&:to_i).join(',')
+
+    omit_clause = ""
+    if omit_tag_ids.present? && omit_tag_ids.is_a?(Array) && omit_tag_ids.any?
+      sanitized_omit_ids = omit_tag_ids.map(&:to_i).join(',')
+      omit_clause = <<-SQL
+        AND pt.id NOT IN (
+          SELECT plaid_transaction_id FROM tag_plaid_transactions WHERE tag_id IN (#{sanitized_omit_ids})
+        )
+      SQL
+    end
 
     sql = <<-SQL
       SELECT
@@ -31,6 +41,7 @@ class TagService < BaseService
         AND tpt.tag_id IN (#{sanitized_tag_ids})
         AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
         AND pt.date <= #{ActiveRecord::Base.connection.quote(end_date)}
+        #{omit_clause}
       GROUP BY
         year, month, tag_id
       ORDER BY

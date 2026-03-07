@@ -23,7 +23,8 @@ function getDateRange(monthsBack: number) {
 
 export default function TagsSpendPage() {
   const { tags, loading: loadingTags, createTag } = useTags();
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
+  const [includedTagIds, setIncludedTagIds] = useState<number[]>([]);
+  const [omittedTagIds, setOmittedTagIds] = useState<number[]>([]);
   const [monthsBack, setMonthsBack] = useState(6);
   const [stats, setStats] = useState<TagSpendStats[]>([]);
   const [loadingStats, setLoadingStats] = useState(false);
@@ -45,39 +46,41 @@ export default function TagsSpendPage() {
     setSearchParams,
   } = useTransactions({
     initialSearchParams: {
-      tag_ids: selectedTagIds,
+      tag_ids: includedTagIds,
+      omit_tag_ids: omittedTagIds,
       ...dateRange,
     },
   });
 
   useEffect(() => {
     setSearchParams({
-      tag_ids: selectedTagIds,
+      tag_ids: includedTagIds,
+      omit_tag_ids: omittedTagIds,
       ...dateRange,
     });
-  }, [selectedTagIds, dateRange]);
+  }, [includedTagIds, omittedTagIds, dateRange]);
 
   useEffect(() => {
     fetchMerchantCategories().then(setMerchantCategories).catch(console.error);
   }, []);
 
   useEffect(() => {
-    if (selectedTagIds.length === 0) {
+    if (includedTagIds.length === 0) {
       setStats([]);
       return;
     }
     setLoadingStats(true);
-    fetchTagSpendStats({ tagIds: selectedTagIds, monthsBack })
+    fetchTagSpendStats({ tagIds: includedTagIds, monthsBack, omitTagIds: omittedTagIds })
       .then(setStats)
       .finally(() => setLoadingStats(false));
-  }, [selectedTagIds, monthsBack]);
+  }, [includedTagIds, omittedTagIds, monthsBack]);
 
   const createAndAddTag = async (transactionId: number, name: string) => {
     const newTag = await createTag(name);
     addTransactionTag(transactionId, newTag.id);
   };
 
-  const hasSelection = selectedTagIds.length > 0;
+  const hasSelection = includedTagIds.length > 0 || omittedTagIds.length > 0;
 
   return (
     <div className="h-full flex flex-col gap-6">
@@ -86,8 +89,10 @@ export default function TagsSpendPage() {
           <div className="flex-1 w-full">
             <TagSelector
               tags={tags}
-              selectedTagIds={selectedTagIds}
-              onChange={setSelectedTagIds}
+              includedTagIds={includedTagIds}
+              omittedTagIds={omittedTagIds}
+              onIncludeChange={setIncludedTagIds}
+              onOmitChange={setOmittedTagIds}
             />
           </div>
           <MonthsBackSelect value={monthsBack} onChange={setMonthsBack} />

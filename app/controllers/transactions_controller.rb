@@ -23,6 +23,7 @@ class TransactionsController < ApplicationController
         merchant_group_id: search_params[:merchant_group_id],
         plaid_account_ids: search_params[:plaid_account_ids],
         tag_ids: search_params[:tag_ids],
+        omit_tag_ids: search_params[:omit_tag_ids],
       ).call
       
       @page, @transactions = pagy(
@@ -84,6 +85,7 @@ class TransactionsController < ApplicationController
       :per_page,
       plaid_account_ids: [],
       tag_ids: [],
+      omit_tag_ids: [],
     )
   end
 
