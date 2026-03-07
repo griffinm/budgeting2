@@ -1,9 +1,10 @@
 import { Loading } from "@/components/Loading";
-import { Paper, SimpleGrid, Text } from "@mantine/core";
+import { SimpleGrid } from "@mantine/core";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 
 function formatDollars(value: number): string {
-  return `$${Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  const prefix = value < 0 ? '-$' : '$';
+  return `${prefix}${Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
 }
 
 interface DashboardSummaryProps {
@@ -63,28 +64,40 @@ export function DashboardSummary({
   ];
 
   return (
-    <SimpleGrid cols={{ base: 2, sm: 4 }}>
-      {cards.map((card) => {
-        const trendColor = card.diff !== undefined
-          ? (card.inverted ? (card.diff >= 0 ? "red" : "teal") : (card.diff >= 0 ? "teal" : "red"))
-          : undefined;
+    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700 dark:from-primary-800 dark:via-primary-700 dark:to-primary-900 p-6">
+      <div className="absolute inset-0 opacity-10"
+        style={{
+          backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%),
+                            radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%)`,
+        }}
+      />
+      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={{ base: 'xl', sm: 'md' }} className="relative">
+        {cards.map((card, index) => {
+          const trendColor = card.diff !== undefined
+            ? (card.inverted ? (card.diff >= 0 ? "text-red-300 dark:text-red-300" : "text-emerald-100 dark:text-emerald-300") : (card.diff >= 0 ? "text-emerald-100 dark:text-emerald-300" : "text-red-300 dark:text-red-300"))
+            : undefined;
 
-        return (
-          <Paper withBorder p="md" radius="md" key={card.title}>
-            <Text size="sm" c="dimmed">{card.title}</Text>
-            <Text size="xxl" fw={700} mt={4} style={{ fontSize: '1.75rem' }}>{formatDollars(card.value)}</Text>
-            {card.diff !== undefined && (
-              <Text size="xs" mt={4} c={trendColor} className="flex items-center gap-1">
-                {card.diff >= 0 ? <IconTrendingUp size={14} /> : <IconTrendingDown size={14} />}
-                {Math.abs(card.diff).toFixed(0)}% vs avg
-              </Text>
-            )}
-            {card.subText && (
-              <Text size="xs" c="dimmed" mt={2}>{card.subText}</Text>
-            )}
-          </Paper>
-        );
-      })}
-    </SimpleGrid>
+          return (
+            <div key={card.title} className={index > 0 ? "sm:border-l sm:border-white/10 sm:pl-4" : ""}>
+              <div className="text-white/90 dark:text-primary-200 text-sm font-medium tracking-wide uppercase mb-1">
+                {card.title}
+              </div>
+              <div className="text-white text-3xl font-bold tracking-tight">
+                {formatDollars(card.value)}
+              </div>
+              {card.diff !== undefined && (
+                <div className={`flex items-center gap-1 mt-1 ${trendColor}`}>
+                  {card.diff >= 0 ? <IconTrendingUp size={14} /> : <IconTrendingDown size={14} />}
+                  {Math.abs(card.diff).toFixed(0)}% vs avg
+                </div>
+              )}
+              {card.subText && (
+                <div className="text-primary-100 text-sm mt-1">{card.subText}</div>
+              )}
+            </div>
+          );
+        })}
+      </SimpleGrid>
+    </div>
   );
 }

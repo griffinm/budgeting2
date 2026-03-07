@@ -2,7 +2,6 @@ import { AccountBalance as AccountBalanceType, AccountType } from "@/utils/types
 import { useState } from "react";
 import { Loading } from "@/components/Loading";
 import { getAccountsByType, getTotalBalanceByType, getCurrentBalance } from "./accountBalanceUtils";
-import { ColorBox } from "@/components/ColorBox";
 import { Currency } from "@/components/Currency";
 import { AccountBalanceHistoryModal } from "./AccountBalanceHistoryModal";
 import { IconChartLine } from '@tabler/icons-react';
@@ -112,7 +111,7 @@ function BalanceCard({
   onTypeHistoryClick: (type: AccountType, typeName: string) => void;
 }) {
   return (
-    <ColorBox>
+    <div className="rounded-md w-full bg-white dark:bg-transparent border border-gray-200 dark:border-gray-700">
       <div className="flex flex-col justify-between h-full items-center p-4">
         {/* Header with title and chart icon */}
         <div className="w-full flex justify-between items-start mb-2">
@@ -164,6 +163,6 @@ function BalanceCard({
           )}
         </div>
       </div>
-    </ColorBox>
+    </div>
   )
 }

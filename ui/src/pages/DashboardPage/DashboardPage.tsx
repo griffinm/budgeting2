@@ -46,7 +46,14 @@ export default function DashboardPage() {
   };
 
   // Computed values for DashboardSummary
-  const netWorth = accountBalances.reduce((sum, ab) => sum + getCurrentBalance(ab), 0);
+  const netWorth = accountBalances.reduce((sum, ab) => {
+    const balance = getCurrentBalance(ab);
+    const type = ab.plaidAccount.accountType;
+    if (type === 'credit' || type === 'loan') {
+      return sum - Math.abs(balance);
+    }
+    return sum + balance;
+  }, 0);
 
   const currentDay = new Date().getDate();
 
