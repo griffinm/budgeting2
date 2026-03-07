@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { Button, Modal, NumberInput, Select, TextInput } from "@mantine/core";
 import { IconCheck, IconX } from "@tabler/icons-react";
-import { MerchantTag } from "@/utils/types";
-import { CreateMerchantTagRequest, UpdateMerchantTagRequest } from "@/api";
+import { MerchantCategory } from "@/utils/types";
+import { CreateMerchantCategoryRequest, UpdateMerchantCategoryRequest } from "@/api";
 import { Errors } from "@/components/Errors/Errors";
 
-function getDescendantIds(tag: MerchantTag): number[] {
-  const ids: number[] = [tag.id];
-  for (const child of tag.children) {
+function getDescendantIds(category: MerchantCategory): number[] {
+  const ids: number[] = [category.id];
+  for (const child of category.children) {
     ids.push(...getDescendantIds(child));
   }
   return ids;
 }
 
 export function EditCategoryModal({
-  merchantTag,
-  allMerchantTags,
+  merchantCategory,
+  allMerchantCategories,
   isOpen,
   onClose,
   onSave,
@@ -23,32 +23,32 @@ export function EditCategoryModal({
   isSaving,
   errors,
 }: {
-  merchantTag?: MerchantTag;
-  allMerchantTags: MerchantTag[];
+  merchantCategory?: MerchantCategory;
+  allMerchantCategories: MerchantCategory[];
   isOpen: boolean;
   onClose: () => void;
-  onSave: (params: UpdateMerchantTagRequest) => void;
-  onCreate: (params: CreateMerchantTagRequest) => void;
+  onSave: (params: UpdateMerchantCategoryRequest) => void;
+  onCreate: (params: CreateMerchantCategoryRequest) => void;
   isSaving: boolean;
   errors: string[];
 }) {
-  const isEditing = !!merchantTag;
-  const [name, setName] = useState(merchantTag?.name || "");
-  const [budget, setBudget] = useState<number | string>(merchantTag?.targetBudget || "");
+  const isEditing = !!merchantCategory;
+  const [name, setName] = useState(merchantCategory?.name || "");
+  const [budget, setBudget] = useState<number | string>(merchantCategory?.targetBudget || "");
   const [parentId, setParentId] = useState<string | null>(
-    merchantTag?.parentMerchantTagId?.toString() || null
+    merchantCategory?.parentMerchantTagId?.toString() || null
   );
 
   useEffect(() => {
     if (isOpen) {
-      setName(merchantTag?.name || "");
-      setBudget(merchantTag?.targetBudget || "");
-      setParentId(merchantTag?.parentMerchantTagId?.toString() || null);
+      setName(merchantCategory?.name || "");
+      setBudget(merchantCategory?.targetBudget || "");
+      setParentId(merchantCategory?.parentMerchantTagId?.toString() || null);
     }
-  }, [isOpen, merchantTag]);
+  }, [isOpen, merchantCategory]);
 
-  const excludedIds = merchantTag ? getDescendantIds(merchantTag) : [];
-  const parentOptions = allMerchantTags
+  const excludedIds = merchantCategory ? getDescendantIds(merchantCategory) : [];
+  const parentOptions = allMerchantCategories
     .filter((t) => !excludedIds.includes(t.id))
     .map((t) => ({
       value: t.id.toString(),
@@ -62,7 +62,7 @@ export function EditCategoryModal({
       parentMerchantTagId: parentId ? Number(parentId) : null,
     };
     if (isEditing) {
-      onSave({ id: merchantTag!.id, data });
+      onSave({ id: merchantCategory!.id, data });
     } else {
       onCreate(data);
     }
@@ -72,7 +72,7 @@ export function EditCategoryModal({
     <Modal
       opened={isOpen}
       onClose={onClose}
-      title={isEditing ? `Edit Category: ${merchantTag?.name}` : "New Category"}
+      title={isEditing ? `Edit Category: ${merchantCategory?.name}` : "New Category"}
       size="md"
     >
       <div className="flex flex-col gap-4">

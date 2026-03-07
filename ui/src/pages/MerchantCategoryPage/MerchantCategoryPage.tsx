@@ -4,45 +4,45 @@ import { usePageTitle } from "@/hooks";
 import { urls } from "@/utils/urls";
 import { Loading } from "@/components/Loading";
 import { Breadcrumbs } from "@mantine/core";
-import { MerchantTag } from "@/utils/types";
-import { fetchMerchantTag } from "@/api/merchant-tags-client";
+import { MerchantCategory } from "@/utils/types";
+import { fetchMerchantCategory } from "@/api/merchant-categories-client";
 import { Merchants } from "./Merchants";
 import { Transactions } from "./Transactions";
 import { TrendReport } from "./TrendReport";
 
-export default function MerchantTagPage() {
+export default function MerchantCategoryPage() {
   const { id } = useParams();
-  const [merchantTag, setMerchantTag] = useState<MerchantTag | null>(null);
-  const [merchantTagLoading, setMerchantTagLoading] = useState(true);
+  const [merchantCategory, setMerchantCategory] = useState<MerchantCategory | null>(null);
+  const [merchantCategoryLoading, setMerchantCategoryLoading] = useState(true);
 
   // Set the title of the page
   const setTitle = usePageTitle();
   useEffect(() => {
-    if (merchantTag) {
-      setTitle(urls.merchantTag.title({ tagName: merchantTag.name }));
+    if (merchantCategory) {
+      setTitle(urls.merchantCategory.title({ categoryName: merchantCategory.name }));
     }
-  }, [setTitle, merchantTag]);
+  }, [setTitle, merchantCategory]);
 
-  // Load the merchant tag
+  // Load the merchant category
   useEffect(() => {
-    setMerchantTagLoading(true);
-    fetchMerchantTag({ tagId: Number(id) }).then(setMerchantTag)
-      .finally(() => setMerchantTagLoading(false));
+    setMerchantCategoryLoading(true);
+    fetchMerchantCategory({ categoryId: Number(id) }).then(setMerchantCategory)
+      .finally(() => setMerchantCategoryLoading(false));
   }, [id]);
 
-  if (merchantTagLoading) {
+  if (merchantCategoryLoading) {
     return <Loading />;
   }
 
   return (
     <div>
       <Breadcrumbs className="mb-4">
-        <Link to={urls.merchantTags.path()}>Categories</Link>
-        <span>{merchantTag?.name}</span>
+        <Link to={urls.merchantCategories.path()}>Categories</Link>
+        <span>{merchantCategory?.name}</span>
       </Breadcrumbs>
 
       <div className="flex flex-col md:flex-row justify-between mb-3">
-        <h1 className="text-2xl font-bold mb-4">{merchantTag?.name}</h1>
+        <h1 className="text-2xl font-bold mb-4">{merchantCategory?.name}</h1>
       </div>
 
       <div className="flex flex-col gap-4">

@@ -2,23 +2,23 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@mantine/core";
 import { IconEye, IconPencil } from "@tabler/icons-react";
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import { urls } from "@/utils/urls";
 import { Budget } from "./Budget";
 import classNames from "classnames";
 
-export function MerchantTagRow({
+export function MerchantCategoryRow({
   tag,
   expandedLevel = 0,
   onViewTransactions,
   monthsBack,
   onEdit,
 }: {
-  tag: MerchantTag;
+  tag: MerchantCategory;
   expandedLevel?: number;
-  onViewTransactions: (merchantTag: MerchantTag) => void;
+  onViewTransactions: (merchantCategory: MerchantCategory) => void;
   monthsBack: number;
-  onEdit: (merchantTag: MerchantTag) => void;
+  onEdit: (merchantCategory: MerchantCategory) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const hasChildren = tag.children && tag.children.length > 0;
@@ -64,14 +64,14 @@ export function MerchantTagRow({
               >
               </div>
               <div className="text-xl sm:text-base">
-                <Link to={urls.merchantTag.path(tag.id)}>{tag.name}</Link>
+                <Link to={urls.merchantCategory.path(tag.id)}>{tag.name}</Link>
               </div>
           </div>
         </div>
 
         <div className="flex flex-col w-full sm:w-1/3">
           <div style={{ paddingLeft: `${paddingLeft}px` }}>
-            <Budget merchantTag={tag} monthsBack={monthsBack || 1} />
+            <Budget merchantCategory={tag} monthsBack={monthsBack || 1} />
           </div>
         </div>
 
@@ -90,11 +90,11 @@ export function MerchantTagRow({
       {expanded && (
         <>
           {tag.children?.map((child) => (
-            <MerchantTagRow
+            <MerchantCategoryRow
               key={child.id}
               tag={child}
               expandedLevel={expandedLevel + 1}
-              onViewTransactions={(merchantTag) => onViewTransactions(merchantTag)}
+              onViewTransactions={(merchantCategory) => onViewTransactions(merchantCategory)}
               monthsBack={monthsBack}
               onEdit={onEdit}
             />

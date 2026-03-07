@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import {
-  createMerchantTag,
-  CreateMerchantTagRequest,
-  fetchMerchantTagSpendStats,
-  fetchMerchantTags,
-  updateMerchantTag,
-  UpdateMerchantTagRequest,
+  createMerchantCategory,
+  CreateMerchantCategoryRequest,
+  fetchMerchantCategorySpendStats,
+  fetchMerchantCategories,
+  updateMerchantCategory,
+  UpdateMerchantCategoryRequest,
 } from "@/api";
 import { Loading } from "../Loading";
 import { Button, Select, SegmentedControl } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-import { formatMerchantTagsAsTree } from "@/utils/merchantTagUtils";
+import { formatMerchantCategoriesAsTree } from "@/utils/merchantCategoryUtils";
 import {
   endOfMonth,
   startOfMonth,
@@ -20,7 +20,7 @@ import {
 import { DateInput } from "@mantine/dates";
 import { TransactionModal } from "./TransactionModal";
 import { EditCategoryModal } from "./EditCategoryModal";
-import { MerchantTagRow } from "./MerchantTagRow";
+import { MerchantCategoryRow } from "./MerchantCategoryRow";
 import '@mantine/dates/styles.css';
 
 const defaultStartDate = startOfMonth(new Date());
@@ -35,27 +35,27 @@ const quickOptions = [
 ]
 
 export const View = () => {
-  const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
+  const [merchantCategories, setMerchantCategories] = useState<MerchantCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [selectedMerchantTag, setSelectedMerchantTag] = useState<MerchantTag | undefined>();
+  const [selectedMerchantCategory, setSelectedMerchantCategory] = useState<MerchantCategory | undefined>();
   const [monthsBack, setMonthsBack] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingMerchantTag, setEditingMerchantTag] = useState<MerchantTag | undefined>();
-  const [rawMerchantTags, setRawMerchantTags] = useState<MerchantTag[]>([]);
+  const [editingMerchantCategory, setEditingMerchantCategory] = useState<MerchantCategory | undefined>();
+  const [rawMerchantCategories, setRawMerchantCategories] = useState<MerchantCategory[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
   const refreshData = () => {
     setLoading(true);
     Promise.all([
-      fetchMerchantTagSpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) }),
-      fetchMerchantTags(),
+      fetchMerchantCategorySpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) }),
+      fetchMerchantCategories(),
     ])
-    .then(([merchantTagSpendStats, allTags]) => {
-      setMerchantTags(formatMerchantTagsAsTree({ merchantTags: merchantTagSpendStats as MerchantTag[] }));
-      setRawMerchantTags(allTags);
+    .then(([merchantCategorySpendStats, allCategories]) => {
+      setMerchantCategories(formatMerchantCategoriesAsTree({ merchantCategories: merchantCategorySpendStats as MerchantCategory[] }));
+      setRawMerchantCategories(allCategories);
     })
     .finally(() => {
       setLoading(false);
@@ -66,25 +66,25 @@ export const View = () => {
     refreshData();
   }, [startDate, endDate]);
 
-  const onViewTransactions = (merchantTag: MerchantTag) => {
-    setSelectedMerchantTag(merchantTag);
+  const onViewTransactions = (merchantCategory: MerchantCategory) => {
+    setSelectedMerchantCategory(merchantCategory);
     setIsTransactionModalOpen(true);
   }
 
-  const onEdit = (merchantTag: MerchantTag) => {
-    setEditingMerchantTag(merchantTag);
+  const onEdit = (merchantCategory: MerchantCategory) => {
+    setEditingMerchantCategory(merchantCategory);
     setIsEditModalOpen(true);
   };
 
   const [editErrors, setEditErrors] = useState<string[]>([]);
 
-  const onSaveEdit = (params: UpdateMerchantTagRequest) => {
+  const onSaveEdit = (params: UpdateMerchantCategoryRequest) => {
     setIsSaving(true);
     setEditErrors([]);
-    updateMerchantTag({ data: params })
+    updateMerchantCategory({ data: params })
       .then(() => {
         setIsEditModalOpen(false);
-        setEditingMerchantTag(undefined);
+        setEditingMerchantCategory(undefined);
         refreshData();
       })
       .catch((error) => {
@@ -95,10 +95,10 @@ export const View = () => {
       });
   };
 
-  const onCreateCategory = (params: CreateMerchantTagRequest) => {
+  const onCreateCategory = (params: CreateMerchantCategoryRequest) => {
     setIsSaving(true);
     setEditErrors([]);
-    createMerchantTag({ data: params })
+    createMerchantCategory({ data: params })
       .then(() => {
         setIsEditModalOpen(false);
         refreshData();
@@ -114,10 +114,10 @@ export const View = () => {
   const renderTable = () => {
     return (
       <div className="w-full flex flex-col overflow-x-auto">
-        {merchantTags.map((tag) => (
-          <MerchantTagRow
-            key={tag.id}
-            tag={tag}
+        {merchantCategories.map((category) => (
+          <MerchantCategoryRow
+            key={category.id}
+            tag={category}
             onEdit={onEdit}
             onViewTransactions={onViewTransactions}
             monthsBack={monthsBack}
@@ -145,7 +145,7 @@ export const View = () => {
           variant="outline"
           leftSection={<IconPlus size={16} />}
           onClick={() => {
-            setEditingMerchantTag(undefined);
+            setEditingMerchantCategory(undefined);
             setIsEditModalOpen(true);
           }}
         >
@@ -157,17 +157,17 @@ export const View = () => {
 
       {loading ? <Loading /> : renderTable()}
       <TransactionModal
-        merchantTag={selectedMerchantTag}
+        merchantCategory={selectedMerchantCategory}
         onClose={() => setIsTransactionModalOpen(false)}
         isOpen={isTransactionModalOpen}
       />
       <EditCategoryModal
-        merchantTag={editingMerchantTag}
-        allMerchantTags={rawMerchantTags}
+        merchantCategory={editingMerchantCategory}
+        allMerchantCategories={rawMerchantCategories}
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);
-          setEditingMerchantTag(undefined);
+          setEditingMerchantCategory(undefined);
           setEditErrors([]);
         }}
         onSave={onSaveEdit}

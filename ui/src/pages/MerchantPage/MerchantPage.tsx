@@ -132,7 +132,7 @@ export default function MerchantPage() {
             isLoading={merchantTransactionsLoading}
             page={merchantTransactionsPage}
             updateTransaction={updateMerchantTransaction}
-            merchantTags={[]}
+            merchantCategories={[]}
             error={merchantTransactionsError}
             condensed={true}
             isLoadingMore={false}

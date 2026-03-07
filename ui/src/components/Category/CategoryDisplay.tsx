@@ -1,16 +1,16 @@
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import { useState } from "react";
 import { CategoryEdit } from "./CategoryEdit";
-import { fullyQualifiedTagName } from "@/utils/merchantTagUtils";
+import { fullyQualifiedCategoryName } from "@/utils/merchantCategoryUtils";
 
 export function CategoryDisplay({
   category,
   onSave,
   allCategories,
 }: {
-  category?: MerchantTag | null;
+  category?: MerchantCategory | null;
   onSave: ({ id, useDefaultCategory }: { id: number; useDefaultCategory: boolean }) => void;
-  allCategories: MerchantTag[];
+  allCategories: MerchantCategory[];
 }) {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -40,9 +40,9 @@ export function Display({
   onEdit,
   allCategories,
 }: {
-  tag?: MerchantTag | null;
+  tag?: MerchantCategory | null;
   onEdit: () => void;
-  allCategories: MerchantTag[];
+  allCategories: MerchantCategory[];
 }) {
 
   const renderName = () => {
@@ -53,7 +53,7 @@ export function Display({
     return (
       <div className="flex flex-row gap-2">
         <div className="flex flex-col">
-          <div className="text-gray-500 text-sm">{fullyQualifiedTagName(tag, allCategories)}</div>
+          <div className="text-gray-500 text-sm">{fullyQualifiedCategoryName(tag, allCategories)}</div>
           <div className="font-bold">{tag.name}</div>
         </div>
       </div>

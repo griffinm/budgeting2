@@ -4,11 +4,11 @@ import { useEffect } from "react";
 import { MerchantCategoryTree } from "@/components/MerchantCategoryTree";
 import { Card } from "@mantine/core";
 
-export default function MerchantTagsPage() {
+export default function MerchantCategoriesPage() {
   const setTitle = usePageTitle();
 
   useEffect(() => {
-    setTitle(urls.merchantTags.title());
+    setTitle(urls.merchantCategories.title());
   }, [setTitle]);
 
   return (

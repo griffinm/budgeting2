@@ -1,9 +1,9 @@
 import { CollapsibleCard } from "@/components/CollapsibleCard";
-import { fetchMerchantTagSpendStats } from "@/api";
+import { fetchMerchantCategorySpendStats } from "@/api";
 import { useEffect, useState } from "react";
-import { MerchantTag, MerchantTagSpendStats } from "@/utils/types";
+import { MerchantCategory, MerchantCategorySpendStats } from "@/utils/types";
 import { Loading } from "@/components/Loading";
-import { useMerchantTags } from "@/hooks/useMerchantTags";
+import { useMerchantCategories } from "@/hooks/useMerchantCategories";
 import { BarChart } from "@mantine/charts";
 import { formatSpendStatsForChart } from "./utils";
 import { MonthsBackSelect } from "@/components/MonthsBackSelect/MonthsBackSelect";
@@ -13,19 +13,19 @@ export function TrendReport({
 }: {
   tagId: number;
 }) {
-  const [stats, setStats] = useState<MerchantTagSpendStats[]>([]);
+  const [stats, setStats] = useState<MerchantCategorySpendStats[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [monthsBack, setMonthsBack] = useState(6);
   const {
-    rawMerchantTags: merchantTags,
-    loading: loadingMerchantTags,
-  } = useMerchantTags();
-  const loading = loadingStats || loadingMerchantTags;
+    rawMerchantCategories: merchantCategories,
+    loading: loadingMerchantCategories,
+  } = useMerchantCategories();
+  const loading = loadingStats || loadingMerchantCategories;
 
   useEffect(() => {
-    fetchMerchantTagSpendStats({ tagId, monthsBack })
+    fetchMerchantCategorySpendStats({ categoryId: tagId, monthsBack })
       .then((resp) => {
-        setStats(resp as MerchantTagSpendStats[]);
+        setStats(resp as MerchantCategorySpendStats[]);
       })
       .finally(() => setLoadingStats(false));
   }, [tagId, monthsBack]);
@@ -40,7 +40,7 @@ export function TrendReport({
               onChange={setMonthsBack}
             />
           </div>
-          <TrendChart stats={stats} allMerchantTags={merchantTags} monthsBack={monthsBack} />
+          <TrendChart stats={stats} allMerchantCategories={merchantCategories} monthsBack={monthsBack} />
         </div>
       )}
     </CollapsibleCard>
@@ -49,21 +49,21 @@ export function TrendReport({
 
 function TrendChart({
   stats,
-  allMerchantTags,
+  allMerchantCategories,
   monthsBack,
 }: {
-  stats: MerchantTagSpendStats[];
-  allMerchantTags: MerchantTag[];
+  stats: MerchantCategorySpendStats[];
+  allMerchantCategories: MerchantCategory[];
   monthsBack: number;
 }) {
-  const { chartData, uniqueTags } = formatSpendStatsForChart({ stats, allMerchantTags, monthsBack });
-  
+  const { chartData, uniqueTags } = formatSpendStatsForChart({ stats, allMerchantCategories, monthsBack });
+
   // Transform chartData to format expected by Mantine BarChart
   const transformedData = chartData.map(monthData => {
     const dataPoint: { month: string; [key: string]: string | number } = {
       month: monthData.month,
     };
-    
+
     // Add each tag's amount as a property using the exact name from uniqueTags
     monthData.tags.forEach(tag => {
       const matchingUniqueTag = uniqueTags.find(ut => ut.id === tag.tagId);
@@ -71,10 +71,10 @@ function TrendChart({
         dataPoint[matchingUniqueTag.name] = tag.totalAmount;
       }
     });
-    
+
     return dataPoint;
   });
-  
+
   // Create series configuration for the chart
   const series = uniqueTags.map(tag => ({
     name: tag.name,

@@ -25,7 +25,7 @@ export interface TransactionSearchParams {
 
 export interface TransactionUpdateParams {
   transactionType?: TransactionType;
-  merchantTagId?: number | null;
+  merchantCategoryId?: number | null;
   note?: string;
   useAsDefault?: boolean;
   merchantId?: number; // Only used when updating all transactions for a merchant
@@ -49,13 +49,14 @@ export const updateTransaction = async ({
   id: number;
   params: TransactionUpdateParams;
 }): Promise<Transaction> => {
-  const response = await baseClient.patch<Transaction>(`/transactions/${id}`, { 
+  const { merchantCategoryId, useAsDefault, merchantId, ...rest } = params;
+  const response = await baseClient.patch<Transaction>(`/transactions/${id}`, {
     transaction: {
-      ...params,
-      useAsDefault: undefined,
+      ...rest,
+      merchantTagId: merchantCategoryId,
     },
-    useAsDefault: params.useAsDefault,
-    merchantId: params.merchantId,
+    useAsDefault,
+    merchantId,
   });
   return response.data;
 };

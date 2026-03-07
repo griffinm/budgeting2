@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Card, Text } from "@mantine/core";
 import { IconBookmarks } from "@tabler/icons-react";
-import { fetchTagSpendStats, fetchMerchantTags } from "@/api";
-import { MerchantTag, TagSpendStats } from "@/utils/types";
+import { fetchTagSpendStats, fetchMerchantCategories } from "@/api";
+import { MerchantCategory, TagSpendStats } from "@/utils/types";
 import { useTags } from "@/hooks/useTags";
 import { useTransactions } from "@/hooks";
 import { Loading } from "@/components/Loading";
@@ -27,7 +27,7 @@ export default function TagsSpendPage() {
   const [monthsBack, setMonthsBack] = useState(6);
   const [stats, setStats] = useState<TagSpendStats[]>([]);
   const [loadingStats, setLoadingStats] = useState(false);
-  const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
+  const [merchantCategories, setMerchantCategories] = useState<MerchantCategory[]>([]);
 
   const dateRange = useMemo(() => getDateRange(monthsBack), [monthsBack]);
 
@@ -58,7 +58,7 @@ export default function TagsSpendPage() {
   }, [selectedTagIds, dateRange]);
 
   useEffect(() => {
-    fetchMerchantTags().then(setMerchantTags).catch(console.error);
+    fetchMerchantCategories().then(setMerchantCategories).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function TagsSpendPage() {
             error={error}
             page={page}
             updateTransaction={updateTransaction}
-            merchantTags={merchantTags}
+            merchantCategories={merchantCategories}
             allTags={tags}
             addTransactionTag={addTransactionTag}
             removeTransactionTag={removeTransactionTag}

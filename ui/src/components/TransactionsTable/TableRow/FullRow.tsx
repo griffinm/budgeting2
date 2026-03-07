@@ -1,4 +1,4 @@
-import { MerchantTag, Tag, Transaction } from "@/utils/types";
+import { MerchantCategory, Tag, Transaction } from "@/utils/types";
 import { TransactionTags } from "@/components/TransactionTags/TransactionTags";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
@@ -17,7 +17,7 @@ import { useState } from "react";
 export function FullRow({
   transaction,
   updateTransaction,
-  merchantTags,
+  merchantCategories,
   allTags,
   addTransactionTag,
   removeTransactionTag,
@@ -25,7 +25,7 @@ export function FullRow({
 }: {
   transaction: Transaction;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
-  merchantTags: MerchantTag[];
+  merchantCategories: MerchantCategory[];
   allTags?: Tag[];
   addTransactionTag?: (transactionId: number, tagId: number) => void;
   removeTransactionTag?: (transactionId: number, transactionTagId: number) => void;
@@ -66,9 +66,9 @@ export function FullRow({
           <CategoryDisplay
             category={transaction.merchantTag}
             onSave={({ id, useDefaultCategory }) => {
-              updateTransaction(transaction.id, { merchantTagId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
+              updateTransaction(transaction.id, { merchantCategoryId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
             }}
-            allCategories={merchantTags}
+            allCategories={merchantCategories}
           />
         </div>
 
@@ -152,9 +152,9 @@ export function FullRow({
               <CategoryDisplay
                 category={transaction.merchantTag}
                 onSave={({ id, useDefaultCategory }) => {
-                  updateTransaction(transaction.id, { merchantTagId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
+                  updateTransaction(transaction.id, { merchantCategoryId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
                 }}
-                allCategories={merchantTags}
+                allCategories={merchantCategories}
               />
             </div>
             {allTags && addTransactionTag && removeTransactionTag && createAndAddTag && (

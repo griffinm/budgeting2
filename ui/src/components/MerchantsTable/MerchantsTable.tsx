@@ -1,5 +1,5 @@
 import { MerchantSearchParams } from "@/api";
-import { MerchantTag, Page, TransactionType as TransactionTypeType, MerchantGroup } from "@/utils/types";
+import { MerchantCategory, Page, TransactionType as TransactionTypeType, MerchantGroup } from "@/utils/types";
 import { Merchant } from "@/utils/types";
 import { Pagination } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
@@ -17,7 +17,7 @@ export function MerchantsTable({
   page,
   setPage,
   onUpdateMerchant,
-  allMerchantTags,
+  allMerchantCategories,
   allMerchantGroups,
   onUpdateMerchantGroup,
   onGroupCreated,
@@ -29,7 +29,7 @@ export function MerchantsTable({
   searchParams: MerchantSearchParams;
   onSetSearchParams: (searchParams: MerchantSearchParams) => void;
   onUpdateMerchant: (params: UpdateMerchantParams) => void;
-  allMerchantTags: MerchantTag[];
+  allMerchantCategories: MerchantCategory[];
   allMerchantGroups: MerchantGroup[];
   onUpdateMerchantGroup: (merchantId: number, groupId: number | null) => void;
   onGroupCreated?: (group: MerchantGroup) => void;
@@ -68,7 +68,7 @@ export function MerchantsTable({
                     <CategoryDisplay
                       category={merchant.defaultMerchantTag}
                       onSave={({ id, }) => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
-                      allCategories={allMerchantTags}
+                      allCategories={allMerchantCategories}
                     />
                   </div>
                   

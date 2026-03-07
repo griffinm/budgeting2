@@ -1,6 +1,6 @@
-import { 
-  RouterProvider, 
-  createBrowserRouter, 
+import {
+  RouterProvider,
+  createBrowserRouter,
 } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import './index.css';
@@ -15,7 +15,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage/SignupPage'));
 const MainLayout = lazy(() => import('./layouts/MainLayout/MainLayout'));
 const AuthLayout = lazy(() => import('./layouts/AuthLayout/AuthLayout'));
-const MerchantTagPage = lazy(() => import('./pages/MerchantTagPage/MerchantTagPage'));
+const MerchantCategoryPage = lazy(() => import('./pages/MerchantCategoryPage/MerchantCategoryPage'));
 
 const WithSuspense = (component: React.ReactNode) => (
   <Suspense fallback={<Loading />}>
@@ -36,7 +36,7 @@ const otherRoutes = [
   },
   {
     path: '/categories/:id',
-    element: WithSuspense(<MerchantTagPage />),
+    element: WithSuspense(<MerchantCategoryPage />),
   }
 ];
 

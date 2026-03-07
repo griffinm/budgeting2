@@ -1,17 +1,17 @@
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import { Progress } from "@mantine/core";
 import { Currency } from "../Currency";
-import { totalBudgetForChildren } from "@/utils/merchantTagUtils";
+import { totalBudgetForChildren } from "@/utils/merchantCategoryUtils";
 
 export function Budget({
-  merchantTag,
+  merchantCategory,
   monthsBack,
 }: {
-  merchantTag: MerchantTag;
+  merchantCategory: MerchantCategory;
   monthsBack: number;
 }) {
-  const targetBudget = totalBudgetForChildren(merchantTag) * monthsBack;
-  const totalTransactionAmount = merchantTag.totalTransactionAmount || 0;
+  const targetBudget = totalBudgetForChildren(merchantCategory) * monthsBack;
+  const totalTransactionAmount = merchantCategory.totalTransactionAmount || 0;
   const remainingBudget = targetBudget - totalTransactionAmount;
   const isOverBudget = remainingBudget < 0;
   const progressValue = Math.abs(totalTransactionAmount) / targetBudget * 100;
@@ -37,7 +37,7 @@ export function Budget({
   if (!targetBudget || targetBudget <= 0) {
     return (
       <div>
-        <NoBudget merchantTag={merchantTag} />
+        <NoBudget merchantCategory={merchantCategory} />
       </div>
     )
   }
@@ -58,11 +58,11 @@ export function Budget({
             <Progress.Label>&nbsp;</Progress.Label>
           </Progress.Section>
         </Progress.Root>
-        <div 
-          style={{ 
-            position: 'absolute', 
-            top: '50%', 
-            left: '50%', 
+        <div
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
             transform: 'translate(-50%, -50%)',
             fontWeight: 500,
             pointerEvents: 'none',
@@ -77,14 +77,14 @@ export function Budget({
 }
 
 function NoBudget({
-  merchantTag,
+  merchantCategory,
 }: {
-  merchantTag: MerchantTag;
+  merchantCategory: MerchantCategory;
 }) {
   return (
     <div>
       <Currency
-        amount={merchantTag.totalTransactionAmount || 0}
+        amount={merchantCategory.totalTransactionAmount || 0}
         applyColor={false}
         showCents={false}
         useBold={true}

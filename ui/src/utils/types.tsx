@@ -72,7 +72,7 @@ export interface Merchant {
   website: string | null;
   defaultTransactionType: TransactionType;
   defaultMerchantTagId?: number | null;
-  defaultMerchantTag: MerchantTag | null;
+  defaultMerchantTag: MerchantCategory | null;
   merchantGroup?: MerchantGroup | null;
 }
 
@@ -135,7 +135,7 @@ export interface Transaction {
   checkNumber: string | null;
   merchant: Merchant;
   plaidAccount: PlaidAccount;
-  merchantTag?: MerchantTag | null;
+  merchantTag?: MerchantCategory | null;
   hasDefaultMerchantTag?: boolean;
   note?: string | null;
   recurring: boolean;
@@ -146,7 +146,7 @@ export interface Transaction {
   transactionTags: TransactionTag[];
 }
 
-export interface MerchantTag {
+export interface MerchantCategory {
   id: number;
   name: string;
   parentMerchantTagId: number | null;
@@ -154,7 +154,7 @@ export interface MerchantTag {
   createdAt: string;
   updatedAt: string;
   totalTransactionAmount?: number;
-  children: MerchantTag[];
+  children: MerchantCategory[];
   targetBudget?: number | null;
   isLeaf: boolean;
 }
@@ -232,12 +232,12 @@ export interface UpdateAllResponse {
   is_updating: boolean;
 }
 
-export interface MerchantTagSpendStats {
+export interface MerchantCategorySpendStats {
   month: number;
   year: number;
   tagId: number;
   totalAmount: number;
-  merchantTag?: MerchantTag;
+  merchantTag?: MerchantCategory;
 }
 
 export interface PageRequestParams {

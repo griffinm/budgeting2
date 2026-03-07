@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useTransactions, usePageTitle } from '@/hooks';
 import { urls } from '@/utils/urls';
 import { TransactionsTable } from '@/components/TransactionsTable';
-import { MerchantTag } from '@/utils/types';
-import { fetchMerchantTags } from '@/api/merchant-tags-client';
+import { MerchantCategory } from '@/utils/types';
+import { fetchMerchantCategories } from '@/api/merchant-categories-client';
 import { usePlaidAccount } from '@/hooks/usePlaidAccount';
 import { useTags } from '@/hooks/useTags';
 import { Card } from '@mantine/core';
@@ -28,7 +28,7 @@ export default function TransactionsPage() {
   } = useTransactions();
 
   const { plaidAccounts } = usePlaidAccount();
-  const [merchantTags, setMerchantTags] = useState<MerchantTag[]>([]);
+  const [merchantCategories, setMerchantCategories] = useState<MerchantCategory[]>([]);
   const { tags: allTags, createTag } = useTags();
 
   const createAndAddTag = async (transactionId: number, name: string) => {
@@ -42,8 +42,8 @@ export default function TransactionsPage() {
   }, [setTitle]);
 
   useEffect(() => {
-    fetchMerchantTags()
-      .then(setMerchantTags)
+    fetchMerchantCategories()
+      .then(setMerchantCategories)
       .catch(console.error);
   }, []);
 
@@ -72,7 +72,7 @@ export default function TransactionsPage() {
           error={error}
           page={page}
           updateTransaction={updateTransaction}
-          merchantTags={merchantTags}
+          merchantCategories={merchantCategories}
           allTags={allTags}
           addTransactionTag={addTransactionTag}
           removeTransactionTag={removeTransactionTag}

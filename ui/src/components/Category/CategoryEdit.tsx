@@ -1,7 +1,7 @@
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import { Button, Checkbox, Input, Modal } from "@mantine/core";
 import { useState } from "react";
-import { fullyQualifiedTagName } from "@/utils/merchantTagUtils";
+import { fullyQualifiedCategoryName } from "@/utils/merchantCategoryUtils";
 import classNames from "classnames";
 
 export function CategoryEdit({
@@ -12,14 +12,14 @@ export function CategoryEdit({
   opened,
   onClose,
 }: {
-  currentValue?: MerchantTag | null;
+  currentValue?: MerchantCategory | null;
   onCancel: () => void;
   onSave: ({ id, useDefaultCategory }: { id: number; useDefaultCategory: boolean }) => void;
-  allCategories: MerchantTag[];
+  allCategories: MerchantCategory[];
   opened: boolean;
   onClose: () => void;
 }) {
-  const [newValue, setNewValue] = useState<MerchantTag | null>(currentValue || null);
+  const [newValue, setNewValue] = useState<MerchantCategory | null>(currentValue || null);
   const [filter, setFilter] = useState('');
   const [useDefaultCategory, setUseDefaultCategory] = useState(false);
 
@@ -94,13 +94,13 @@ function RowItem({
   filter,
   selected,
 }: {
-  item: MerchantTag;
-  allCategories: MerchantTag[];
-  onSelect: (item: MerchantTag) => void;
+  item: MerchantCategory;
+  allCategories: MerchantCategory[];
+  onSelect: (item: MerchantCategory) => void;
   filter: string;
   selected: boolean;
 }) {
-  const isFiltered = filter.length > 0 && !fullyQualifiedTagName(item, allCategories).toLowerCase().includes(filter.toLowerCase());
+  const isFiltered = filter.length > 0 && !fullyQualifiedCategoryName(item, allCategories).toLowerCase().includes(filter.toLowerCase());
 
   if (isFiltered) {
     return null;
@@ -119,7 +119,7 @@ function RowItem({
         &nbsp;
       </div>
       <div>
-        {fullyQualifiedTagName(item, allCategories)}
+        {fullyQualifiedCategoryName(item, allCategories)}
       </div>
     </div>
   )

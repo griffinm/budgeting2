@@ -1,21 +1,21 @@
 import { CollapsibleCard } from "@/components/CollapsibleCard";
 import { Loading } from "@/components/Loading";
 import { TransactionsTable } from "@/components/TransactionsTable";
-import { useMerchantTags, useTransactions } from "@/hooks";
+import { useMerchantCategories, useTransactions } from "@/hooks";
 
 export function Transactions({
   tagId,
 }: {
   tagId: number;
 }) {
-  const { 
+  const {
     transactions,
     isLoading,
     error,
     page,
     updateTransaction,
   } = useTransactions({ initialSearchParams: { merchant_tag_id: tagId } });
-  const { merchantTags, loading } = useMerchantTags();
+  const { merchantCategories, loading } = useMerchantCategories();
 
   return (
     <CollapsibleCard
@@ -32,7 +32,7 @@ export function Transactions({
           error={error}
           page={page}
           updateTransaction={updateTransaction}
-          merchantTags={merchantTags}
+          merchantCategories={merchantCategories}
         />
       )}
     </CollapsibleCard>

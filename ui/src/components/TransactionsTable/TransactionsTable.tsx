@@ -1,4 +1,4 @@
-import { Transaction, Page, MerchantTag, Tag } from "@/utils/types";
+import { Transaction, Page, MerchantCategory, Tag } from "@/utils/types";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { TableRow } from "./TableRow";
 import { Loading } from "../Loading";
@@ -13,7 +13,7 @@ export function TransactionsTable({
   hasMore,
   loadMore,
   updateTransaction,
-  merchantTags,
+  merchantCategories,
   allTags,
   addTransactionTag,
   removeTransactionTag,
@@ -28,7 +28,7 @@ export function TransactionsTable({
   error: Error | null;
   page: Page;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
-  merchantTags: MerchantTag[];
+  merchantCategories: MerchantCategory[];
   allTags?: Tag[];
   addTransactionTag?: (transactionId: number, tagId: number) => void;
   removeTransactionTag?: (transactionId: number, transactionTagId: number) => void;
@@ -113,7 +113,7 @@ export function TransactionsTable({
                       transaction={transaction}
                       condensed={condensed}
                       updateTransaction={updateTransaction}
-                      merchantTags={merchantTags}
+                      merchantCategories={merchantCategories}
                       allTags={allTags}
                       addTransactionTag={addTransactionTag}
                       removeTransactionTag={removeTransactionTag}
