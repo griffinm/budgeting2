@@ -185,6 +185,42 @@ class PlaidService < BaseService
     common_words.length.to_f / total_words
   end
 
+  def sync_balances
+    access_tokens = @account.plaid_access_tokens
+
+    access_tokens.each do |access_token|
+      begin
+        request = Plaid::AccountsGetRequest.new(
+          client_id: ENV["PLAID_CLIENT_ID"],
+          secret: ENV["PLAID_SECRET"],
+          access_token: access_token.token,
+        )
+
+        response = api_client.accounts_get(request)
+
+        response.accounts.each do |plaid_api_account|
+          plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
+          next unless plaid_account
+
+          current = plaid_api_account.balances.current&.to_f || 0.0
+          available = plaid_api_account.balances.available&.to_f || 0.0
+          limit = plaid_api_account.balances.limit&.to_f
+
+          plaid_account.plaid_accounts_users.each do |plaid_accounts_user|
+            plaid_accounts_user.account_balances.create(
+              current_balance: current,
+              available_balance: available,
+              limit: limit,
+            )
+          end
+        end
+      rescue => exception
+        Rails.logger.error "Error syncing balances for access token #{access_token.id}: #{exception.message}"
+        Rails.logger.error exception.backtrace.join("\n")
+      end
+    end
+  end
+
   def create_link_token(user:)
     request = Plaid::LinkTokenCreateRequest.new(
       {

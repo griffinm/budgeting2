@@ -4,7 +4,9 @@ class SyncService < BaseService
     accounts = Account.live_accounts
     Rails.logger.info "Syncing transactions for #{accounts.count} live accounts"
     accounts.each do |account|
-      PlaidService.new(account_id: account.id).sync_transactions
+      plaid_service = PlaidService.new(account_id: account.id)
+      plaid_service.sync_transactions
+      plaid_service.sync_balances
     end
     Rails.logger.info "Synced transactions for #{accounts.count} live accounts"
   end

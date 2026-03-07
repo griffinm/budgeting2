@@ -45,11 +45,12 @@ export default function DashboardPage() {
     navigate(urls.accounts.path());
   };
 
-  // Computed values for DashboardSummary
-  const netWorth = accountBalances.reduce((sum, ab) => {
-    const balance = getCurrentBalance(ab);
+  // Computed values for DashboardSummary — only deposit and credit accounts
+  const availableCash = accountBalances.reduce((sum, ab) => {
     const type = ab.plaidAccount.accountType;
-    if (type === 'credit' || type === 'loan') {
+    if (type !== 'deposit' && type !== 'credit') return sum;
+    const balance = getCurrentBalance(ab);
+    if (type === 'credit') {
       return sum - Math.abs(balance);
     }
     return sum + balance;
@@ -130,7 +131,7 @@ export default function DashboardPage() {
 
       <div className="flex flex-col gap-4">
         <DashboardSummary
-          netWorth={netWorth}
+          availableCash={availableCash}
           expensesThisMonth={expensesThisMonth}
           incomeThisMonth={incomeThisMonth}
           profitThisMonth={profitThisMonth}

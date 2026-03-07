@@ -8,7 +8,7 @@ function formatDollars(value: number): string {
 }
 
 interface DashboardSummaryProps {
-  netWorth: number;
+  availableCash: number;
   expensesThisMonth: number;
   incomeThisMonth: number;
   profitThisMonth: number;
@@ -21,7 +21,7 @@ interface DashboardSummaryProps {
 }
 
 export function DashboardSummary({
-  netWorth,
+  availableCash,
   expensesThisMonth,
   incomeThisMonth,
   profitThisMonth,
@@ -38,8 +38,8 @@ export function DashboardSummary({
 
   const cards = [
     {
-      title: "Net Worth",
-      value: netWorth,
+      title: "Available Cash",
+      value: availableCash,
     },
     {
       title: "Expenses This Month",
