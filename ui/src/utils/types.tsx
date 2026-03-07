@@ -73,6 +73,7 @@ export interface Merchant {
   defaultTransactionType: TransactionType;
   defaultMerchantTagId?: number | null;
   defaultMerchantTag: MerchantCategory | null;
+  defaultTags: Tag[];
   merchantGroup?: MerchantGroup | null;
 }
 

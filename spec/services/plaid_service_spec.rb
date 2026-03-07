@@ -51,6 +51,7 @@ RSpec.describe PlaidService do
       allow(mock_sync_response).to receive(:removed).and_return([])
       allow(mock_sync_response).to receive(:next_cursor).and_return("next_cursor_123")
       allow(mock_sync_response).to receive(:has_more).and_return(false)
+      allow(mock_sync_response).to receive(:accounts).and_return([])
     end
 
     context 'when account has access tokens' do
@@ -75,10 +76,12 @@ RSpec.describe PlaidService do
 
       it 'calls Plaid API with correct parameters' do
         expect(Plaid::TransactionsSyncRequest).to receive(:new).with(
+          client_id: "test_client_id",
+          secret: "test_secret",
           access_token: plaid_access_token.token,
           cursor: plaid_access_token.next_cursor
         )
-        
+
         service.sync_transactions
       end
 
@@ -106,18 +109,22 @@ RSpec.describe PlaidService do
             merchant_name: nil,
             authorized_date: Date.current,
             date: Date.current,
+            datetime: nil,
             check_number: nil,
             iso_currency_code: "USD",
             pending: false,
             personal_finance_category: mock_personal_finance_category,
             payment_channel: "online",
-            merchant_entity_id: "entity_123"
+            merchant_entity_id: "entity_123",
+            logo_url: nil,
+            category: ["Food and Drink"]
           )
         end
 
         before do
           allow(mock_personal_finance_category).to receive(:primary).and_return("FOOD_AND_DRINK")
           allow(mock_personal_finance_category).to receive(:detailed).and_return("RESTAURANTS")
+          allow(mock_personal_finance_category).to receive(:confidence_level).and_return("HIGH")
           allow(mock_sync_response).to receive(:added).and_return([mock_transaction])
         end
 
@@ -176,7 +183,17 @@ RSpec.describe PlaidService do
             amount: -75.00,
             name: "Updated Transaction",
             merchant_name: nil,
-            authorized_date: Date.current
+            authorized_date: Date.current,
+            date: Date.current,
+            datetime: nil,
+            check_number: nil,
+            iso_currency_code: "USD",
+            pending: false,
+            personal_finance_category: double(primary: "FOOD_AND_DRINK", detailed: "RESTAURANTS", confidence_level: "HIGH"),
+            payment_channel: "online",
+            merchant_entity_id: "entity_123",
+            logo_url: nil,
+            category: ["Food and Drink"]
           )
         end
 
@@ -265,12 +282,15 @@ RSpec.describe PlaidService do
         merchant_name: nil,
         authorized_date: Date.current,
         date: Date.current,
+        datetime: nil,
         check_number: nil,
         iso_currency_code: "USD",
         pending: false,
-        personal_finance_category: double(primary: "FOOD_AND_DRINK", detailed: "RESTAURANTS"),
+        personal_finance_category: double(primary: "FOOD_AND_DRINK", detailed: "RESTAURANTS", confidence_level: "HIGH"),
         payment_channel: "online",
-        merchant_entity_id: "entity_123"
+        merchant_entity_id: "entity_123",
+        logo_url: nil,
+        category: ["Food and Drink"]
       )
     end
 

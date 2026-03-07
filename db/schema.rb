@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_192835) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -60,6 +60,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
     t.string "text"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "merchant_default_tags", force: :cascade do |t|
+    t.bigint "merchant_id", null: false
+    t.bigint "tag_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_id", "tag_id"], name: "index_merchant_default_tags_on_merchant_id_and_tag_id", unique: true
+    t.index ["merchant_id"], name: "index_merchant_default_tags_on_merchant_id"
+    t.index ["tag_id"], name: "index_merchant_default_tags_on_tag_id"
+    t.index ["user_id"], name: "index_merchant_default_tags_on_user_id"
   end
 
   create_table "merchant_group_memberships", force: :cascade do |t|
@@ -244,6 +256,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
   end
 
   add_foreign_key "account_balances", "plaid_accounts_users"
+  add_foreign_key "merchant_default_tags", "merchants"
+  add_foreign_key "merchant_default_tags", "tags"
+  add_foreign_key "merchant_default_tags", "users"
   add_foreign_key "merchant_group_memberships", "merchant_groups"
   add_foreign_key "merchant_group_memberships", "merchants"
   add_foreign_key "merchant_groups", "accounts"

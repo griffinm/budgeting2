@@ -14,6 +14,9 @@ import { EditableLabel } from "@/components/EditableLabel";
 import { updateMerchant } from "@/api/merchant-client";
 import { SpendSummary } from "./SpendSummary";
 import { MerchantGroupCard } from "./MerchantGroup";
+import { MerchantDefaults } from "./MerchantDefaults";
+import { useMerchantCategories } from "@/hooks/useMerchantCategories";
+import { useTags } from "@/hooks/useTags";
 
 export default function MerchantPage() {
   const { id } = useParams();
@@ -34,6 +37,8 @@ export default function MerchantPage() {
       merchant_id: Number(id),
     },
   });
+  const { rawMerchantCategories: allCategories } = useMerchantCategories();
+  const { tags: allTags, createTag } = useTags();
   const [chartMonthsBack, setChartMonthsBack] = useState(6);
   const averageSpendForChart = useMemo(() => {
     if (!merchantSpendStats) {
@@ -112,6 +117,14 @@ export default function MerchantPage() {
         />
 
         <SpendSummary merchant={merchant} />
+
+        <MerchantDefaults
+          merchant={merchant}
+          setMerchant={setMerchant}
+          allCategories={allCategories}
+          allTags={allTags}
+          onCreateTag={createTag}
+        />
 
         <Card>
           <TrendChart

@@ -18,6 +18,7 @@ class PlaidTransaction < ApplicationRecord
     presence: true,
     uniqueness: { scope: :account_id, message: "Transaction already exists" }
   before_create :set_default_categories
+  after_create :apply_merchant_default_tags
 
   scope :not_pending, -> { where(pending: false) }
   scope :expense, -> { where(transaction_type: TRANSACTION_TYPES[:expense]) }
@@ -42,8 +43,20 @@ class PlaidTransaction < ApplicationRecord
   end
 
   def set_default_categories
-    self.merchant_tag_id = self.merchant.default_merchant_tag_id if self.merchant.default_merchant_tag_id.present?
-    self.transaction_type = self.merchant.default_transaction_type if self.merchant.default_transaction_type.present?
+    default_category = self.merchant.default_merchant_tag_id
+    default_type = self.merchant.default_transaction_type
+
+    # Fall back to group merchant defaults if this merchant doesn't have its own
+    if self.merchant.merchant_group && (default_category.blank? || default_type.blank?)
+      self.merchant.merchant_group.merchants.each do |group_merchant|
+        default_category ||= group_merchant.default_merchant_tag_id
+        default_type ||= group_merchant.default_transaction_type
+        break if default_category.present? && default_type.present?
+      end
+    end
+
+    self.merchant_tag_id = default_category if default_category.present?
+    self.transaction_type = default_type if default_type.present?
 
     if self.transaction_type.blank?
       # Infer the transaction type based on the amount
@@ -52,6 +65,24 @@ class PlaidTransaction < ApplicationRecord
         self.transaction_type = 'income'
       else
         self.transaction_type = 'expense'
+      end
+    end
+  end
+
+  def apply_merchant_default_tags
+    merchants_to_check = if merchant.merchant_group
+      merchant.merchant_group.merchants.includes(:merchant_default_tags)
+    else
+      [merchant]
+    end
+
+    merchants_to_check.each do |m|
+      m.merchant_default_tags.each do |mdt|
+        TagPlaidTransaction.find_or_create_by(
+          tag_id: mdt.tag_id,
+          plaid_transaction_id: id,
+          user_id: mdt.user_id
+        )
       end
     end
   end

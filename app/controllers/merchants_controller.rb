@@ -15,17 +15,43 @@ class MerchantsController < ApplicationController
 
   # GET /api/merchants/:id
   def show
-    @merchant = current_user.account.merchants.includes(:merchant_tag, merchant_group: :merchants).find(params[:id])
+    @merchant = current_user.account.merchants.includes(:merchant_tag, :default_tags, merchant_group: :merchants).find(params[:id])
   end
 
   # PATCH /api/merchants/:id
   def update
     @merchant = current_user.account.merchants.find(params[:id])
-    if @merchant.update(update_params)
-      render :show
-    else
-      render json: { errors: @merchant.errors.full_messages }, status: :unprocessable_entity
+
+    ActiveRecord::Base.transaction do
+      unless @merchant.update(update_params)
+        render json: { errors: @merchant.errors.full_messages }, status: :unprocessable_entity
+        return
+      end
+
+      if params[:default_tag_ids].is_a?(Array)
+        new_ids = params[:default_tag_ids].map(&:to_i)
+        current_ids = @merchant.merchant_default_tags.pluck(:tag_id)
+
+        ids_to_add = new_ids - current_ids
+        ids_to_remove = current_ids - new_ids
+
+        @merchant.merchant_default_tags.where(tag_id: ids_to_remove).destroy_all if ids_to_remove.any?
+        ids_to_add.each do |tag_id|
+          @merchant.merchant_default_tags.create!(tag_id: tag_id, user_id: current_user.id)
+        end
+      end
+
+      @merchant.propagate_defaults_to_group
+
+      if params[:apply_to_existing].present? && ActiveModel::Type::Boolean.new.cast(params[:apply_to_existing])
+        @merchant.apply_default_merchant_tag_to_all_transactions
+        @merchant.apply_default_transaction_type_to_all_transactions if @merchant.default_transaction_type.present?
+        @merchant.apply_default_tags_to_all_transactions
+      end
     end
+
+    @merchant.reload
+    render :show
   end
 
   # GET /api/merchants/:id/spend_stats
@@ -103,6 +129,6 @@ class MerchantsController < ApplicationController
   end
 
   private def update_params
-    params.require(:merchant).permit(:custom_name, :default_transaction_type, :default_merchant_tag_id)
+    params.fetch(:merchant, {}).permit(:custom_name, :default_transaction_type, :default_merchant_tag_id)
   end
 end

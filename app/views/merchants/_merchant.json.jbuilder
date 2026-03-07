@@ -20,6 +20,12 @@ json.defaultMerchantTag do
   end
 end
 
+json.defaultTags merchant.default_tags do |tag|
+  json.id tag.id
+  json.name tag.name
+  json.color tag.color
+end
+
 json.merchantGroup do
   if merchant.merchant_group
     json.id merchant.merchant_group.id
