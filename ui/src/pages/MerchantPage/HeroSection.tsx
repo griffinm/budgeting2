@@ -6,7 +6,6 @@ import { MerchantDefaults } from "./MerchantDefaults";
 import { Merchant, MerchantCategory, Tag } from "@/utils/types";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { updateMerchant } from "@/api/merchant-client";
-import { urls } from "@/utils/urls";
 
 export function HeroSection({
   merchant,

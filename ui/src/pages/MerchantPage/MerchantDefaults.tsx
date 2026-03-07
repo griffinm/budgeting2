@@ -86,7 +86,7 @@ export function MerchantDefaults({
   const handleRemoveTag = (tagId: number) => {
     const newTagIds = merchant.defaultTags.filter((t) => t.id !== tagId).map((t) => t.id);
 
-    const doUpdate = (applyToExisting: boolean) =>
+    const doUpdate = () =>
       updateMerchant({
         id: merchant.id,
         value: {},
@@ -96,7 +96,7 @@ export function MerchantDefaults({
 
     // No confirmation needed for removal - just save
     setSaving(true);
-    doUpdate(false).then(setMerchant).finally(() => setSaving(false));
+    doUpdate().then(setMerchant).finally(() => setSaving(false));
   };
 
   const handleCreateAndAddTag = async (name: string) => {
