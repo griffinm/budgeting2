@@ -115,7 +115,7 @@ export function MerchantDefaults({
           onCategoryChange={handleCategoryChange}
           onClear={handleClearCategory}
         />
-        <div className="w-px bg-gray-200 self-stretch" />
+        <div className="w-px bg-gray-200 dark:bg-gray-700 self-stretch" />
         <DefaultTags
           merchant={merchant}
           allTags={allTags}
@@ -134,7 +134,7 @@ export function MerchantDefaults({
         title="Apply to existing transactions?"
         centered
       >
-        <p className="mb-4 text-sm text-gray-600">
+        <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
           Would you like to apply this change to all existing transactions for this {merchant.merchantGroup ? 'merchant group' : 'merchant'}?
         </p>
         <div className="flex justify-end gap-2">
@@ -172,7 +172,7 @@ function DefaultCategory({
 }) {
   return (
     <div>
-      <div className="text-sm font-semibold text-gray-700 mb-1">Default Category</div>
+      <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Default Category</div>
       <div className="flex items-center gap-2">
         <Display
           tag={merchant.defaultMerchantTag}
@@ -235,7 +235,7 @@ function DefaultTags({
 
   return (
     <div>
-      <div className="text-sm font-semibold text-gray-700 mb-1">Default Tags</div>
+      <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Default Tags</div>
       <div className="flex flex-wrap gap-1 items-center">
         {merchant.defaultTags.map((tag) => (
           <Badge
@@ -286,7 +286,7 @@ function DefaultTags({
                 {availableTags.map((tag) => (
                   <div
                     key={tag.id}
-                    className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 transition-colors"
+                    className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors"
                     onClick={() => {
                       onAdd(tag.id);
                       setOpened(false);
@@ -297,7 +297,7 @@ function DefaultTags({
                 ))}
                 {showCreateOption && (
                   <div
-                    className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 transition-colors text-blue-600 flex items-center gap-1"
+                    className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors text-blue-600 dark:text-blue-400 flex items-center gap-1"
                     onClick={() => {
                       onCreateAndAdd(filter.trim());
                       setOpened(false);
@@ -308,7 +308,7 @@ function DefaultTags({
                   </div>
                 )}
                 {availableTags.length === 0 && !showCreateOption && (
-                  <div className="text-gray-400 text-xs px-1 py-2">No tags found</div>
+                  <div className="text-gray-400 dark:text-gray-500 text-xs px-1 py-2">No tags found</div>
                 )}
               </div>
             </div>

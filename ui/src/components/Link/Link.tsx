@@ -12,7 +12,7 @@ export function Link({ children, to, onClick }: { children: React.ReactNode, to:
   return (
     <a
       href={to}
-      className="cursor-pointer text-neutral-500 hover:text-neutral-700 transition-colors"
+      className="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300 transition-colors"
       onClick={handleClick}
     >
       {children}

@@ -1,6 +1,6 @@
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { urls } from "@/utils/urls";
-import { Alert, Button, Card, TextInput } from "@mantine/core";
+import { Alert, Button, Card, SegmentedControl, Text, TextInput, useMantineColorScheme } from "@mantine/core";
 import { useEffect, useState, useContext } from "react";
 import { CurrentUserContext } from "@/providers/CurrentUser/CurrentUserContext";
 import { Errors } from "@/components/Errors";
@@ -9,6 +9,7 @@ import { ErrorResponse, LoginResponse } from "@/utils/types";
 
 export default function ProfilePage() {
   const { user, setUser, setToken } = useContext(CurrentUserContext);
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
 
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
@@ -23,6 +24,12 @@ export default function ProfilePage() {
   useEffect(() => {
     setTitle(urls.profile.title());
   }, [setTitle]);
+
+  const handleColorSchemeChange = (value: string) => {
+    const scheme = value as 'light' | 'dark' | 'auto';
+    setColorScheme(scheme);
+    document.cookie = `mantine-color-scheme=${scheme};path=/;max-age=34560000`;
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,7 +70,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <Card className="max-w-sm">
         <Errors errors={error} />
         {success && <Alert color="green" title="Success">Profile updated successfully</Alert>}
@@ -103,6 +110,19 @@ export default function ProfilePage() {
           />
           <Button disabled={loading} type="submit">Save</Button>
         </form>
+      </Card>
+
+      <Card className="max-w-sm">
+        <Text fw={500} mb="xs">Appearance</Text>
+        <SegmentedControl
+          value={colorScheme}
+          onChange={handleColorSchemeChange}
+          data={[
+            { label: 'System', value: 'auto' },
+            { label: 'Light', value: 'light' },
+            { label: 'Dark', value: 'dark' },
+          ]}
+        />
       </Card>
     </div>
   );

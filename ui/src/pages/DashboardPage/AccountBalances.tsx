@@ -38,7 +38,7 @@ export const AccountBalances = ({
   const hasInvestmentAccounts = investmentAccountBalances.length > 0;
 
   if (!hasDepositAccounts && !hasCreditAccounts && !hasLoanAccounts && !hasInvestmentAccounts) {
-    return <div className="text-center text-gray-500">No accounts found</div>;
+    return <div className="text-center text-gray-500 dark:text-gray-400">No accounts found</div>;
   }
 
   const handleCardClick = (type: AccountType) => {
@@ -116,7 +116,7 @@ function BalanceCard({
       <div className="flex flex-col justify-between h-full items-center p-4">
         {/* Header with title and chart icon */}
         <div className="w-full flex justify-between items-start mb-2">
-          <div className="text-sm text-gray-500">{title}</div>
+          <div className="text-sm text-gray-500 dark:text-gray-400">{title}</div>
           <button
             onClick={(e) => {
               e.stopPropagation();

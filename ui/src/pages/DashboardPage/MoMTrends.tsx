@@ -75,8 +75,8 @@ export function MoMTrends({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
         <ColorBox>
           <div className="flex flex-col gap-2 justify-between items-center p-4">
-            <h2 className="text-lg text-gray-500">{expenseText}</h2>
-            <div className="text-3xl font-bold text-gray-500 flex flex-row gap-2">
+            <h2 className="text-lg text-gray-500 dark:text-gray-400">{expenseText}</h2>
+            <div className="text-3xl font-bold text-gray-500 dark:text-gray-400 flex flex-row gap-2">
               {expenseArrow} {Math.abs(expenseChange || 0) + '%'}
             </div>
             <Text size="sm" c="dimmed" ta="center">
@@ -90,8 +90,8 @@ export function MoMTrends({
 
         <ColorBox>
           <div className="flex flex-col gap-2 justify-between items-center p-4">
-            <h2 className="text-lg text-gray-500">{incomeText}</h2>
-            <div className="text-3xl font-bold text-gray-500 flex flex-row gap-2">
+            <h2 className="text-lg text-gray-500 dark:text-gray-400">{incomeText}</h2>
+            <div className="text-3xl font-bold text-gray-500 dark:text-gray-400 flex flex-row gap-2">
               {incomeArrow} {Math.abs(incomeChange || 0) + '%'}
             </div>
             <Text size="sm" c="dimmed" ta="center">

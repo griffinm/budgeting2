@@ -16,7 +16,7 @@ export function Currency({
     'font-bold': useBold,
     'text-red-500': applyColor && isNegative,
     'text-green-500': applyColor && !isNegative,
-    'text-[#555]': !applyColor,
+    'text-gray-600 dark:text-gray-400': !applyColor,
   });
   const minFractionDigits = showCents ? 2 : 0;
   const maxFractionDigits = showCents ? 2 : 0;

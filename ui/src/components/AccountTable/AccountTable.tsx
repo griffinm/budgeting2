@@ -63,7 +63,7 @@ function AccountCard({
       <Card.Section withBorder pb="sm">
         <div className="flex flex-col gap-2">
           <EditableLabel
-            additionalClasses="text-black text-lg font-bold"
+            additionalClasses="text-black dark:text-white text-lg font-bold"
             id={account.id}
             value={account.nickname || account.plaidOfficialName}
             onSave={onNicknameChange}

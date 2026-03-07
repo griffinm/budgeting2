@@ -35,8 +35,8 @@ export function MerchantCategoryRow({
   });
 
   return (
-    <div className="w-full flex flex-col hover:bg-gray-100 transition-colors">
-      <div className="flex flex-col sm:flex-row w-full border-b border-gray-200 py-2 items-center gap-2 sm:gap-0">
+    <div className="w-full flex flex-col hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors">
+      <div className="flex flex-col sm:flex-row w-full border-b border-gray-200 dark:border-gray-700 py-2 items-center gap-2 sm:gap-0">
         <div className="flex flex-col w-full sm:w-1/3">
           <div onClick={() => setExpanded(!expanded)} className="flex items-center gap-2">
             {!hasChildren && (

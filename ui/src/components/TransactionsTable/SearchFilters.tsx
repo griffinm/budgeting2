@@ -24,7 +24,7 @@ export interface SearchFiltersProps {
 function FilterSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{label}</div>
+      <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{label}</div>
       {children}
     </div>
   );
@@ -84,7 +84,7 @@ export function SearchFilters({
       />
 
       {totalCount !== undefined && (
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           {isLoading ? 'Searching...' : `${totalCount.toLocaleString()} transaction${totalCount !== 1 ? 's' : ''} found`}
         </div>
       )}

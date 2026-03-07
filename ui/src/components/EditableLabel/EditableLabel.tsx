@@ -21,7 +21,7 @@ export function EditableLabel({
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newValue, setNewValue] = useState(value);
-  const displayClasses = classNames('text-gray-500 hover:text-gray-700 cursor-pointer');
+  const displayClasses = classNames('text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer');
   
   // Update newValue when value prop changes
   useEffect(() => {

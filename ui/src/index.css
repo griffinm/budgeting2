@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-mantine-color-scheme="dark"], [data-mantine-color-scheme="dark"] *));
+
 @theme {
   --color-primary-50: #ecf4ff;
   --color-primary-100: #dce4f5;
@@ -28,7 +30,7 @@ body, html {
 
 #root {
   height: 100%;
-  @apply bg-neutral-50;
+  @apply bg-neutral-50 dark:bg-[var(--mantine-color-dark-8)];
   font-family: "Noto Sans", sans-serif;
 }
 
@@ -71,7 +73,7 @@ body, html {
 }
 
 .small-text {
-  @apply text-sm text-gray-500;
+  @apply text-sm text-gray-500 dark:text-gray-400;
 }
 
 /* Ensure full height layout */

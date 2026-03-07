@@ -237,7 +237,7 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
 
           <Stack gap="sm">
             {(suggestions || []).slice(0, 5).map((suggestion) => (
-              <Group key={suggestion.merchant.id} justify="space-between" p="sm" style={{ border: '1px solid #e9ecef', borderRadius: '8px' }}>
+              <Group key={suggestion.merchant.id} justify="space-between" p="sm" className="border border-gray-200 dark:border-gray-700 rounded-lg">
                 <div>
                   <Text fw={500}>{suggestion.merchant.customName || suggestion.merchant.name}</Text>
                   <Text size="sm" c="dimmed">{suggestion.reason}</Text>
@@ -284,7 +284,7 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
               </Text>
               <Stack gap="xs">
                 {(merchantGroups || []).slice(0, 3).map((group) => (
-                  <Group key={group.id} justify="space-between" p="xs" style={{ border: '1px solid #e9ecef', borderRadius: '6px' }}>
+                  <Group key={group.id} justify="space-between" p="xs" className="border border-gray-200 dark:border-gray-700 rounded-md">
                     <div>
                       <Text fw={500} size="sm">{group.name}</Text>
                       <Text size="xs" c="dimmed">

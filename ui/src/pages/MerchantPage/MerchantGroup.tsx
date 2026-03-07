@@ -42,7 +42,7 @@ export function MerchantGroupCard({
           position="bottom-start"
           w={400}
         >
-          <IconInfoCircle size={20} className="text-gray-500 cursor-help" />
+          <IconInfoCircle size={20} className="text-gray-500 dark:text-gray-400 cursor-help" />
         </Tooltip>
       </div>
       
@@ -58,27 +58,27 @@ export function MerchantGroupCard({
       {merchant.merchantGroup && (
         <div>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-700 mb-2">
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
               {merchant.merchantGroup.name}
             </h3>
             {merchant.merchantGroup.description && (
-              <p className="text-gray-600 mb-4">{merchant.merchantGroup.description}</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">{merchant.merchantGroup.description}</p>
             )}
-            <div className="text-sm text-gray-500 mb-4">
+            <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               {merchant.merchantGroup.merchants?.length || 0} merchants in this group
             </div>
           </div>
           
           <div className="space-y-2">
-            <h4 className="font-medium text-gray-700">Merchants in this group:</h4>
+            <h4 className="font-medium text-gray-700 dark:text-gray-300">Merchants in this group:</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {merchant.merchantGroup.merchants?.map((groupMerchant) => (
                 <div
                   key={groupMerchant.id}
                   className={`p-3 border rounded-lg transition-colors ${
                     groupMerchant.id === merchant.id
-                      ? 'bg-blue-50 border-blue-200'
-                      : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700'
+                      : 'bg-gray-50 dark:bg-[var(--mantine-color-dark-5)] border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -87,19 +87,19 @@ export function MerchantGroupCard({
                         to={urls.merchant.path(groupMerchant.id)}
                         className={`font-medium ${
                           groupMerchant.id === merchant.id
-                            ? 'text-blue-700'
-                            : 'text-gray-700 hover:text-blue-600'
+                            ? 'text-blue-700 dark:text-blue-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
                         }`}
                       >
                         {merchantDisplayName(groupMerchant)}
                       </Link>
                       {groupMerchant.id === merchant.merchantGroup?.primaryMerchant?.id && (
-                        <div className="text-xs text-blue-600 font-medium mt-1">
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
                           Primary Merchant
                         </div>
                       )}
                       {groupMerchant.id === merchant.id && (
-                        <div className="text-xs text-blue-600 font-medium mt-1">
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
                           Current Merchant
                         </div>
                       )}

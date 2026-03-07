@@ -63,9 +63,9 @@ export function MerchantGroupEdit({
       centered
       size="lg"
     >
-      <div className="flex flex-col h-[400px] bg-white relative">
+      <div className="flex flex-col h-[400px] bg-white dark:bg-[var(--mantine-color-dark-6)] relative">
         {/* Fixed search box at top */}
-        <div className="mb-4 border-b border-gray-200">
+        <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
           <Input
             value={filter}
             onChange={e => setFilter(e.target.value)}
@@ -74,15 +74,15 @@ export function MerchantGroupEdit({
         </div>
 
         {/* Scrollable list in middle */}
-        <div className="flex-1 overflow-y-auto border border-gray-300 shadow-md">
+        <div className="flex-1 overflow-y-auto border border-gray-300 dark:border-gray-600 shadow-md">
           {/* Option to remove from group */}
           <div
-            className={classNames('py-2 cursor-pointer hover:bg-gray-100 rounded-md px-1 transition-colors border-b border-gray-300 flex items-center gap-2', {
-              'bg-gray-300 font-bold': newValue === null,
+            className={classNames('py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] rounded-md px-1 transition-colors border-b border-gray-300 dark:border-gray-600 flex items-center gap-2', {
+              'bg-gray-300 dark:bg-gray-700 font-bold': newValue === null,
             })}
             onClick={() => setNewValue(null)}
           >
-            <div className="text-sm text-gray-500">No group</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">No group</div>
           </div>
           
           {filteredGroups.map(group => (
@@ -96,9 +96,9 @@ export function MerchantGroupEdit({
           ))}
           
           {showCreateOption && (
-            <div className="py-2 px-1 border-b border-gray-300">
+            <div className="py-2 px-1 border-b border-gray-300 dark:border-gray-600">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   No groups found matching "{filter}"
                 </div>
                 <Button
@@ -115,7 +115,7 @@ export function MerchantGroupEdit({
         </div>
 
         {/* Fixed action buttons at bottom */}
-        <div className="mb-4 bg-white mt-4">
+        <div className="mb-4 bg-white dark:bg-[var(--mantine-color-dark-6)] mt-4">
           <form onSubmit={onFormSubmit}>
             <div className="flex justify-end gap-2">
               <Button variant="outline" size="xs" color="gray" onClick={onCancel}>
@@ -149,8 +149,8 @@ function GroupRowItem({
     return null;
   }
 
-  const classes = classNames('py-2 cursor-pointer hover:bg-gray-100 rounded-md px-1 transition-colors border-b border-gray-300 flex items-center gap-2', {
-    'bg-gray-300 font-bold': selected,
+  const classes = classNames('py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] rounded-md px-1 transition-colors border-b border-gray-300 dark:border-gray-600 flex items-center gap-2', {
+    'bg-gray-300 dark:bg-gray-700 font-bold': selected,
   });
 
   return (
@@ -161,9 +161,9 @@ function GroupRowItem({
       <div className="flex flex-col">
         <div className="text-sm font-medium">{group.name}</div>
         {group.description && (
-          <div className="text-xs text-gray-500">{group.description}</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">{group.description}</div>
         )}
-        <div className="text-xs text-gray-400">
+        <div className="text-xs text-gray-400 dark:text-gray-500">
           {group.merchantCount || group.merchants?.length || 0} merchants
         </div>
       </div>

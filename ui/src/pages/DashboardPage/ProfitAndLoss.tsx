@@ -107,14 +107,14 @@ export function ProfitAndLoss({
                         useBold={true}
                         showCents={false}
                       />
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         {item.profitPercentage > 0 ? '+' : ''}{item.profitPercentage.toFixed(1)}%
                       </div>
                     </div>
                   </Table.Td>
                 </Table.Tr>
               ))}
-              <Table.Tr style={{ backgroundColor: '#f2f2f2', borderTop: '2px solid gray' }}>
+              <Table.Tr className="bg-gray-100 dark:bg-[var(--mantine-color-dark-5)]" style={{ borderTop: '2px solid gray' }}>
                 <Table.Td>
                   <span className="font-bold">Total</span>
                 </Table.Td>

@@ -88,7 +88,7 @@ export default function MainLayout() {
             BearBudget
           </div>
           <div>
-            <span className="text-sm text-gray-500 mr-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400 mr-2">
               Logged in as&nbsp;{user?.firstName}
             </span>
             <Button variant="subtle" size="xs" onClick={handleLogout}>Logout</Button>

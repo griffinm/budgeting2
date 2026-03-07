@@ -15,7 +15,7 @@ export function CondensedRow({
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
 }) {
   return (
-    <div className="w-full relative border-b border-gray-300 hover:bg-gray-100 transition-colors">
+    <div className="w-full relative border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors">
       <div className="px-3 py-2 flex flex-row items-center gap-3">
         {/* Logo */}
         <div className="h-[30px] w-[30px] flex-shrink-0 hidden md:flex items-center">
@@ -29,7 +29,7 @@ export function CondensedRow({
               {merchantDisplayName(transaction.merchant)}
             </Link>
           </div>
-          <span className="text-xs text-gray-400 truncate">
+          <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
             {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
           </span>
         </div>

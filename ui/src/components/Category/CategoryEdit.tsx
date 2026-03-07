@@ -38,9 +38,9 @@ export function CategoryEdit({
       centered
       size="lg"
     >
-      <div className="flex flex-col h-[400px] bg-white relative">
+      <div className="flex flex-col h-[400px] bg-white dark:bg-[var(--mantine-color-dark-6)] relative">
         {/* Fixed search box at top */}
-        <div className="mb-4 border-b border-gray-200">
+        <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
           <Input
             value={filter}
             onChange={e => setFilter(e.target.value)}
@@ -49,7 +49,7 @@ export function CategoryEdit({
         </div>
 
         {/* Scrollable list in middle */}
-        <div className="flex-1 overflow-y-auto border border-gray-300 shadow-md">
+        <div className="flex-1 overflow-y-auto border border-gray-300 dark:border-gray-600 shadow-md">
           {allCategories.map(category => (
             <RowItem
               key={category.id}
@@ -63,7 +63,7 @@ export function CategoryEdit({
         </div>
 
         {/* Fixed action buttons at bottom */}
-        <div className="mb-4 bg-white mt-4">
+        <div className="mb-4 bg-white dark:bg-[var(--mantine-color-dark-6)] mt-4">
           <form onSubmit={onFormSubmit}>
             <div className="flex justify-between">
               <Checkbox
@@ -106,7 +106,7 @@ function RowItem({
     return null;
   }
 
-  const classes = classNames('py-2 cursor-pointer hover:bg-gray-100 rounded-md px-1 transition-colors border-b border-gray-300 flex items-center gap-2', {
+  const classes = classNames('py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] rounded-md px-1 transition-colors border-b border-gray-300 dark:border-gray-600 flex items-center gap-2', {
     'bg-gray-300 font-bold': selected,
   });
 
