@@ -2,7 +2,7 @@ import { Currency } from "@/components/Currency/Currency";
 import { Loading } from "@/components/Loading";
 import { ProfitAndLossItem } from "@/utils/types";
 import { BarChart } from "@mantine/charts";
-import { Select, Table } from "@mantine/core";
+import { Group, Select, Table, Text } from "@mantine/core";
 import { 
   format as formatDate,
   addDays,
@@ -180,22 +180,23 @@ export function ProfitAndLoss({
   }
 
   return (
-    <>
-      <div className="flex flex-row gap-2 justify-end mb-2">
+    <div className="flex flex-col gap-2">
+      <Group justify="space-between" align="flex-end" mb="md">
+        <Text size="lg" fw={600}>Profit & Loss</Text>
         <Select
-          size="xs"
-          data={[
-            { value: '3', label: 'Show 3 Months' },
-            { value: '6', label: 'Show 6 Months' },
-            { value: '12', label: 'Show 12 Months' },
-            { value: '24', label: 'Show 24 Months' },
-          ]}
           value={monthsBack.toString()}
           onChange={(value) => setMonthsBack(parseInt(value || '12'))}
+          data={[
+            { value: '3', label: '3 Months' },
+            { value: '6', label: '6 Months' },
+            { value: '12', label: '12 Months' },
+            { value: '24', label: '24 Months' },
+          ]}
+          size="xs"
+          w={120}
         />
-      </div>
-
+      </Group>
       {loading ? <Loading fullHeight={false} /> : renderData()}
-    </>
+    </div>
   )
 }
