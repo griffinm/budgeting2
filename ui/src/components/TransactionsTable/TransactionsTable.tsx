@@ -4,7 +4,7 @@ import { TableRow } from "./TableRow";
 import { Loading } from "../Loading";
 import { groupTransactionsByDate } from './utils';
 import { DayHeader } from "./DayHeader";
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 export function TransactionsTable({
   transactions,
@@ -19,6 +19,7 @@ export function TransactionsTable({
   removeTransactionTag,
   createAndAddTag,
   condensed = false,
+  scrollCacheKey,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
@@ -34,12 +35,48 @@ export function TransactionsTable({
   removeTransactionTag?: (transactionId: number, transactionTagId: number) => void;
   createAndAddTag?: (transactionId: number, name: string) => void;
   condensed?: boolean;
+  scrollCacheKey?: string;
 }) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollRestoredRef = useRef(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [displayTransactions, setDisplayTransactions] = useState(transactions);
-  
+
+  // Debounced scroll position saving
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const handleScroll = useCallback(() => {
+    if (!scrollCacheKey) return;
+    if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    scrollTimerRef.current = setTimeout(() => {
+      if (scrollContainerRef.current) {
+        sessionStorage.setItem(scrollCacheKey, String(scrollContainerRef.current.scrollTop));
+      }
+    }, 150);
+  }, [scrollCacheKey]);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', handleScroll);
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+    };
+  }, [handleScroll]);
+
+  // Restore scroll position after cached transactions render
+  useLayoutEffect(() => {
+    if (scrollRestoredRef.current || !scrollCacheKey) return;
+    if (displayTransactions.length > 0 && !isLoading && scrollContainerRef.current) {
+      const savedScroll = sessionStorage.getItem(scrollCacheKey);
+      if (savedScroll !== null && Number(savedScroll) > 0) {
+        scrollContainerRef.current.scrollTop = Number(savedScroll);
+      }
+      scrollRestoredRef.current = true;
+    }
+  }, [displayTransactions.length, isLoading, scrollCacheKey]);
+
   // Handle fade transition when loading new search results
   useEffect(() => {
     if (isLoading) {

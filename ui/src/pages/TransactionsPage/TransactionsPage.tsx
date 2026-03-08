@@ -25,6 +25,7 @@ export default function TransactionsPage() {
     addTransactionTag,
     removeTransactionTag,
     clearSearchParams,
+    scrollCacheKey,
   } = useTransactions();
 
   const { plaidAccounts } = usePlaidAccount();
@@ -77,6 +78,7 @@ export default function TransactionsPage() {
           addTransactionTag={addTransactionTag}
           removeTransactionTag={removeTransactionTag}
           createAndAddTag={createAndAddTag}
+          scrollCacheKey={scrollCacheKey}
         />
       </Card>
 

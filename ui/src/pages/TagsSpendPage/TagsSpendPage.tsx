@@ -1,16 +1,10 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { Card, Text } from "@mantine/core";
-import { IconBookmarks } from "@tabler/icons-react";
 import { fetchTagSpendStats, fetchMerchantCategories, fetchTagReports, createTagReport, deleteTagReport } from "@/api";
 import { MerchantCategory, TagSpendStats, TagReport } from "@/utils/types";
 import { useTags } from "@/hooks/useTags";
 import { useTransactions } from "@/hooks";
-import { Loading } from "@/components/Loading";
-import { MonthsBackSelect } from "@/components/MonthsBackSelect/MonthsBackSelect";
-import { TransactionsTable } from "@/components/TransactionsTable";
-import { TagSelector } from "./TagSelector";
-import { TagSpendChart } from "./TagSpendChart";
-import { SavedTagReports } from "./SavedTagReports";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { TagsSpendView } from "@/views/TagsSpendView";
 import { format } from "date-fns";
 
 function getDateRange(monthsBack: number) {
@@ -23,6 +17,9 @@ function getDateRange(monthsBack: number) {
 }
 
 export default function TagsSpendPage() {
+  const setPageTitle = usePageTitle();
+  useEffect(() => { setPageTitle("Tag Spend"); }, [setPageTitle]);
+
   const { tags, loading: loadingTags, createTag } = useTags();
   const [includedTagIds, setIncludedTagIds] = useState<number[]>([]);
   const [omittedTagIds, setOmittedTagIds] = useState<number[]>([]);
@@ -105,67 +102,36 @@ export default function TagsSpendPage() {
     addTransactionTag(transactionId, newTag.id);
   };
 
-  const hasSelection = includedTagIds.length > 0 || omittedTagIds.length > 0;
-
   return (
-    <div className="h-full flex flex-col gap-6">
-      <Card shadow="sm" radius="md" withBorder p="lg">
-        <div className="flex flex-col gap-4">
-          <SavedTagReports
-            reports={tagReports}
-            activeReportId={activeReportId}
-            onSelect={handleSelectReport}
-            onSave={handleSaveReport}
-            onDelete={handleDeleteReport}
-            canSave={includedTagIds.length > 0 || omittedTagIds.length > 0}
-          />
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-end">
-          <div className="flex-1 w-full">
-            <TagSelector
-              tags={tags}
-              includedTagIds={includedTagIds}
-              omittedTagIds={omittedTagIds}
-              onIncludeChange={(ids) => { setActiveReportId(null); setIncludedTagIds(ids); }}
-              onOmitChange={(ids) => { setActiveReportId(null); setOmittedTagIds(ids); }}
-            />
-          </div>
-          <MonthsBackSelect value={monthsBack} onChange={setMonthsBack} />
-        </div>
-        </div>
-      </Card>
-
-      <Card shadow="sm" radius="md" withBorder p="lg">
-        {loadingTags || loadingStats ? (
-          <Loading />
-        ) : !hasSelection ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-            <IconBookmarks size={48} stroke={1.2} />
-            <Text size="lg" mt="md">Select tags to see spending trends</Text>
-          </div>
-        ) : (
-          <TagSpendChart stats={stats} allTags={tags} monthsBack={monthsBack} />
-        )}
-      </Card>
-
-      {hasSelection && (
-        <Card p={0} shadow="sm" radius="md" withBorder className="flex-1 min-h-0">
-          <TransactionsTable
-            transactions={transactions}
-            isLoading={isLoadingTransactions}
-            isLoadingMore={isLoadingMore}
-            hasMore={hasMore}
-            loadMore={loadMore}
-            error={error}
-            page={page}
-            updateTransaction={updateTransaction}
-            merchantCategories={merchantCategories}
-            allTags={tags}
-            addTransactionTag={addTransactionTag}
-            removeTransactionTag={removeTransactionTag}
-            createAndAddTag={createAndAddTag}
-          />
-        </Card>
-      )}
-    </div>
+    <TagsSpendView
+      tags={tags}
+      loadingTags={loadingTags}
+      includedTagIds={includedTagIds}
+      setIncludedTagIds={setIncludedTagIds}
+      omittedTagIds={omittedTagIds}
+      setOmittedTagIds={setOmittedTagIds}
+      monthsBack={monthsBack}
+      setMonthsBack={setMonthsBack}
+      stats={stats}
+      loadingStats={loadingStats}
+      merchantCategories={merchantCategories}
+      tagReports={tagReports}
+      activeReportId={activeReportId}
+      setActiveReportId={setActiveReportId}
+      handleSelectReport={handleSelectReport}
+      handleSaveReport={handleSaveReport}
+      handleDeleteReport={handleDeleteReport}
+      transactions={transactions}
+      isLoadingTransactions={isLoadingTransactions}
+      isLoadingMore={isLoadingMore}
+      hasMore={hasMore}
+      loadMore={loadMore}
+      error={error}
+      page={page}
+      updateTransaction={updateTransaction}
+      addTransactionTag={addTransactionTag}
+      removeTransactionTag={removeTransactionTag}
+      createAndAddTag={createAndAddTag}
+    />
   );
 }
