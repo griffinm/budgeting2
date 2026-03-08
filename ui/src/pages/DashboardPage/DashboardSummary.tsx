@@ -1,3 +1,4 @@
+import { HeroBox } from "@/components/HeroBox";
 import { Loading } from "@/components/Loading";
 import { SimpleGrid } from "@mantine/core";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
@@ -64,14 +65,8 @@ export function DashboardSummary({
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-600 via-primary-500 to-primary-700 dark:from-primary-800 dark:via-primary-700 dark:to-primary-900 p-6">
-      <div className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%),
-                            radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%)`,
-        }}
-      />
-      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={{ base: 'xl', sm: 'md' }} className="relative">
+    <HeroBox>
+      <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={{ base: 'xl', sm: 'md' }}>
         {cards.map((card, index) => {
           const trendColor = card.diff !== undefined
             ? (card.inverted ? (card.diff >= 0 ? "text-red-300 dark:text-red-300" : "text-emerald-100 dark:text-emerald-300") : (card.diff >= 0 ? "text-emerald-100 dark:text-emerald-300" : "text-red-300 dark:text-red-300"))
@@ -98,6 +93,6 @@ export function DashboardSummary({
           );
         })}
       </SimpleGrid>
-    </div>
+    </HeroBox>
   );
 }

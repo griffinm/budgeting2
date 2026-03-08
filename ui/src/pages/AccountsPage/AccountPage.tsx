@@ -1,3 +1,4 @@
+import { HeroBox } from "@/components/HeroBox";
 import { usePageTitle } from "@/hooks";
 import { useContext, useEffect, useState } from "react";
 import { urls } from "@/utils/urls";
@@ -90,14 +91,8 @@ export default function AccountsPage() {
   return (
     <div className="h-full flex flex-col gap-8">
       {/* Net Worth Header */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary-800 via-primary-700 to-primary-900 p-8">
-        <div className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%),
-                              radial-gradient(circle at 80% 20%, rgba(255,255,255,0.15) 0%, transparent 40%)`,
-          }}
-        />
-        <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <HeroBox className="p-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="text-primary-200 text-sm font-medium tracking-wide uppercase mb-1">
               Net Worth
@@ -138,7 +133,7 @@ export default function AccountsPage() {
             )}
           </div>
         )}
-      </div>
+      </HeroBox>
 
       {/* Account Sections */}
       <div className="flex flex-col gap-6">
