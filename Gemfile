@@ -21,6 +21,9 @@ group :development, :test do
   gem "dotenv-rails"
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
   gem "brakeman", require: false
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-rails-omakase", require: false
   gem "foreman"
   gem "rspec-rails"
   gem "factory_bot_rails"
