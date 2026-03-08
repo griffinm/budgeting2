@@ -1,7 +1,7 @@
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import { Button, Checkbox, Input, Modal } from "@mantine/core";
 import { useState } from "react";
-import { fullyQualifiedTagName } from "@/utils/merchantTagUtils";
+import { fullyQualifiedCategoryName } from "@/utils/merchantCategoryUtils";
 import classNames from "classnames";
 
 export function CategoryEdit({
@@ -12,14 +12,14 @@ export function CategoryEdit({
   opened,
   onClose,
 }: {
-  currentValue?: MerchantTag | null;
+  currentValue?: MerchantCategory | null;
   onCancel: () => void;
   onSave: ({ id, useDefaultCategory }: { id: number; useDefaultCategory: boolean }) => void;
-  allCategories: MerchantTag[];
+  allCategories: MerchantCategory[];
   opened: boolean;
   onClose: () => void;
 }) {
-  const [newValue, setNewValue] = useState<MerchantTag | null>(currentValue || null);
+  const [newValue, setNewValue] = useState<MerchantCategory | null>(currentValue || null);
   const [filter, setFilter] = useState('');
   const [useDefaultCategory, setUseDefaultCategory] = useState(false);
 
@@ -38,9 +38,9 @@ export function CategoryEdit({
       centered
       size="lg"
     >
-      <div className="flex flex-col h-[400px] bg-white relative">
+      <div className="flex flex-col h-[400px] bg-white dark:bg-[var(--mantine-color-dark-6)] relative">
         {/* Fixed search box at top */}
-        <div className="mb-4 border-b border-gray-200">
+        <div className="mb-4 border-b border-gray-200 dark:border-gray-700">
           <Input
             value={filter}
             onChange={e => setFilter(e.target.value)}
@@ -49,7 +49,7 @@ export function CategoryEdit({
         </div>
 
         {/* Scrollable list in middle */}
-        <div className="flex-1 overflow-y-auto border border-gray-300 shadow-md">
+        <div className="flex-1 overflow-y-auto border border-gray-300 dark:border-gray-600 shadow-md">
           {allCategories.map(category => (
             <RowItem
               key={category.id}
@@ -63,7 +63,7 @@ export function CategoryEdit({
         </div>
 
         {/* Fixed action buttons at bottom */}
-        <div className="mb-4 bg-white mt-4">
+        <div className="mb-4 bg-white dark:bg-[var(--mantine-color-dark-6)] mt-4">
           <form onSubmit={onFormSubmit}>
             <div className="flex justify-between">
               <Checkbox
@@ -94,19 +94,19 @@ function RowItem({
   filter,
   selected,
 }: {
-  item: MerchantTag;
-  allCategories: MerchantTag[];
-  onSelect: (item: MerchantTag) => void;
+  item: MerchantCategory;
+  allCategories: MerchantCategory[];
+  onSelect: (item: MerchantCategory) => void;
   filter: string;
   selected: boolean;
 }) {
-  const isFiltered = filter.length > 0 && !fullyQualifiedTagName(item, allCategories).toLowerCase().includes(filter.toLowerCase());
+  const isFiltered = filter.length > 0 && !fullyQualifiedCategoryName(item, allCategories).toLowerCase().includes(filter.toLowerCase());
 
   if (isFiltered) {
     return null;
   }
 
-  const classes = classNames('py-2 cursor-pointer hover:bg-gray-100 rounded-md px-1 transition-colors border-b border-gray-300 flex items-center gap-2', {
+  const classes = classNames('py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] rounded-md px-1 transition-colors border-b border-gray-300 dark:border-gray-600 flex items-center gap-2', {
     'bg-gray-300 font-bold': selected,
   });
 
@@ -119,7 +119,7 @@ function RowItem({
         &nbsp;
       </div>
       <div>
-        {fullyQualifiedTagName(item, allCategories)}
+        {fullyQualifiedCategoryName(item, allCategories)}
       </div>
     </div>
   )

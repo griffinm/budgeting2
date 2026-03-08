@@ -6,19 +6,23 @@ import { useProfitAndLoss } from '@/hooks/useProfitAndLoss';
 import { ProfitAndLoss } from './ProfitAndLoss';
 import { useAccountBalances } from '@/hooks/useAccountBalance';
 import { AccountBalances } from './AccountBalances';
-import { Card, Group, Text, Modal, Button, Stack } from '@mantine/core';
-import { IconWallet, IconCalculator, IconCalendar, IconBuildingBank } from '@tabler/icons-react';
-import { MonthlyLineChart } from '@/components/MonthlySpend/MonthlyLineChart';
-import { MoMTrends } from './MoMTrends';
+import { Text, Modal, Button, Stack, Paper } from '@mantine/core';
+import { IconBuildingBank } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
+import { DashboardSummary } from './DashboardSummary';
+import { MonthlyTrends } from './MonthlyTrends';
+import { CollapsibleCard } from '@/components/CollapsibleCard/CollapsibleCard';
+import { getCurrentBalance } from './accountBalanceUtils';
+import { getDailyRunningTotal, getPercentChangeForCurrentDay } from '@/utils/chartUtils';
+import { getAverageForCurrentDay } from '@/utils/movingAverageUtils';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useContext(CurrentUserContext);
   const [showLinkAccountsModal, setShowLinkAccountsModal] = useState(user?.linkedAccounts === 0);
-  
-  const { 
+
+  const {
     profitAndLoss,
     profitAndLossLoading,
     monthsBack,
@@ -27,11 +31,11 @@ export default function DashboardPage() {
 
   const currentMonthExpenses = useCurrentMonthTransactions('expense');
   const currentMonthIncome = useCurrentMonthTransactions('income');
-  const { data: currentMonthSpendMovingAverage, loading: currentMonthSpendMovingAverageLoading } = useMovingAverage('expense');
-  const { data: currentMonthIncomeMovingAverage, loading: currentMonthIncomeMovingAverageLoading } = useMovingAverage('income');
+  const { data: spendMovingAverage, loading: spendMovingAverageLoading } = useMovingAverage('expense');
+  const { data: incomeMovingAverage, loading: incomeMovingAverageLoading } = useMovingAverage('income');
 
   const { accountBalances, loading: accountBalancesLoading } = useAccountBalances();
-  
+
   useEffect(() => {
     document.title = urls.dashboard.title();
   }, []);
@@ -40,6 +44,57 @@ export default function DashboardPage() {
     setShowLinkAccountsModal(false);
     navigate(urls.accounts.path());
   };
+
+  // Computed values for DashboardSummary — only deposit and credit accounts
+  const availableCash = accountBalances.reduce((sum, ab) => {
+    const type = ab.plaidAccount.accountType;
+    if (type !== 'deposit' && type !== 'credit') return sum;
+    const balance = getCurrentBalance(ab);
+    if (type === 'credit') {
+      return sum - Math.abs(balance);
+    }
+    return sum + balance;
+  }, 0);
+
+  const currentDay = new Date().getDate();
+
+  const expensesThisMonth = getDailyRunningTotal({
+    transactions: currentMonthExpenses.transactions,
+    toDay: currentDay,
+    transactionType: 'expense',
+  });
+
+  const incomeThisMonth = getDailyRunningTotal({
+    transactions: currentMonthIncome.transactions,
+    toDay: currentDay,
+    transactionType: 'income',
+  });
+
+  const profitThisMonth = incomeThisMonth - expensesThisMonth;
+
+  const expenseAvgByToday = getAverageForCurrentDay(spendMovingAverage)?.cumulativeTotal || 0;
+  const incomeAvgByToday = getAverageForCurrentDay(incomeMovingAverage)?.cumulativeTotal || 0;
+
+  const expenseChange = getPercentChangeForCurrentDay({
+    transactionsThisMonth: currentMonthExpenses.transactions,
+    averageSpendOnCurrentDay: expenseAvgByToday,
+    currentDay,
+    transactionType: 'expense',
+  });
+
+  const incomeChange = getPercentChangeForCurrentDay({
+    transactionsThisMonth: currentMonthIncome.transactions,
+    averageSpendOnCurrentDay: incomeAvgByToday,
+    currentDay,
+    transactionType: 'income',
+  });
+
+  const avgProfitByToday = incomeAvgByToday - expenseAvgByToday;
+  const profitChange = avgProfitByToday !== 0
+    ? Math.round(((profitThisMonth - avgProfitByToday) / Math.abs(avgProfitByToday)) * 1000) / 10
+    : 0;
+
+  const summaryLoading = currentMonthExpenses.loading || currentMonthIncome.loading || spendMovingAverageLoading || incomeMovingAverageLoading || accountBalancesLoading;
 
   return (
     <div className="h-full flex flex-col">
@@ -63,9 +118,9 @@ export default function DashboardPage() {
           <Text size="sm" c="dimmed" ta="center">
             Connect your accounts securely through Plaid to automatically import your transactions and see your financial overview.
           </Text>
-          <Button 
-            fullWidth 
-            size="md" 
+          <Button
+            fullWidth
+            size="md"
             mt="md"
             onClick={handleLinkAccounts}
           >
@@ -73,61 +128,42 @@ export default function DashboardPage() {
           </Button>
         </Stack>
       </Modal>
-      
-      <div className="flex flex-col gap-4">
-        <Card>
-          <Group mb="md">
-            <IconWallet size={20} />
-            <Text fw={600}>Account Balances</Text>
-          </Group>
-          <AccountBalances accountBalances={accountBalances} loading={accountBalancesLoading} />
-        </Card>
 
-        <MoMTrends
-          currentMonthExpenses={currentMonthExpenses}
-          currentMonthIncome={currentMonthIncome}
-          currentMonthIncomeMovingAverage={currentMonthIncomeMovingAverage}
-          currentMonthSpendMovingAverage={currentMonthSpendMovingAverage}
-          currentMonthSpendMovingAverageLoading={currentMonthSpendMovingAverageLoading}
-          currentMonthIncomeMovingAverageLoading={currentMonthIncomeMovingAverageLoading}
+      <div className="flex flex-col gap-4">
+        <DashboardSummary
+          availableCash={availableCash}
+          expensesThisMonth={expensesThisMonth}
+          incomeThisMonth={incomeThisMonth}
+          profitThisMonth={profitThisMonth}
+          expenseChange={expenseChange}
+          incomeChange={incomeChange}
+          profitChange={profitChange}
+          expenseAvgByToday={expenseAvgByToday}
+          incomeAvgByToday={incomeAvgByToday}
+          loading={summaryLoading}
         />
 
-        <Card>
-          <Group mb="md">
-            <IconCalculator size={20} />
-            <Text fw={600}>Profit & Loss</Text>
-          </Group>
+        <CollapsibleCard title="Account Balances" initialState="collapsed">
+          <AccountBalances accountBalances={accountBalances} loading={accountBalancesLoading} />
+        </CollapsibleCard>
+
+        <Paper>
           <ProfitAndLoss
             profitAndLoss={profitAndLoss}
             monthsBack={monthsBack}
             setMonthsBack={setProfitAndLossMonthsBack}
             loading={profitAndLossLoading}
           />
-        </Card>
+        </Paper>
 
-        <Card>
-          <Group mb="md">
-            <IconCalendar size={20} />
-            <Text fw={600}>Monthly Spend</Text>
-          </Group>
-          <MonthlyLineChart
-            currentMonthTransactions={currentMonthExpenses.transactions}
-            transactionMovingAverage={currentMonthSpendMovingAverage}
-            transactionType="expense"
+        <Paper>
+          <MonthlyTrends
+            expenseTransactions={currentMonthExpenses.transactions}
+            incomeTransactions={currentMonthIncome.transactions}
+            spendMovingAverage={spendMovingAverage}
+            incomeMovingAverage={incomeMovingAverage}
           />
-        </Card>
-
-        <Card>
-          <Group mb="md">
-            <IconCalendar size={20} />
-            <Text fw={600}>Monthly Income</Text>
-          </Group>
-          <MonthlyLineChart
-            currentMonthTransactions={currentMonthIncome.transactions}
-            transactionMovingAverage={currentMonthIncomeMovingAverage}
-            transactionType="income"
-          />
-        </Card>
+        </Paper>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 export * from './user-client';
 export * from './transaction-client';
 export * from './merchant-client';
-export * from './merchant-tags-client';
+export * from './merchant-categories-client';
 export * from './data-client';
 export * from './plaid-account-client';
 export * from './sync-event-client';
@@ -9,3 +9,4 @@ export * from './account-balance-client';
 export * from './account-client';
 export * from './tags-client';
 export * from './transaction-tags-client';
+export * from './tag-reports-client';

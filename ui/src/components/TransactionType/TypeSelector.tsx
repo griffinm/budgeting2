@@ -25,7 +25,7 @@ export function TypeSelector({
         onChange={(value) => onSave(value as TransactionType)}
       />
       <div 
-        className="text-xs text-gray-500 ml-3 cursor-pointer hover:bg-gray-300 rounded-full p-2 transition-colors duration-200"
+        className="text-xs text-gray-500 dark:text-gray-400 ml-3 cursor-pointer hover:bg-gray-300 dark:hover:bg-[var(--mantine-color-dark-4)] rounded-full p-2 transition-colors duration-200"
         onClick={onCancel}
       >
         X

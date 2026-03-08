@@ -28,7 +28,7 @@ export function FooterActionBar({
   return (
     <>
       <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-        <div className="flex items-center justify-center px-4 py-3 border-t border-gray-200 bg-white/90 backdrop-blur-md">
+        <div className="flex items-center justify-center px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white/90 dark:bg-[var(--mantine-color-dark-7)]/90 backdrop-blur-md">
           <button
             onClick={open}
             className="relative flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary-700 text-white text-sm font-medium shadow-lg active:scale-95 transition-transform"

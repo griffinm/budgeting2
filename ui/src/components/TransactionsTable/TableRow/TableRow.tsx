@@ -1,4 +1,4 @@
-import { MerchantTag, Tag, Transaction } from "@/utils/types";
+import { MerchantCategory, Tag, Transaction } from "@/utils/types";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { FullRow } from "./FullRow";
 import { CondensedRow } from "./CondensedRow";
@@ -7,7 +7,7 @@ export function TableRow({
   transaction,
   condensed,
   updateTransaction,
-  merchantTags,
+  merchantCategories,
   allTags,
   addTransactionTag,
   removeTransactionTag,
@@ -16,7 +16,7 @@ export function TableRow({
   transaction: Transaction;
   condensed?: boolean;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
-  merchantTags: MerchantTag[];
+  merchantCategories: MerchantCategory[];
   allTags?: Tag[];
   addTransactionTag?: (transactionId: number, tagId: number) => void;
   removeTransactionTag?: (transactionId: number, transactionTagId: number) => void;
@@ -33,7 +33,7 @@ export function TableRow({
         <FullRow
           transaction={transaction}
           updateTransaction={updateTransaction}
-          merchantTags={merchantTags}
+          merchantCategories={merchantCategories}
           allTags={allTags}
           addTransactionTag={addTransactionTag}
           removeTransactionTag={removeTransactionTag}

@@ -1,5 +1,5 @@
 import { MerchantSearchParams } from "@/api";
-import { MerchantTag, Page, TransactionType as TransactionTypeType, MerchantGroup } from "@/utils/types";
+import { MerchantCategory, Page, TransactionType as TransactionTypeType, MerchantGroup } from "@/utils/types";
 import { Merchant } from "@/utils/types";
 import { Pagination } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
@@ -17,7 +17,7 @@ export function MerchantsTable({
   page,
   setPage,
   onUpdateMerchant,
-  allMerchantTags,
+  allMerchantCategories,
   allMerchantGroups,
   onUpdateMerchantGroup,
   onGroupCreated,
@@ -29,7 +29,7 @@ export function MerchantsTable({
   searchParams: MerchantSearchParams;
   onSetSearchParams: (searchParams: MerchantSearchParams) => void;
   onUpdateMerchant: (params: UpdateMerchantParams) => void;
-  allMerchantTags: MerchantTag[];
+  allMerchantCategories: MerchantCategory[];
   allMerchantGroups: MerchantGroup[];
   onUpdateMerchantGroup: (merchantId: number, groupId: number | null) => void;
   onGroupCreated?: (group: MerchantGroup) => void;
@@ -41,12 +41,12 @@ export function MerchantsTable({
       <div className="flex-1 flex flex-col gap-3 overflow-y-auto scrollbar-hide">
         {isLoading && merchants.length === 0 ? (
           <div className="flex flex-row justify-center transition-opacity duration-300 ease-in-out">
-            <div className="text-sm text-gray-500">Loading...</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">Loading...</div>
           </div>
         ) : (
           <div className="flex flex-col transition-opacity duration-300 ease-in-out">
             {merchants.map(merchant => (
-              <div key={merchant.id} className="w-full relative border-b border-gray-300 pt-2 hover:bg-gray-100 transition-colors">
+              <div key={merchant.id} className="w-full relative border-b border-gray-300 dark:border-gray-600 pt-2 hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors">
                 <div className="px-3 flex flex-row">
                   <div className="flex flex-col w-1/4">
                     <EditableLabel
@@ -68,7 +68,7 @@ export function MerchantsTable({
                     <CategoryDisplay
                       category={merchant.defaultMerchantTag}
                       onSave={({ id, }) => onUpdateMerchant({ id: merchant.id, value: { defaultMerchantTagId: id } })}
-                      allCategories={allMerchantTags}
+                      allCategories={allMerchantCategories}
                     />
                   </div>
                   
@@ -82,7 +82,7 @@ export function MerchantsTable({
                         merchantId={merchant.id}
                       />
                       {merchant.merchantGroup?.primaryMerchant?.id === merchant.id && (
-                        <div className="text-xs text-blue-600 font-medium">
+                        <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                           Primary
                         </div>
                       )}
@@ -95,7 +95,7 @@ export function MerchantsTable({
             {/* Show empty state when no merchants and not loading */}
             {merchants.length === 0 && !isLoading && (
               <div className="flex justify-center py-8">
-                <div className="text-sm text-gray-500">No merchants found</div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">No merchants found</div>
               </div>
             )}
           </div>

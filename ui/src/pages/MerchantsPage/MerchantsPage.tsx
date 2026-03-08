@@ -3,14 +3,14 @@ import { urls } from "@/utils/urls";
 import { usePageTitle } from "@/hooks";
 import { useMerchants } from "@/hooks";
 import { MerchantsTable } from "@/components/MerchantsTable/MerchantsTable";
-import { MerchantTag, MerchantGroup } from "@/utils/types";
-import { fetchMerchantTags } from "@/api/merchant-tags-client";
+import { MerchantCategory, MerchantGroup } from "@/utils/types";
+import { fetchMerchantCategories } from "@/api/merchant-categories-client";
 import { fetchMerchantGroups, updateMerchantGroup } from "@/api/merchant-groups-client";
 import { Card } from "@mantine/core";
 import { Search } from "@/components/MerchantsTable/Search";
 
 export default function MerchantsPage() {
-  const [allMerchantTags, setAllMerchantTags] = useState<MerchantTag[]>([]);
+  const [allMerchantCategories, setAllMerchantCategories] = useState<MerchantCategory[]>([]);
   const [allMerchantGroups, setAllMerchantGroups] = useState<MerchantGroup[]>([]);
 
   const setTitle = usePageTitle();
@@ -31,15 +31,15 @@ export default function MerchantsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [merchantTags, merchantGroups] = await Promise.all([
-          fetchMerchantTags(),
+        const [merchantCategories, merchantGroups] = await Promise.all([
+          fetchMerchantCategories(),
           fetchMerchantGroups()
         ]);
-        setAllMerchantTags(merchantTags || []);
+        setAllMerchantCategories(merchantCategories || []);
         setAllMerchantGroups(merchantGroups || []);
       } catch (error) {
         console.error('Failed to fetch merchant data:', error);
-        setAllMerchantTags([]);
+        setAllMerchantCategories([]);
         setAllMerchantGroups([]);
       }
     };
@@ -81,7 +81,7 @@ export default function MerchantsPage() {
       </div>
       <Card p={0} className="flex-1 min-h-0"> 
         <MerchantsTable
-          allMerchantTags={allMerchantTags}
+          allMerchantCategories={allMerchantCategories}
           allMerchantGroups={allMerchantGroups}
           onUpdateMerchant={updateMerchant}
           onUpdateMerchantGroup={handleUpdateMerchantGroup}

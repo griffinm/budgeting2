@@ -11,8 +11,8 @@ const DashboardPage = lazy(() => import('@/pages/DashboardPage/DashboardPage'));
 const TransactionsPage = lazy(() => import('@/pages/TransactionsPage/TransactionsPage'));
 const MerchantsPage = lazy(() => import('@/pages/MerchantsPage/MerchantsPage'));
 const MerchantPage = lazy(() => import('@/pages/MerchantPage/MerchantPage'));
-const MerchantTagsPage = lazy(() => import('@/pages/MerchantTagsPage/MerchantTagsPage'));
-const MerchantTagPage = lazy(() => import('@/pages/MerchantTagPage/MerchantTagPage'));
+const MerchantCategoriesPage = lazy(() => import('@/pages/MerchantCategoriesPage/MerchantCategoriesPage'));
+const MerchantCategoryPage = lazy(() => import('@/pages/MerchantCategoryPage/MerchantCategoryPage'));
 const TransactionPage = lazy(() => import('@/pages/TransactionPage/TransactionPage'));
 const TagsSpendPage = lazy(() => import('@/pages/TagsSpendPage/TagsSpendPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
@@ -79,11 +79,11 @@ export const urls: Record<string, Url> = {
     section: 'none',
     routeString: '/merchants/:id',
   },
-  merchantTags: {
+  merchantCategories: {
     path: () =>'/categories',
     label: 'Categories',
     title: () => 'Categories' + TITLE_SUFFIX,
-    component: MerchantTagsPage,
+    component: MerchantCategoriesPage,
     section: 'main',
   },
   tags: {
@@ -93,10 +93,10 @@ export const urls: Record<string, Url> = {
     component: TagsSpendPage,
     section: 'main',
   },
-  merchantTag: {
+  merchantCategory: {
     path: (id: number) => `/categories/${id}`,
-    title: ({ tagName }: { tagName: string }) => `Category - ${tagName}` + TITLE_SUFFIX,
-    component: MerchantTagPage,
+    title: ({ categoryName }: { categoryName: string }) => `Category - ${categoryName}` + TITLE_SUFFIX,
+    component: MerchantCategoryPage,
     section: 'none',
     routeString: '/categories/:id',
   },

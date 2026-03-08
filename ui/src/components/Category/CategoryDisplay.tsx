@@ -1,16 +1,16 @@
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import { useState } from "react";
 import { CategoryEdit } from "./CategoryEdit";
-import { fullyQualifiedTagName } from "@/utils/merchantTagUtils";
+import { fullyQualifiedCategoryName } from "@/utils/merchantCategoryUtils";
 
 export function CategoryDisplay({
   category,
   onSave,
   allCategories,
 }: {
-  category?: MerchantTag | null;
+  category?: MerchantCategory | null;
   onSave: ({ id, useDefaultCategory }: { id: number; useDefaultCategory: boolean }) => void;
-  allCategories: MerchantTag[];
+  allCategories: MerchantCategory[];
 }) {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -40,20 +40,20 @@ export function Display({
   onEdit,
   allCategories,
 }: {
-  tag?: MerchantTag | null;
+  tag?: MerchantCategory | null;
   onEdit: () => void;
-  allCategories: MerchantTag[];
+  allCategories: MerchantCategory[];
 }) {
 
   const renderName = () => {
     if (!tag) {
-      return <div className="text-gray-500 italic">No category</div>
+      return <div className="text-gray-500 dark:text-gray-400 italic">No category</div>
     }
 
     return (
       <div className="flex flex-row gap-2">
         <div className="flex flex-col">
-          <div className="text-gray-500 text-sm">{fullyQualifiedTagName(tag, allCategories)}</div>
+          <div className="text-gray-500 dark:text-gray-400 text-sm">{fullyQualifiedCategoryName(tag, allCategories)}</div>
           <div className="font-bold">{tag.name}</div>
         </div>
       </div>
@@ -61,7 +61,7 @@ export function Display({
   }
 
   return (
-    <div className="cursor-pointer hover:bg-gray-100 rounded-md p-1 transition-colors flex" onClick={onEdit}>
+    <div className="cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] rounded-md p-1 transition-colors flex" onClick={onEdit}>
       {renderName()}
     </div>
   );

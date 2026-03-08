@@ -65,11 +65,11 @@ export function TransactionTags({
     >
       <Popover.Target>
         <div
-          className="flex flex-wrap gap-1 cursor-pointer min-h-[28px] items-center rounded-md p-1 hover:bg-gray-100 transition-colors"
+          className="flex flex-wrap gap-1 cursor-pointer min-h-[28px] items-center rounded-md p-1 hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors"
           onClick={() => setOpened((o) => !o)}
         >
           {transaction.transactionTags.length === 0 ? (
-            <span className="text-gray-400 text-xs flex items-center gap-1">
+            <span className="text-gray-400 dark:text-gray-500 text-xs flex items-center gap-1">
               <IconPlus size={12} />
               Add tag
             </span>
@@ -92,7 +92,7 @@ export function TransactionTags({
                   {tt.tag.name}
                 </Badge>
               ))}
-              <IconPlus size={12} className="text-gray-400" />
+              <IconPlus size={12} className="text-gray-400 dark:text-gray-500" />
             </>
           )}
         </div>
@@ -111,7 +111,7 @@ export function TransactionTags({
             {availableTags.map((tag) => (
               <div
                 key={tag.id}
-                className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 transition-colors"
+                className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors"
                 onClick={() => handleAdd(tag.id)}
               >
                 {tag.name}
@@ -119,7 +119,7 @@ export function TransactionTags({
             ))}
             {showCreateOption && (
               <div
-                className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 transition-colors text-blue-600 flex items-center gap-1"
+                className="px-2 py-1.5 text-sm rounded cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors text-blue-600 dark:text-blue-400 flex items-center gap-1"
                 onClick={handleCreate}
               >
                 <IconPlus size={12} />
@@ -127,7 +127,7 @@ export function TransactionTags({
               </div>
             )}
             {availableTags.length === 0 && !showCreateOption && (
-              <div className="text-gray-400 text-xs px-1 py-2">No tags found</div>
+              <div className="text-gray-400 dark:text-gray-500 text-xs px-1 py-2">No tags found</div>
             )}
           </div>
         </div>

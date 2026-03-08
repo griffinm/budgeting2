@@ -1,4 +1,4 @@
-import { MerchantTag, Tag, Transaction } from "@/utils/types";
+import { MerchantCategory, Tag, Transaction } from "@/utils/types";
 import { TransactionTags } from "@/components/TransactionTags/TransactionTags";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { TransactionAmount } from "@/components/TransactionAmount/TransactionAmount";
@@ -18,7 +18,7 @@ import { useNavigate } from "react-router-dom";
 export function FullRow({
   transaction,
   updateTransaction,
-  merchantTags,
+  merchantCategories,
   allTags,
   addTransactionTag,
   removeTransactionTag,
@@ -26,7 +26,7 @@ export function FullRow({
 }: {
   transaction: Transaction;
   updateTransaction: (id: number, params: TransactionUpdateParams) => void;
-  merchantTags: MerchantTag[];
+  merchantCategories: MerchantCategory[];
   allTags?: Tag[];
   addTransactionTag?: (transactionId: number, tagId: number) => void;
   removeTransactionTag?: (transactionId: number, transactionTagId: number) => void;
@@ -37,7 +37,7 @@ export function FullRow({
   const navigate = useNavigate();
 
   return (
-    <div className="w-full px-3 py-2 relative border-b border-gray-300 hover:bg-gray-100 transition-colors">
+    <div className="w-full px-3 py-2 relative border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors">
       {/* Desktop layout */}
       <div className="hidden md:flex flex-row items-center gap-3">
         {/* Logo */}
@@ -53,7 +53,7 @@ export function FullRow({
             </Link>
           </div>
           <div className="flex flex-col gap-2 pt-1">
-            <span className="text-xs text-gray-400 truncate">
+            <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
               {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
             </span>
             <TransactionType
@@ -68,9 +68,9 @@ export function FullRow({
           <CategoryDisplay
             category={transaction.merchantTag}
             onSave={({ id, useDefaultCategory }) => {
-              updateTransaction(transaction.id, { merchantTagId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
+              updateTransaction(transaction.id, { merchantCategoryId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
             }}
-            allCategories={merchantTags}
+            allCategories={merchantCategories}
           />
         </div>
 
@@ -125,7 +125,7 @@ export function FullRow({
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <IconChevronDown
               size={14}
-              className={`flex-shrink-0 text-gray-400 transition-transform ${isMobileExpanded ? "rotate-0" : "-rotate-90"}`}
+              className={`flex-shrink-0 text-gray-400 dark:text-gray-500 transition-transform ${isMobileExpanded ? "rotate-0" : "-rotate-90"}`}
             />
             <div className="min-w-0">
               <div className="text-sm font-medium truncate">
@@ -133,7 +133,7 @@ export function FullRow({
                   {merchantDisplayName(transaction.merchant)}
                 </Link>
               </div>
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-400 dark:text-gray-500">
                 {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
               </span>
             </div>
@@ -160,9 +160,9 @@ export function FullRow({
               <CategoryDisplay
                 category={transaction.merchantTag}
                 onSave={({ id, useDefaultCategory }) => {
-                  updateTransaction(transaction.id, { merchantTagId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
+                  updateTransaction(transaction.id, { merchantCategoryId: id, useAsDefault: useDefaultCategory, merchantId: transaction.merchant.id })
                 }}
-                allCategories={merchantTags}
+                allCategories={merchantCategories}
               />
             </div>
             {allTags && addTransactionTag && removeTransactionTag && createAndAddTag && (
@@ -181,6 +181,7 @@ export function FullRow({
       </div>
 
       {/* Note row */}
+      <div className="pt-2">
       <TransactionNote
         transaction={transaction}
         updateTransaction={updateTransaction}
@@ -188,6 +189,7 @@ export function FullRow({
         onCancel={() => setIsEditingNote(false)}
         onEdit={() => setIsEditingNote(true)}
       />
+      </div>
     </div>
   )
 }

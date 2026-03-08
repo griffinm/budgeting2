@@ -19,13 +19,14 @@ export interface TransactionSearchParams {
   merchant_group_id?: number;
   plaid_account_ids?: number[];
   tag_ids?: number[];
+  omit_tag_ids?: number[];
   page?: number;
   per_page?: number;
 }
 
 export interface TransactionUpdateParams {
   transactionType?: TransactionType;
-  merchantTagId?: number | null;
+  merchantCategoryId?: number | null;
   note?: string;
   useAsDefault?: boolean;
   merchantId?: number; // Only used when updating all transactions for a merchant
@@ -58,13 +59,14 @@ export const updateTransaction = async ({
   id: number;
   params: TransactionUpdateParams;
 }): Promise<Transaction> => {
-  const response = await baseClient.patch<Transaction>(`/transactions/${id}`, { 
+  const { merchantCategoryId, useAsDefault, merchantId, ...rest } = params;
+  const response = await baseClient.patch<Transaction>(`/transactions/${id}`, {
     transaction: {
-      ...params,
-      useAsDefault: undefined,
+      ...rest,
+      merchantTagId: merchantCategoryId,
     },
-    useAsDefault: params.useAsDefault,
-    merchantId: params.merchantId,
+    useAsDefault,
+    merchantId,
   });
   return response.data;
 };

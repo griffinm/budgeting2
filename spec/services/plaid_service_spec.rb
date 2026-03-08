@@ -51,6 +51,7 @@ RSpec.describe PlaidService do
       allow(mock_sync_response).to receive(:removed).and_return([])
       allow(mock_sync_response).to receive(:next_cursor).and_return("next_cursor_123")
       allow(mock_sync_response).to receive(:has_more).and_return(false)
+      allow(mock_sync_response).to receive(:accounts).and_return([])
     end
 
     context 'when account has access tokens' do
@@ -75,10 +76,12 @@ RSpec.describe PlaidService do
 
       it 'calls Plaid API with correct parameters' do
         expect(Plaid::TransactionsSyncRequest).to receive(:new).with(
+          client_id: "test_client_id",
+          secret: "test_secret",
           access_token: plaid_access_token.token,
           cursor: plaid_access_token.next_cursor
         )
-        
+
         service.sync_transactions
       end
 
@@ -106,18 +109,22 @@ RSpec.describe PlaidService do
             merchant_name: nil,
             authorized_date: Date.current,
             date: Date.current,
+            datetime: nil,
             check_number: nil,
             iso_currency_code: "USD",
             pending: false,
             personal_finance_category: mock_personal_finance_category,
             payment_channel: "online",
-            merchant_entity_id: "entity_123"
+            merchant_entity_id: "entity_123",
+            logo_url: nil,
+            category: ["Food and Drink"]
           )
         end
 
         before do
           allow(mock_personal_finance_category).to receive(:primary).and_return("FOOD_AND_DRINK")
           allow(mock_personal_finance_category).to receive(:detailed).and_return("RESTAURANTS")
+          allow(mock_personal_finance_category).to receive(:confidence_level).and_return("HIGH")
           allow(mock_sync_response).to receive(:added).and_return([mock_transaction])
         end
 
@@ -176,7 +183,17 @@ RSpec.describe PlaidService do
             amount: -75.00,
             name: "Updated Transaction",
             merchant_name: nil,
-            authorized_date: Date.current
+            authorized_date: Date.current,
+            date: Date.current,
+            datetime: nil,
+            check_number: nil,
+            iso_currency_code: "USD",
+            pending: false,
+            personal_finance_category: double(primary: "FOOD_AND_DRINK", detailed: "RESTAURANTS", confidence_level: "HIGH"),
+            payment_channel: "online",
+            merchant_entity_id: "entity_123",
+            logo_url: nil,
+            category: ["Food and Drink"]
           )
         end
 
@@ -265,12 +282,15 @@ RSpec.describe PlaidService do
         merchant_name: nil,
         authorized_date: Date.current,
         date: Date.current,
+        datetime: nil,
         check_number: nil,
         iso_currency_code: "USD",
         pending: false,
-        personal_finance_category: double(primary: "FOOD_AND_DRINK", detailed: "RESTAURANTS"),
+        personal_finance_category: double(primary: "FOOD_AND_DRINK", detailed: "RESTAURANTS", confidence_level: "HIGH"),
         payment_channel: "online",
-        merchant_entity_id: "entity_123"
+        merchant_entity_id: "entity_123",
+        logo_url: nil,
+        category: ["Food and Drink"]
       )
     end
 
@@ -361,4 +381,144 @@ RSpec.describe PlaidService do
       end
     end
   end
-end 
+
+  describe '#sync_balances' do
+    let(:mock_api_client) { instance_double(Plaid::PlaidApi) }
+    let(:mock_accounts_response) { instance_double(Plaid::AccountsGetResponse) }
+
+    before do
+      allow(service).to receive(:api_client).and_return(mock_api_client)
+      plaid_account_user # ensure the user-account association exists
+    end
+
+    context 'when access token has investment accounts' do
+      let(:plaid_account) do
+        create(:plaid_account,
+          account: account,
+          plaid_access_token: plaid_access_token,
+          plaid_type: 'investment',
+          plaid_subtype: '401k')
+      end
+
+      let(:mock_balance) do
+        double(current: 103_930.23, available: nil, limit: nil)
+      end
+
+      let(:mock_plaid_api_account) do
+        double(
+          account_id: plaid_account.plaid_id,
+          name: plaid_account.plaid_name,
+          type: 'investment',
+          subtype: '401k',
+          balances: mock_balance
+        )
+      end
+
+      before do
+        allow(mock_api_client).to receive(:accounts_get).and_return(mock_accounts_response)
+        allow(mock_accounts_response).to receive(:accounts).and_return([mock_plaid_api_account])
+      end
+
+      it 'calls Plaid accounts_get API' do
+        expect(mock_api_client).to receive(:accounts_get)
+        service.sync_balances
+      end
+
+      it 'creates an account balance record' do
+        expect { service.sync_balances }.to change(AccountBalance, :count).by(1)
+      end
+
+      it 'sets the correct balance values' do
+        service.sync_balances
+        balance = AccountBalance.last
+
+        expect(balance.current_balance).to eq(103_930.23)
+        expect(balance.available_balance).to eq(0.0)
+        expect(balance.limit).to be_nil
+      end
+
+      it 'creates balance for each user associated with the plaid account' do
+        second_user = create(:user, account: account)
+        create(:plaid_accounts_user, user: second_user, plaid_account: plaid_account)
+
+        expect { service.sync_balances }.to change(AccountBalance, :count).by(2)
+      end
+    end
+
+    context 'when access token has only depository accounts' do
+      let(:plaid_account) do
+        create(:plaid_account,
+          account: account,
+          plaid_access_token: plaid_access_token,
+          plaid_type: 'depository',
+          plaid_subtype: 'checking')
+      end
+
+      let(:mock_balance) do
+        double(current: 5_000.00, available: 4_800.00, limit: nil)
+      end
+
+      let(:mock_plaid_api_account) do
+        double(
+          account_id: plaid_account.plaid_id,
+          name: plaid_account.plaid_name,
+          type: 'depository',
+          subtype: 'checking',
+          balances: mock_balance
+        )
+      end
+
+      before do
+        allow(mock_api_client).to receive(:accounts_get).and_return(mock_accounts_response)
+        allow(mock_accounts_response).to receive(:accounts).and_return([mock_plaid_api_account])
+      end
+
+      it 'still syncs balances for non-investment accounts' do
+        expect { service.sync_balances }.to change(AccountBalance, :count).by(1)
+      end
+
+      it 'sets the correct balance values' do
+        service.sync_balances
+        balance = AccountBalance.last
+
+        expect(balance.current_balance).to eq(5_000.00)
+        expect(balance.available_balance).to eq(4_800.00)
+      end
+    end
+
+    context 'when Plaid API returns an error' do
+      before do
+        allow(mock_api_client).to receive(:accounts_get).and_raise(StandardError.new("Plaid API error"))
+        plaid_access_token # ensure token exists
+      end
+
+      it 'does not raise an error' do
+        expect { service.sync_balances }.not_to raise_error
+      end
+
+      it 'does not create any balance records' do
+        expect { service.sync_balances }.not_to change(AccountBalance, :count)
+      end
+    end
+
+    context 'when plaid account has no matching local record' do
+      before do
+        allow(mock_api_client).to receive(:accounts_get).and_return(mock_accounts_response)
+        allow(mock_accounts_response).to receive(:accounts).and_return([
+          double(
+            account_id: 'unknown_plaid_id',
+            name: 'Unknown Account',
+            type: 'investment',
+            subtype: '401k',
+            balances: double(current: 50_000.00, available: nil, limit: nil)
+          )
+        ])
+        plaid_access_token
+      end
+
+      it 'skips accounts without local plaid_account records' do
+        expect { service.sync_balances }.not_to change(AccountBalance, :count)
+      end
+    end
+  end
+end

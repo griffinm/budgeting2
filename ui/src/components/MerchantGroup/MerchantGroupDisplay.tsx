@@ -29,22 +29,22 @@ export function MerchantGroupDisplay({
   return (
     <>
       <div 
-        className="cursor-pointer hover:bg-gray-100 rounded-md p-1 transition-colors flex flex-col"
+        className="cursor-pointer hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] rounded-md p-1 transition-colors flex flex-col"
         onClick={() => setIsEditing(true)}
       >
         {group ? (
           <div className="flex flex-col">
-            <div className="text-sm font-medium text-gray-700">
+            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {group.name}
             </div>
             {group.description && (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 {group.description}
               </div>
             )}
           </div>
         ) : (
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-gray-400 dark:text-gray-500">
             No group
           </div>
         )}

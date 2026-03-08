@@ -6,14 +6,16 @@ import { Merchant, MerchantSpendStats } from "@/utils/types";
 import { useTransactions } from "@/hooks";
 import { TransactionsTable } from "@/components/TransactionsTable";
 import { Loading } from "@/components/Loading";
-import { Breadcrumbs, Card } from "@mantine/core";
+import { Badge, Breadcrumbs, Paper } from "@mantine/core";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { urls } from "@/utils/urls";
 import { TrendChart } from "./TrendChart";
-import { EditableLabel } from "@/components/EditableLabel";
-import { updateMerchant } from "@/api/merchant-client";
 import { SpendSummary } from "./SpendSummary";
 import { MerchantGroupCard } from "./MerchantGroup";
+import { HeroSection } from "./HeroSection";
+import { CollapsibleCard } from "@/components/CollapsibleCard/CollapsibleCard";
+import { useMerchantCategories } from "@/hooks/useMerchantCategories";
+import { useTags } from "@/hooks/useTags";
 
 export default function MerchantPage() {
   const { id } = useParams();
@@ -22,7 +24,7 @@ export default function MerchantPage() {
   const [merchantSpendStats, setMerchantSpendStats] = useState<MerchantSpendStats | null>(null);
   const [merchantSpendStatsLoading, setMerchantSpendStatsLoading] = useState(true);
 
-  const { 
+  const {
     transactions,
     setSearchParams,
     isLoading: merchantTransactionsLoading,
@@ -34,13 +36,25 @@ export default function MerchantPage() {
       merchant_id: Number(id),
     },
   });
+  const { rawMerchantCategories: allCategories } = useMerchantCategories();
+  const { tags: allTags, createTag } = useTags();
   const [chartMonthsBack, setChartMonthsBack] = useState(6);
-  const averageSpendForChart = useMemo(() => {
-    if (!merchantSpendStats) {
-      return undefined;
-    }
-    return merchantSpendStats.monthlySpend.reduce((acc, curr) => acc + curr.amount, 0) / chartMonthsBack;
+
+  // Slice the full 24-month data for the chart view
+  const chartSpendStats = useMemo(() => {
+    if (!merchantSpendStats) return undefined;
+    return {
+      ...merchantSpendStats,
+      monthlySpend: merchantSpendStats.monthlySpend.slice(-chartMonthsBack),
+    };
   }, [merchantSpendStats, chartMonthsBack]);
+
+  const averageSpendForChart = useMemo(() => {
+    if (!chartSpendStats) return undefined;
+    const months = chartSpendStats.monthlySpend;
+    if (months.length === 0) return undefined;
+    return months.reduce((acc, curr) => acc + curr.amount, 0) / months.length;
+  }, [chartSpendStats]);
 
   // Fetch the merchant
   useEffect(() => {
@@ -53,7 +67,6 @@ export default function MerchantPage() {
   // Get the transactions for the merchant or group
   useEffect(() => {
     if (merchant) {
-      // If merchant belongs to a group, show group transactions; otherwise show merchant transactions
       if (merchant.merchantGroup) {
         setSearchParams({ merchant_group_id: merchant.merchantGroup.id });
       } else {
@@ -62,16 +75,15 @@ export default function MerchantPage() {
     }
   }, [id, setSearchParams, merchant]);
 
-  // Get the spend stats for the merchant or group
+  // Single API call for spend stats (24 months covers all needs)
   useEffect(() => {
     if (merchant) {
       setMerchantSpendStatsLoading(true);
-      
-      // If merchant belongs to a group, fetch group stats; otherwise fetch merchant stats
-      const fetchStats = merchant.merchantGroup 
-        ? fetchMerchantGroupSpendStats({ id: merchant.merchantGroup.id, monthsBack: chartMonthsBack })
-        : fetchMerchantSpendStats({ id: Number(id), monthsBack: chartMonthsBack });
-      
+
+      const fetchStats = merchant.merchantGroup
+        ? fetchMerchantGroupSpendStats({ id: merchant.merchantGroup.id, monthsBack: 24 })
+        : fetchMerchantSpendStats({ id: Number(id), monthsBack: 24 });
+
       fetchStats
         .then((data) => {
           setMerchantSpendStats({
@@ -85,11 +97,13 @@ export default function MerchantPage() {
         })
         .finally(() => setMerchantSpendStatsLoading(false));
     }
-  }, [merchant, chartMonthsBack, setMerchantSpendStatsLoading, id]);
+  }, [merchant, id]);
 
   if (merchantLoading || !merchant) {
     return <Loading />
   }
+
+  const transactionCount = merchantTransactionsPage?.totalCount;
 
   return (
     <div>
@@ -98,56 +112,53 @@ export default function MerchantPage() {
         <span>{merchantDisplayName(merchant)}</span>
       </Breadcrumbs>
       <div className="flex flex-col gap-4">
-        <EditableLabel
-          id={merchant.id}
-          component="h1"
-          additionalClasses="text-2xl font-bold"
-          value={merchantDisplayName(merchant)}
-          linkValue={urls.merchant.path(merchant.id)}
-          onSave={async (id: number, value: string) => {
-            updateMerchant({ id, value: { customName: value } }).then(() => {
-              setMerchant(prev => prev ? { ...prev, customName: value } : null);
-            });
-          }}
+        <HeroSection
+          merchant={merchant}
+          setMerchant={setMerchant}
+          allCategories={allCategories}
+          allTags={allTags}
+          onCreateTag={createTag}
         />
 
-        <SpendSummary merchant={merchant} />
+        <SpendSummary spendStats={merchantSpendStats} loading={merchantSpendStatsLoading} />
 
-        <Card>
+        <Paper withBorder p="md" radius="md">
           <TrendChart
-            merchantSpendStats={merchantSpendStats || undefined}
+            merchantSpendStats={chartSpendStats}
             loading={merchantSpendStatsLoading}
             monthsBack={chartMonthsBack}
             onChangeMonthsBack={setChartMonthsBack}
             averageSpendForChart={averageSpendForChart}
-            />
-        </Card>
+          />
+        </Paper>
 
-        <Card>
-          <h2 className="text-xl font-bold mb-4">
-            {merchant.merchantGroup ? 'Group Transactions' : 'Transactions'}
-          </h2>
+        <CollapsibleCard
+          title={merchant.merchantGroup ? 'Group Transactions' : 'Transactions'}
+          initialState="collapsed"
+          rightSection={transactionCount !== undefined ? <Badge variant="light">{transactionCount}</Badge> : undefined}
+        >
           <TransactionsTable
             transactions={transactions}
             isLoading={merchantTransactionsLoading}
             page={merchantTransactionsPage}
             updateTransaction={updateMerchantTransaction}
-            merchantTags={[]}
+            merchantCategories={[]}
             error={merchantTransactionsError}
             condensed={true}
             isLoadingMore={false}
             hasMore={false}
             loadMore={() => {}}
           />
-        </Card>
-        
-        {merchant.merchantGroup && (
-          <MerchantGroupCard
-            merchant={merchant}
-            setMerchant={setMerchant}
-          />
-        )}
+        </CollapsibleCard>
 
+        {merchant.merchantGroup && (
+          <CollapsibleCard title="Merchant Group" initialState="collapsed">
+            <MerchantGroupCard
+              merchant={merchant}
+              setMerchant={setMerchant}
+            />
+          </CollapsibleCard>
+        )}
       </div>
     </div>
   )

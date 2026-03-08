@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_07_202021) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -60,6 +60,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
     t.string "text"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "merchant_default_tags", force: :cascade do |t|
+    t.bigint "merchant_id", null: false
+    t.bigint "tag_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_id", "tag_id"], name: "index_merchant_default_tags_on_merchant_id_and_tag_id", unique: true
+    t.index ["merchant_id"], name: "index_merchant_default_tags_on_merchant_id"
+    t.index ["tag_id"], name: "index_merchant_default_tags_on_tag_id"
+    t.index ["user_id"], name: "index_merchant_default_tags_on_user_id"
   end
 
   create_table "merchant_group_memberships", force: :cascade do |t|
@@ -219,6 +231,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
     t.index ["user_id"], name: "index_tag_plaid_transactions_on_user_id"
   end
 
+  create_table "tag_report_tags", force: :cascade do |t|
+    t.bigint "tag_report_id", null: false
+    t.bigint "tag_id", null: false
+    t.string "role", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["tag_id"], name: "index_tag_report_tags_on_tag_id"
+    t.index ["tag_report_id", "tag_id"], name: "index_tag_report_tags_on_tag_report_id_and_tag_id", unique: true
+    t.index ["tag_report_id"], name: "index_tag_report_tags_on_tag_report_id"
+  end
+
+  create_table "tag_reports", force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.bigint "account_id", null: false
+    t.bigint "user_id", null: false
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id"], name: "index_tag_reports_on_account_id"
+    t.index ["user_id"], name: "index_tag_reports_on_user_id"
+  end
+
   create_table "tags", force: :cascade do |t|
     t.string "name"
     t.bigint "account_id"
@@ -244,6 +279,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
   end
 
   add_foreign_key "account_balances", "plaid_accounts_users"
+  add_foreign_key "merchant_default_tags", "merchants"
+  add_foreign_key "merchant_default_tags", "tags"
+  add_foreign_key "merchant_default_tags", "users"
   add_foreign_key "merchant_group_memberships", "merchant_groups"
   add_foreign_key "merchant_group_memberships", "merchants"
   add_foreign_key "merchant_groups", "accounts"
@@ -266,5 +304,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_03_175907) do
   add_foreign_key "plaid_transactions", "merchants"
   add_foreign_key "plaid_transactions", "plaid_accounts"
   add_foreign_key "plaid_transactions", "plaid_sync_events"
+  add_foreign_key "tag_report_tags", "tag_reports"
+  add_foreign_key "tag_report_tags", "tags"
+  add_foreign_key "tag_reports", "accounts"
+  add_foreign_key "tag_reports", "users"
   add_foreign_key "users", "accounts"
 end

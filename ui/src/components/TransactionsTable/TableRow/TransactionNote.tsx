@@ -52,7 +52,7 @@ export function TransactionNote({
   }
   return (
     <div
-      className="text-sm text-gray-500 cursor-pointer hover:text-gray-700 transition-colors"
+      className="text-sm text-gray-500 dark:text-gray-400 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
       onClick={onEdit}
     >
       {transaction.note}

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-mantine-color-scheme="dark"], [data-mantine-color-scheme="dark"] *));
+
 @theme {
   --color-primary-50: #ecf4ff;
   --color-primary-100: #dce4f5;
@@ -19,16 +21,16 @@
 }
 
 body, html {
-  height: 100%;  
-  background-color: var(--mantine-color-gray-0);
+  min-height: 100%;
+  @apply bg-neutral-50 dark:bg-[var(--mantine-color-dark-8)];
   font-family: "Noto Sans", sans-serif;
   font-optical-sizing: auto;
   font-variation-settings: "wdth" 100;
 }
 
 #root {
-  height: 100%;
-  @apply bg-neutral-50;
+  min-height: 100%;
+  @apply bg-neutral-50 dark:bg-[var(--mantine-color-dark-8)];
   font-family: "Noto Sans", sans-serif;
 }
 
@@ -71,7 +73,7 @@ body, html {
 }
 
 .small-text {
-  @apply text-sm text-gray-500;
+  @apply text-sm text-gray-500 dark:text-gray-400;
 }
 
 /* Ensure full height layout */

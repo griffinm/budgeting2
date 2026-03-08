@@ -1,16 +1,16 @@
 import { useTransactions } from "@/hooks/useTransactions";
-import { MerchantTag } from "@/utils/types";
+import { MerchantCategory } from "@/utils/types";
 import { Modal } from "@mantine/core";
 import { useEffect } from "react";
 import { TransactionsTable } from "../TransactionsTable";
-import { useMerchantTags } from "@/hooks/useMerchantTags";
+import { useMerchantCategories } from "@/hooks/useMerchantCategories";
 
 export function TransactionModal({
-  merchantTag,
+  merchantCategory,
   onClose,
   isOpen,
 }: {
-  merchantTag?: MerchantTag;
+  merchantCategory?: MerchantCategory;
   onClose: () => void;
   isOpen: boolean;
 }) {
@@ -23,21 +23,21 @@ export function TransactionModal({
     updateTransaction,
   } = useTransactions();
   const {
-    rawMerchantTags: merchantTags,
-  } = useMerchantTags();
+    rawMerchantCategories: merchantCategories,
+  } = useMerchantCategories();
 
   useEffect(() => {
-    if (merchantTag) {
-      setSearchParams({ merchant_tag_id: merchantTag.id });
+    if (merchantCategory) {
+      setSearchParams({ merchant_tag_id: merchantCategory.id });
     }
-  }, [merchantTag, setSearchParams]);
+  }, [merchantCategory, setSearchParams]);
 
   return (
     <div>
       <Modal
         opened={isOpen}
         onClose={onClose}
-        title={`Transactions for ${merchantTag?.name}`}
+        title={`Transactions for ${merchantCategory?.name}`}
         size="xl"
         padding={0}
       >
@@ -52,7 +52,7 @@ export function TransactionModal({
               isLoadingMore={false}
               hasMore={false}
               loadMore={() => {}}
-              merchantTags={merchantTags}
+              merchantCategories={merchantCategories}
               condensed={true}
             />
           </div>

@@ -5,6 +5,8 @@ import { PageResponse, Merchant, MerchantSpendStats, PageRequestParams, Merchant
 export interface UpdateMerchantParams {
   id: number;
   value: Omit<Partial<Merchant>, 'id'>;
+  defaultTagIds?: number[];
+  applyToExisting?: boolean;
 }
 
 export interface MerchantSearchParams {
@@ -33,9 +35,15 @@ export const fetchMerchants = async ({
 export const updateMerchant = async ({
   id,
   value,
+  defaultTagIds,
+  applyToExisting,
 }: UpdateMerchantParams): Promise<Merchant> => {
   const url = `/merchants/${id}`;
-  const response = await baseClient.patch(url, { merchant: value });
+  const response = await baseClient.patch(url, {
+    merchant: value,
+    default_tag_ids: defaultTagIds,
+    apply_to_existing: applyToExisting,
+  });
   return response.data;
 };
 

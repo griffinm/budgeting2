@@ -33,9 +33,10 @@ class TagsController < ApplicationController
   # GET /api/tags/spend_stats
   def spend_stats
     tag_ids = params[:tag_ids] || []
+    omit_tag_ids = params[:omit_tag_ids] || []
     months_back = (params[:months_back] || 6).to_i
     service = TagService.new(account_id: current_user.account_id, user_id: current_user.id)
-    @data = service.spend_stats(tag_ids: tag_ids, months_back: months_back)
+    @data = service.spend_stats(tag_ids: tag_ids, months_back: months_back, omit_tag_ids: omit_tag_ids)
     render :spend_stats
   end
 
