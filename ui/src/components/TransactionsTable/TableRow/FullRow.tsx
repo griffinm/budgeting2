@@ -11,8 +11,9 @@ import { Logo } from "../Logo";
 import { PendingBadge } from "./PendingBadge";
 import { TransactionNote } from "./TransactionNote";
 import { ActionIcon, Menu } from "@mantine/core";
-import { IconChevronDown, IconDotsVertical, IconPencil } from "@tabler/icons-react";
+import { IconChevronDown, IconDotsVertical, IconEye, IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function FullRow({
   transaction,
@@ -33,6 +34,7 @@ export function FullRow({
 }) {
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="w-full px-3 py-2 relative border-b border-gray-300 hover:bg-gray-100 transition-colors">
@@ -86,7 +88,7 @@ export function FullRow({
         {/* Amount — right-aligned */}
         <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto pl-3">
           {transaction.pending && <PendingBadge />}
-          <div className="text-right">
+          <div className="text-right cursor-pointer hover:underline" onClick={() => navigate(urls.transaction.path(transaction.id))}>
             <TransactionAmount amount={transaction.amount} />
           </div>
         </div>
@@ -100,6 +102,9 @@ export function FullRow({
               </ActionIcon>
             </Menu.Target>
             <Menu.Dropdown>
+              <Menu.Item leftSection={<IconEye size={16} />} onClick={() => navigate(urls.transaction.path(transaction.id))}>
+                View Details
+              </Menu.Item>
               <Menu.Item leftSection={<IconPencil size={16} />} onClick={() => setIsEditingNote(true)}>
                 Edit Note
               </Menu.Item>
@@ -131,7 +136,10 @@ export function FullRow({
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0 pl-3">
+          <div
+            className="flex items-center gap-1.5 flex-shrink-0 pl-3 cursor-pointer"
+            onClick={(e) => { e.stopPropagation(); navigate(urls.transaction.path(transaction.id)); }}
+          >
             {transaction.pending && <PendingBadge />}
             <TransactionAmount amount={transaction.amount} />
           </div>

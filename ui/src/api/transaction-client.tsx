@@ -42,6 +42,15 @@ export const getTransactions = async ({
   return response.data;
 }; 
 
+export const getTransaction = async ({
+  id,
+}: {
+  id: number;
+}): Promise<Transaction> => {
+  const response = await baseClient.get<Transaction>(`/transactions/${id}`);
+  return response.data;
+};
+
 export const updateTransaction = async ({
   id,
   params,
