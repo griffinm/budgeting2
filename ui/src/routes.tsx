@@ -16,6 +16,7 @@ const SignupPage = lazy(() => import('./pages/SignupPage/SignupPage'));
 const MainLayout = lazy(() => import('./layouts/MainLayout/MainLayout'));
 const AuthLayout = lazy(() => import('./layouts/AuthLayout/AuthLayout'));
 const MerchantCategoryPage = lazy(() => import('./pages/MerchantCategoryPage/MerchantCategoryPage'));
+const TransactionPage = lazy(() => import('./pages/TransactionPage/TransactionPage'));
 
 const WithSuspense = (component: React.ReactNode) => (
   <Suspense fallback={<Loading />}>
@@ -30,6 +31,10 @@ const mainNavLinks = MainNavLinks.map(url => ({
 
 // TODO: use the urls object instead of hardcoding the paths
 const otherRoutes = [
+  {
+    path: '/transactions/:id',
+    element: WithSuspense(<TransactionPage />),
+  },
   {
     path: '/merchants/:id',
     element: WithSuspense(<MerchantPage />),

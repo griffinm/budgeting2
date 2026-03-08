@@ -13,6 +13,7 @@ const MerchantsPage = lazy(() => import('@/pages/MerchantsPage/MerchantsPage'));
 const MerchantPage = lazy(() => import('@/pages/MerchantPage/MerchantPage'));
 const MerchantCategoriesPage = lazy(() => import('@/pages/MerchantCategoriesPage/MerchantCategoriesPage'));
 const MerchantCategoryPage = lazy(() => import('@/pages/MerchantCategoryPage/MerchantCategoryPage'));
+const TransactionPage = lazy(() => import('@/pages/TransactionPage/TransactionPage'));
 const TagsSpendPage = lazy(() => import('@/pages/TagsSpendPage/TagsSpendPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
 const SignupPage = lazy(() => import('@/pages/SignupPage/SignupPage'));
@@ -63,6 +64,13 @@ export const urls: Record<string, Url> = {
     title: () => 'Merchants' + TITLE_SUFFIX,
     component: MerchantsPage,
     section: 'main',
+  },
+  transaction: {
+    path: (id: number) => `/transactions/${id}`,
+    title: () => 'Transaction' + TITLE_SUFFIX,
+    component: TransactionPage,
+    section: 'none' as MenuSection,
+    routeString: '/transactions/:id',
   },
   merchant: {
     path: (id: number) => `/merchants/${id}`,

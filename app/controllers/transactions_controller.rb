@@ -34,6 +34,13 @@ class TransactionsController < ApplicationController
       )
   end
 
+  # GET /transactions/:id
+  def show
+    @transaction = PlaidTransaction
+      .base_query_for_api(current_user.account_id)
+      .find(params[:id])
+  end
+
   # PATCH /transactions/:id
   def update
     @transaction = current_user.account.plaid_transactions.find(params[:id])

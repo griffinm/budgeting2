@@ -19,7 +19,7 @@ Rails.application.routes.draw do
       resources :users, only: [:index]
     end
 
-    resources :transactions, only: [:index, :update]
+    resources :transactions, only: [:index, :show, :update]
     resources :merchants, only: [:index, :update, :show] do
       get 'spend_stats', to: 'merchants#spend_stats'
       get 'suggest_groups', to: 'merchants#suggest_groups'
