@@ -12,7 +12,6 @@ import { PendingTransaction } from "./PendingTransaction";
 import { DetailsCard } from "./DetailsCard";
 import { TransactionNote } from "./TransactionNote";
 import { TransactionHeader } from "./TransactionHeader";
-import { MerchantDefaultTagsCard } from "./MerchantDefaultTagsCard";
 
 interface TransactionViewProps {
     transaction: Transaction;
@@ -71,6 +70,9 @@ export function TransactionView({ transaction, setTransaction, updateTransaction
         <TransactionHeader
           transaction={transaction}
           merchant={merchant}
+          allTags={allTags}
+          onMerchantUpdated={handleMerchantUpdated}
+          onTagCreated={handleTagCreated}
         />
 
         {transaction.pending && <PendingTransaction />}
@@ -86,15 +88,6 @@ export function TransactionView({ transaction, setTransaction, updateTransaction
             onAddTag={addTransactionTag}
             onRemoveTag={removeTransactionTag}
             onCreateAndAddTag={createAndAddTag}
-          />
-        </Card>
-
-        <Card>
-          <MerchantDefaultTagsCard
-            merchant={merchant}
-            allTags={allTags}
-            onMerchantUpdated={handleMerchantUpdated}
-            onTagCreated={handleTagCreated}
           />
         </Card>
 
