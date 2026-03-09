@@ -56,7 +56,7 @@ class TransactionSearchService < BaseService
         { tag_plaid_transactions: :tag },
         merchant: [
           :default_merchant_tag,
-          :merchant_default_tags,
+          { merchant_default_tags: :tag },
           { merchant_group: [:primary_merchant, :merchants] }
         ]
       )
