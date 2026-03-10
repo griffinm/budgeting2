@@ -4,6 +4,7 @@ import { TransactionSearchParams } from "@/api/transaction-client";
 import { PlaidAccount, Tag } from "@/utils/types";
 import { IconFilter, IconFilterOff } from "@tabler/icons-react";
 import { SearchFilters, countActiveFilters } from "./SearchFilters";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export function Search({
   searchParams,
@@ -58,15 +59,17 @@ export function Search({
 
       <Collapse in={showFilters}>
         <div className="pt-1 pb-2 max-w-xl">
-          <SearchFilters
-            searchParams={searchParams}
-            onSetSearchParams={onSetSearchParams}
-            clearSearchParams={clearSearchParams}
-            plaidAccounts={plaidAccounts}
-            tags={tags}
-            totalCount={totalCount}
-            isLoading={isLoading}
-          />
+          <ErrorBoundary>
+            <SearchFilters
+              searchParams={searchParams}
+              onSetSearchParams={onSetSearchParams}
+              clearSearchParams={clearSearchParams}
+              plaidAccounts={plaidAccounts}
+              tags={tags}
+              totalCount={totalCount}
+              isLoading={isLoading}
+            />
+          </ErrorBoundary>
         </div>
       </Collapse>
     </div>

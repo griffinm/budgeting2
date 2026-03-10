@@ -2,6 +2,7 @@ import { Badge, Drawer } from "@mantine/core";
 import { TransactionSearchParams } from "@/api/transaction-client";
 import { PlaidAccount, Tag } from "@/utils/types";
 import { SearchFilters, countActiveFilters } from "./SearchFilters";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export function SearchDrawer({
   searchParams,
@@ -52,16 +53,18 @@ export function SearchDrawer({
       }}
     >
       <div className="pb-6">
-        <SearchFilters
-          searchParams={searchParams}
-          onSetSearchParams={onSetSearchParams}
-          clearSearchParams={handleClear}
-          plaidAccounts={plaidAccounts}
-          tags={tags}
-          withinPortal={false}
-          totalCount={totalCount}
-          isLoading={isLoading}
-        />
+        <ErrorBoundary>
+          <SearchFilters
+            searchParams={searchParams}
+            onSetSearchParams={onSetSearchParams}
+            clearSearchParams={handleClear}
+            plaidAccounts={plaidAccounts}
+            tags={tags}
+            withinPortal={false}
+            totalCount={totalCount}
+            isLoading={isLoading}
+          />
+        </ErrorBoundary>
       </div>
     </Drawer>
   );

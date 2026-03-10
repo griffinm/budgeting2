@@ -10,6 +10,15 @@ import { IconCurrencyDollar } from "@tabler/icons-react";
 
 const SEARCH_TIMEOUT = 250;
 
+function deduplicateOptions(options: { value: string; label: string }[]) {
+  const seen = new Set<string>();
+  return options.filter((opt) => {
+    if (seen.has(opt.value)) return false;
+    seen.add(opt.value);
+    return true;
+  });
+}
+
 export interface SearchFiltersProps {
   searchParams: TransactionSearchParams;
   onSetSearchParams: (searchParams: TransactionSearchParams) => void;
@@ -160,10 +169,10 @@ export function SearchFilters({
           placeholder="Accounts"
           value={(localParams.plaid_account_ids || []).map(String)}
           onChange={(values) => updateLocalParam('plaid_account_ids', values.map(Number))}
-          data={plaidAccounts.map((account) => ({
+          data={deduplicateOptions(plaidAccounts.map((account) => ({
             value: String(account.id),
             label: account.nickname || account.plaidOfficialName || `Account ${account.plaidMask}`,
-          }))}
+          })))}
           searchable
           clearable
           comboboxProps={portalProps}
@@ -172,7 +181,7 @@ export function SearchFilters({
           placeholder="Tags"
           value={(localParams.tag_ids || []).map(String)}
           onChange={(values) => updateLocalParam('tag_ids', values.map(Number))}
-          data={tags.map((tag) => ({ value: String(tag.id), label: tag.name }))}
+          data={deduplicateOptions(tags.map((tag) => ({ value: String(tag.id), label: tag.name })))}
           searchable
           clearable
           comboboxProps={portalProps}
