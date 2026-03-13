@@ -185,7 +185,7 @@ class PlaidService < BaseService
     common_words.length.to_f / total_words
   end
 
-  def sync_balances
+  def sync_balances(plaid_types: nil)
     access_tokens = @account.plaid_access_tokens
 
     access_tokens.each do |access_token|
@@ -201,6 +201,7 @@ class PlaidService < BaseService
         response.accounts.each do |plaid_api_account|
           plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
           next unless plaid_account
+          next if plaid_types.present? && plaid_types.exclude?(plaid_account.plaid_type)
 
           current = plaid_api_account.balances.current&.to_f || 0.0
           available = plaid_api_account.balances.available&.to_f || 0.0

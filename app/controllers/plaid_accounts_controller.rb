@@ -122,6 +122,7 @@ class PlaidAccountsController < ApplicationController
     Account.where(account_id: 1).each do |account|
       service = PlaidService.new(account_id: account.id)
       service.sync_transactions
+      service.sync_balances(plaid_types: PlaidAccount::LOAN_ACCOUNT_TYPES + PlaidAccount::INVESTMENT_ACCOUNT_TYPES)
     end
     Rails.logger.info("Update all accounts complete")
     render json: { message: "Updates complete" }, status: :ok
