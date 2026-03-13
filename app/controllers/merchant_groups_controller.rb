@@ -7,41 +7,6 @@ class MerchantGroupsController < ApplicationController
       .joins(:primary_merchant, :merchants)
   end
 
-  def show
-    @merchant_group = current_user
-      .account
-      .merchant_groups
-      .includes(:merchants, :primary_merchant)
-      .joins(:merchants, :primary_merchant)
-      .find(params[:id])
-  end
-
-  def create
-    @merchant_group = current_user.account.merchant_groups.build(merchant_group_params)
-    
-    if @merchant_group.save
-      render :show, status: :created
-    else
-      render json: { errors: @merchant_group.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
-
-  def update
-    @merchant_group = current_user.account.merchant_groups.find(params[:id])
-    
-    if @merchant_group.update(merchant_group_params)
-      render :show
-    else
-      render json: { errors: @merchant_group.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
-
-  def destroy
-    @merchant_group = current_user.account.merchant_groups.find(params[:id])
-    @merchant_group.destroy
-    head :no_content
-  end
-
   def spend_stats
     months_back = (params[:months_back] || 6).to_i
     merchant_group_id = params[:id]
@@ -86,40 +51,4 @@ class MerchantGroupsController < ApplicationController
     end
   end
 
-  def suggest_groups
-    merchant = current_user.account.merchants.find(params[:merchant_id])
-    grouping_service = MerchantGroupingService.new(account_id: current_user.account_id)
-    suggestions = grouping_service.suggest_groups_for_merchant(merchant)
-    
-    render json: {
-      suggestions: suggestions.map do |suggestion|
-        {
-          merchant: {
-            id: suggestion[:merchant].id,
-            name: suggestion[:merchant].merchant_name,
-            customName: suggestion[:merchant].custom_name
-          },
-          reason: suggestion[:reason],
-          confidence: suggestion[:confidence]
-        }
-      end
-    }
-  end
-
-  def auto_group
-    threshold = params[:threshold]&.to_f || 0.8
-    grouping_service = MerchantGroupingService.new(account_id: current_user.account_id)
-    grouped_count = grouping_service.auto_group_similar_merchants(threshold: threshold)
-    
-    render json: { 
-      message: "Successfully grouped #{grouped_count.length} merchants",
-      grouped_merchant_ids: grouped_count
-    }
-  end
-
-  private
-
-  def merchant_group_params
-    params.require(:merchant_group).permit(:name, :description, :primary_merchant_id)
-  end
 end

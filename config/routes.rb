@@ -26,16 +26,12 @@ Rails.application.routes.draw do
       post 'create_group', to: 'merchants#create_group'
     end
 
-    resources :merchant_groups, only: [:index, :show, :create, :update, :destroy] do
+    resources :merchant_groups, only: [:index] do
       member do
         post 'add_merchant', to: 'merchant_groups#add_merchant'
         delete 'remove_merchant', to: 'merchant_groups#remove_merchant'
         patch 'set_primary_merchant', to: 'merchant_groups#set_primary_merchant'
         get 'spend_stats', to: 'merchant_groups#spend_stats'
-      end
-      collection do
-        get 'suggest_groups', to: 'merchant_groups#suggest_groups'
-        post 'auto_group', to: 'merchant_groups#auto_group'
       end
     end
 
@@ -72,16 +68,12 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :accounts, only: [:create] do
-      resources :users, only: [:create]
-    end
-
-    resources :tags, only: [:index, :show, :create, :update, :destroy] do
+    resources :tags, only: [:index, :create] do
       collection do
         get 'spend_stats', to: 'tags#spend_stats'
       end
     end
-    resources :tag_reports, only: [:index, :show, :create, :update, :destroy]
+    resources :tag_reports, only: [:index, :create, :destroy]
     resources :transaction_tags, only: [:create, :destroy]
   end
 end

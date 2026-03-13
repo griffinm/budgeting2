@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
 
-  skip_before_action :require_authenticated_user!, only: [:login, :create, :signup]
+  skip_before_action :require_authenticated_user!, only: [:login, :signup]
 
   # POST /api/signup
   def signup
@@ -27,11 +27,6 @@ class UsersController < ApplicationController
 
   def current
     render json: current_user.as_json, status: :ok
-  end
-
-  def create
-    user = User.create!(user_params)
-    render json: { user: user }, status: :created
   end
 
   # GET /accounts/:account_id/users
