@@ -63,13 +63,11 @@ documentation/
 
 - `AuthService` — JWT token encoding/decoding, user lookup
 - `PlaidService` — Plaid API integration (link tokens, syncing)
-- `SyncService` — transaction sync from Plaid
 - `TransactionSearchService` — transaction querying/filtering
 - `MerchantGroupingService` / `MerchantGroupSpendService` — merchant group logic
 - `MerchantSpendService` / `MerchantTagService` — spend stats by merchant/category
 - `ProfitAndLossService` / `MonthlySpendService` — financial reporting
 - `SignupService` — account/user creation
-- `ColorGenService` / `ColorService` — color assignment
 
 ## Running the App
 

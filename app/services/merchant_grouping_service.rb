@@ -45,32 +45,6 @@ class MerchantGroupingService < BaseService
     group
   end
 
-  def auto_group_similar_merchants(threshold: 0.8)
-    grouped_merchants = []
-    
-    @account.merchants.where(merchant_group: nil).each do |merchant|
-      next if grouped_merchants.include?(merchant.id)
-      
-      suggestions = suggest_groups_for_merchant(merchant)
-      high_confidence_suggestions = suggestions.select { |s| s[:confidence] >= threshold }
-      
-      if high_confidence_suggestions.any?
-        merchants_to_group = [merchant] + high_confidence_suggestions.map { |s| s[:merchant] }
-        group_name = generate_group_name(merchants_to_group)
-        
-        group = create_group_with_merchants(
-          name: group_name,
-          description: "Auto-grouped similar merchants",
-          merchants: merchants_to_group
-        )
-        
-        grouped_merchants.concat(merchants_to_group.map(&:id))
-      end
-    end
-    
-    grouped_merchants
-  end
-
   private
 
   def find_similar_merchants(merchant)
@@ -175,16 +149,4 @@ class MerchantGroupingService < BaseService
     common_words.length.to_f / total_words
   end
 
-  def generate_group_name(merchants)
-    # Find the most common word in merchant names
-    all_words = merchants.map { |m| normalize_merchant_name(m.merchant_name).split(' ') }.flatten
-    word_counts = all_words.tally
-    most_common_word = word_counts.max_by { |_, count| count }&.first
-    
-    if most_common_word && word_counts[most_common_word] > 1
-      most_common_word.capitalize
-    else
-      merchants.first.merchant_name
-    end
-  end
 end
