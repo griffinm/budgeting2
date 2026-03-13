@@ -100,4 +100,6 @@ Uses RSpec with FactoryBot and Faker.
 
 ## Documentation
 
-- [API Endpoints](documentation/API.md) — REST API reference for the mobile app
+- [API Endpoints](documentation/API.md) — Complete REST API reference
+
+When API endpoints are added, modified, or removed, update `documentation/API.md` to keep it in sync.
