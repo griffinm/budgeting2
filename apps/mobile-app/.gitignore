@@ -1,0 +1,36 @@
+# Gradle
+.gradle/
+build/
+/app/build/
+/app/release/
+
+# IDE
+*.iml
+/.idea/
+.DS_Store
+
+# Local config
+local.properties
+
+# Native build
+.externalNativeBuild/
+.cxx/
+
+# Captures & profiling
+/captures/
+*.hprof
+
+# Signing & release artifacts
+*.apk
+*.aab
+*.jks
+*.keystore
+/app/*.jks
+/app/*.keystore
+
+# Kotlin
+*.kotlin_module
+
+# Misc
+*.log
+.nav/

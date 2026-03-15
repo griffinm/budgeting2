@@ -20,6 +20,13 @@ Personal finance/budgeting application with a Rails API backend and React fronte
 - **Axios** for API calls
 - **date-fns** and **dayjs** for date handling
 
+### Mobile App (`apps/mobile-app/`)
+- **Kotlin 2.1.0** / **Jetpack Compose** (Material 3)
+- **Retrofit** + **kotlinx.serialization** for networking
+- **Hilt** for dependency injection
+- **Paging 3** for infinite scroll, **Vico** for charts
+- See [Mobile App CLAUDE.md](apps/mobile-app/CLAUDE.md) for full details
+
 ## Project Structure
 
 ```
@@ -42,6 +49,8 @@ ui/
     hooks/         # Custom React hooks
     pages/         # Page components
     utils/         # Utility functions
+apps/
+  mobile-app/      # Android app (Kotlin/Compose)
 documentation/
   API.md           # REST API reference
 ```
