@@ -38,6 +38,7 @@ import com.griffin.budgeting.data.model.Transaction
 import com.griffin.budgeting.ui.transactions.components.ActiveFilterChips
 import com.griffin.budgeting.ui.transactions.components.DayHeader
 import com.griffin.budgeting.ui.transactions.components.NoteSheet
+import com.griffin.budgeting.ui.transactions.components.ManageTagsSheet
 import com.griffin.budgeting.ui.transactions.components.TransactionFilterSheet
 import com.griffin.budgeting.ui.transactions.components.TransactionRow
 import com.griffin.budgeting.ui.transactions.components.TransactionSearchBar
@@ -55,6 +56,8 @@ fun TransactionsScreen(
         val searchParams by viewModel.searchParams.collectAsState()
         var showFilterSheet by remember { mutableStateOf(false) }
         var noteTransaction by remember { mutableStateOf<Transaction?>(null) }
+        val tagEditTransaction by viewModel.tagEditTransaction.collectAsState()
+        val allTags by viewModel.allTags.collectAsState()
 
         Column(
             modifier = Modifier
@@ -138,6 +141,7 @@ fun TransactionsScreen(
                                     transaction = transaction,
                                     onTransactionTypeChanged = viewModel::updateTransactionType,
                                     onNoteClick = { noteTransaction = it },
+                                    onTagAreaClick = viewModel::openTagEditor,
                                 )
                             }
 
@@ -175,6 +179,21 @@ fun TransactionsScreen(
                 transaction = transaction,
                 onSave = viewModel::updateNote,
                 onDismiss = { noteTransaction = null },
+            )
+        }
+
+        tagEditTransaction?.let { transaction ->
+            ManageTagsSheet(
+                transaction = transaction,
+                allTags = allTags,
+                onAddTag = { tag -> viewModel.addTagToTransaction(transaction.id, tag) },
+                onRemoveTag = { transactionTagId ->
+                    viewModel.removeTagFromTransaction(transaction.id, transactionTagId)
+                },
+                onCreateAndAddTag = { tagName ->
+                    viewModel.createAndAddTag(transaction.id, tagName)
+                },
+                onDismiss = viewModel::closeTagEditor,
             )
         }
     }

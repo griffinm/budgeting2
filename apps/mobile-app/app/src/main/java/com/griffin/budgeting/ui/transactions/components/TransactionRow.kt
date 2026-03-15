@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.StickyNote2
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -44,6 +45,7 @@ fun TransactionRow(
     transaction: Transaction,
     onTransactionTypeChanged: (transactionId: Int, newType: String, merchantId: Int?) -> Unit,
     onNoteClick: (Transaction) -> Unit,
+    onTagAreaClick: (Transaction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val merchantName = transaction.merchant?.customName
@@ -127,18 +129,34 @@ fun TransactionRow(
                             )
                         },
                     )
-                    transaction.transactionTags.take(2).forEach { tt ->
-                        val tag = tt.tag
-                        if (tag != null) {
-                            TagChip(name = tag.name, colorHex = tag.color)
+                    Row(
+                        modifier = Modifier
+                            .clickable { onTagAreaClick(transaction) },
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (transaction.transactionTags.isEmpty()) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = "Add tag",
+                                tint = TextTertiary,
+                                modifier = Modifier.size(14.dp),
+                            )
+                        } else {
+                            transaction.transactionTags.take(2).forEach { tt ->
+                                val tag = tt.tag
+                                if (tag != null) {
+                                    TagChip(name = tag.name, colorHex = tag.color)
+                                }
+                            }
+                            if (transaction.transactionTags.size > 2) {
+                                Text(
+                                    "+${transaction.transactionTags.size - 2}",
+                                    style = PremiumTypography.caption,
+                                    color = TextTertiary,
+                                )
+                            }
                         }
-                    }
-                    if (transaction.transactionTags.size > 2) {
-                        Text(
-                            "+${transaction.transactionTags.size - 2}",
-                            style = PremiumTypography.caption,
-                            color = TextTertiary,
-                        )
                     }
                 }
             }

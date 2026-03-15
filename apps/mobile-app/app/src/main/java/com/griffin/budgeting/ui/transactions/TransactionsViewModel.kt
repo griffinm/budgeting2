@@ -5,8 +5,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
+import com.griffin.budgeting.data.model.Tag
 import com.griffin.budgeting.data.model.Transaction
+import com.griffin.budgeting.data.model.TransactionTag
+import com.griffin.budgeting.data.repository.TagRepository
 import com.griffin.budgeting.data.repository.TransactionRepository
+import com.griffin.budgeting.data.repository.TransactionTagRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -52,6 +56,8 @@ data class TransactionSearchParams(
 @HiltViewModel
 class TransactionsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
+    private val tagRepository: TagRepository,
+    private val transactionTagRepository: TransactionTagRepository,
 ) : ViewModel() {
 
     private val _searchParams = MutableStateFlow(TransactionSearchParams())
@@ -62,6 +68,12 @@ class TransactionsViewModel @Inject constructor(
 
     private val _transactions = MutableStateFlow<PagingData<Transaction>>(PagingData.empty())
     val transactions: StateFlow<PagingData<Transaction>> = _transactions.asStateFlow()
+
+    private val _allTags = MutableStateFlow<List<Tag>>(emptyList())
+    val allTags: StateFlow<List<Tag>> = _allTags.asStateFlow()
+
+    private val _tagEditTransaction = MutableStateFlow<Transaction?>(null)
+    val tagEditTransaction: StateFlow<Transaction?> = _tagEditTransaction.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -113,6 +125,79 @@ class TransactionsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             transactionRepository.updateNote(transactionId, note)
+        }
+    }
+
+    fun openTagEditor(transaction: Transaction) {
+        _tagEditTransaction.value = transaction
+        if (_allTags.value.isEmpty()) {
+            loadTags()
+        }
+    }
+
+    fun closeTagEditor() {
+        _tagEditTransaction.value = null
+    }
+
+    fun addTagToTransaction(transactionId: Int, tag: Tag) {
+        viewModelScope.launch {
+            transactionTagRepository.addTag(tag.id, transactionId).onSuccess { transactionTag ->
+                val newTag = transactionTag.copy(tag = tag)
+                _transactions.value = _transactions.value.map { transaction ->
+                    if (transaction.id == transactionId) {
+                        transaction.copy(transactionTags = transaction.transactionTags + newTag)
+                    } else {
+                        transaction
+                    }
+                }
+                _tagEditTransaction.value?.let { current ->
+                    if (current.id == transactionId) {
+                        _tagEditTransaction.value = current.copy(
+                            transactionTags = current.transactionTags + newTag,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun removeTagFromTransaction(transactionId: Int, transactionTagId: Int) {
+        // Optimistic update
+        _transactions.value = _transactions.value.map { transaction ->
+            if (transaction.id == transactionId) {
+                transaction.copy(
+                    transactionTags = transaction.transactionTags.filter { it.id != transactionTagId },
+                )
+            } else {
+                transaction
+            }
+        }
+        _tagEditTransaction.value?.let { current ->
+            if (current.id == transactionId) {
+                _tagEditTransaction.value = current.copy(
+                    transactionTags = current.transactionTags.filter { it.id != transactionTagId },
+                )
+            }
+        }
+        viewModelScope.launch {
+            transactionTagRepository.removeTag(transactionTagId)
+        }
+    }
+
+    fun createAndAddTag(transactionId: Int, tagName: String) {
+        viewModelScope.launch {
+            tagRepository.createTag(tagName).onSuccess { newTag ->
+                _allTags.value = _allTags.value + newTag
+                addTagToTransaction(transactionId, newTag)
+            }
+        }
+    }
+
+    private fun loadTags() {
+        viewModelScope.launch {
+            tagRepository.getTags().onSuccess { tags ->
+                _allTags.value = tags
+            }
         }
     }
 }

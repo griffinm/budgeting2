@@ -227,6 +227,7 @@ fun TagsScreen(
                                     transaction = transaction,
                                     onTransactionTypeChanged = { _, _, _ -> },
                                     onNoteClick = { },
+                                    onTagAreaClick = { },
                                 )
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 16.dp),

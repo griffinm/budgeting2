@@ -35,7 +35,10 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
@@ -68,18 +71,20 @@ fun MonthlyTrendsChart(
         val currentDay = today.dayOfMonth
         val daysInMonth = YearMonth.now().lengthOfMonth()
 
+        val currentMonthX = mutableListOf<Number>()
         val currentMonthLine = mutableListOf<Number>()
+        val averageX = mutableListOf<Number>()
         val averageLine = mutableListOf<Number>()
 
         for (day in 1..daysInMonth) {
             if (day <= currentDay) {
+                currentMonthX.add(day - 1)
                 currentMonthLine.add(
                     DashboardViewModel.getDailyRunningTotal(transactions, day, transactionType)
                 )
-            } else {
-                currentMonthLine.add(currentMonthLine.lastOrNull() ?: 0)
             }
 
+            averageX.add(day - 1)
             val avgEntry = movingAverage.find { it.dayOfMonth == day }
             averageLine.add(avgEntry?.cumulativeTotal ?: averageLine.lastOrNull() ?: 0)
         }
@@ -87,8 +92,8 @@ fun MonthlyTrendsChart(
         if (currentMonthLine.isNotEmpty()) {
             modelProducer.runTransaction {
                 lineSeries {
-                    series(currentMonthLine)
-                    series(averageLine)
+                    series(x = currentMonthX, y = currentMonthLine)
+                    series(x = averageX, y = averageLine)
                 }
             }
         }
@@ -140,6 +145,15 @@ fun MonthlyTrendsChart(
                         ),
                         startAxis = VerticalAxis.rememberStart(
                             label = rememberPremiumAxisLabel(),
+                            valueFormatter = CartesianValueFormatter { _, value, _ ->
+                                val rounded = Math.round(value.toDouble() / 100.0) * 100
+                                val thousands = rounded / 1000.0
+                                if (thousands == thousands.toLong().toDouble()) {
+                                    "${thousands.toLong()}k"
+                                } else {
+                                    "${"%.1f".format(thousands)}k"
+                                }
+                            },
                         ),
                         bottomAxis = HorizontalAxis.rememberBottom(
                             valueFormatter = bottomAxisValueFormatter,
@@ -147,6 +161,8 @@ fun MonthlyTrendsChart(
                         ),
                     ),
                     modelProducer = modelProducer,
+                    scrollState = rememberVicoScrollState(scrollEnabled = false),
+                    zoomState = rememberVicoZoomState(initialZoom = Zoom.Content, zoomEnabled = false),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(220.dp),
