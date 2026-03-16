@@ -13,6 +13,7 @@ json.defaultMerchantTagId merchant.default_merchant_tag_id
 json.plaidCategoryPrimary merchant.plaid_category_primary
 json.plaidCategoryDetail merchant.plaid_category_detail
 json.plaidCategoryConfidenceLevel merchant.plaid_category_confidence_level
+json.transactionCount merchant.respond_to?(:transaction_count) ? merchant.transaction_count : merchant.plaid_transactions.count
 
 json.defaultMerchantTag do
   if merchant.default_merchant_tag

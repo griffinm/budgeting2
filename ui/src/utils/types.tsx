@@ -75,6 +75,7 @@ export interface Merchant {
   defaultMerchantTag: MerchantCategory | null;
   defaultTags: Tag[];
   merchantGroup?: MerchantGroup | null;
+  transactionCount?: number;
 }
 
 export interface MerchantGroup {

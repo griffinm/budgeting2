@@ -1,6 +1,6 @@
 import { baseClient } from "@/api/base-client";
 import { queryStringFromObject } from "@/utils/queryStringFromObject";
-import { PageResponse, Merchant, MerchantSpendStats, PageRequestParams, MerchantGroupSuggestion } from "@/utils/types";
+import { PageResponse, Merchant, MerchantSpendStats, MerchantGroupSuggestion } from "@/utils/types";
 
 export interface UpdateMerchantParams {
   id: number;
@@ -10,15 +10,13 @@ export interface UpdateMerchantParams {
 }
 
 export interface MerchantSearchParams {
-  searchTerm?: string;
-  merchantTagId?: number;
-  merchantGroupId?: number;
-  page?: PageRequestParams;
-}
-
-export interface CreateMerchantGroupParams {
-  groupName: string;
-  description?: string;
+  search_term?: string;
+  merchant_tag_id?: number;
+  merchant_group_id?: number;
+  sort_by?: 'name' | 'transaction_count';
+  sort_direction?: 'asc' | 'desc';
+  page?: number;
+  per_page?: number;
 }
 
 export const fetchMerchants = async ({
@@ -26,8 +24,8 @@ export const fetchMerchants = async ({
 }: {
   params: MerchantSearchParams;
 }): Promise<PageResponse<Merchant>> => {
-  const queryString = `page=${params.page?.page || 1}&per_page=${params.page?.perPage || 25}&${queryStringFromObject({...params})}`;
-  const url = `/merchants?${queryString}`;
+  const queryString = queryStringFromObject({...params});
+  const url = `/merchants?${queryString}&page=${params.page || 1}`;
   const response = await baseClient.get(url);
   return response.data;
 };
@@ -75,8 +73,3 @@ export const fetchMerchantGroupSuggestions = async (merchantId: number): Promise
   return response.data.suggestions;
 };
 
-export const createMerchantGroup = async (merchantId: number, params: CreateMerchantGroupParams): Promise<{ message: string; group: { id: number; name: string; description: string | null } }> => {
-  const url = `/merchants/${merchantId}/create_group`;
-  const response = await baseClient.post(url, params);
-  return response.data;
-};

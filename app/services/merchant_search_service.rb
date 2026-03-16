@@ -1,5 +1,9 @@
 class MerchantSearchService < BaseService
-  def initialize(account_id:, user_id:, search_term: nil, merchant_tag_id: nil, merchant_group_id: nil)
+  VALID_SORT_FIELDS = %w[name transaction_count].freeze
+  VALID_SORT_DIRECTIONS = %w[asc desc].freeze
+  TRANSACTION_COUNT_SQL = "(SELECT COUNT(*) FROM plaid_transactions WHERE plaid_transactions.merchant_id = merchants.id)"
+
+  def initialize(account_id:, user_id:, search_term: nil, merchant_tag_id: nil, merchant_group_id: nil, sort_by: nil, sort_direction: nil)
     @account_id = account_id
     @user_id = user_id
 
@@ -7,13 +11,15 @@ class MerchantSearchService < BaseService
     @merchant_tag_id = merchant_tag_id
     @merchant_group_id = merchant_group_id
     @search_term = search_term
+    @sort_by = VALID_SORT_FIELDS.include?(sort_by) ? sort_by : "name"
+    @sort_direction = VALID_SORT_DIRECTIONS.include?(sort_direction) ? sort_direction : "asc"
   end
 
   def call
     merchants = Merchant.joins(:account)
-      .includes(:default_merchant_tag, :account, :merchant_group)
+      .includes(:default_merchant_tag, :account, :default_tags, merchant_group: [:primary_merchant, :merchants])
+      .select("merchants.*, #{TRANSACTION_COUNT_SQL} AS transaction_count")
       .where(accounts: { id: @account_id })
-      .order(merchants: { merchant_name: :asc })
 
     if @search_term.present?
       merchants = merchants.where("merchants.merchant_name ILIKE ? OR merchants.custom_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")
@@ -30,6 +36,19 @@ class MerchantSearchService < BaseService
       merchants = merchants.where(merchant_group_id: @merchant_group_id)
     end
 
+    merchants = apply_sort(merchants)
+
     merchants
+  end
+
+  private
+
+  def apply_sort(merchants)
+    case @sort_by
+    when "transaction_count"
+      merchants.order(Arel.sql("#{TRANSACTION_COUNT_SQL} #{@sort_direction}"))
+    else
+      merchants.order("merchants.merchant_name #{@sort_direction}")
+    end
   end
 end

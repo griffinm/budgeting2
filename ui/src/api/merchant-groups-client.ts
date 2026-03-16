@@ -23,7 +23,10 @@ export const fetchMerchantGroupSpendStats = async ({
 };
 
 export const createMerchantGroup = async (merchantId: number, params: CreateMerchantGroupParams): Promise<MerchantGroup> => {
-  const response = await baseClient.post(`/merchants/${merchantId}/create_group`, params);
+  const response = await baseClient.post(`/merchants/${merchantId}/create_group`, {
+    group_name: params.name,
+    description: params.description,
+  });
   // The response only contains partial group data, so we need to fetch the full group
   const groupId = response.data.group.id;
   const fullGroups = await fetchMerchantGroups();

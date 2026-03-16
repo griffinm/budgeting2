@@ -16,12 +16,14 @@ export function Merchants({
   const {
     merchants,
     isLoading,
-    page,
-    setPage,
+    isLoadingMore,
+    hasMore,
+    loadMore,
     searchParams,
     setSearchParams,
     updateMerchant,
-  } = useMerchants({ initialSearchParams: { merchantTagId: tagId } });
+    scrollCacheKey,
+  } = useMerchants({ initialSearchParams: { merchant_tag_id: tagId } });
   const { merchantCategories, loading } = useMerchantCategories();
 
   useEffect(() => {
@@ -40,6 +42,7 @@ export function Merchants({
   const handleUpdateMerchantGroup = async (merchantId: number, groupId: number | null) => {
     try {
       await updateMerchantGroup(merchantId, groupId);
+      setSearchParams({ ...searchParams });
     } catch (error) {
       console.error('Failed to update merchant group:', error);
     }
@@ -54,14 +57,14 @@ export function Merchants({
         <MerchantsTable
           merchants={merchants}
           isLoading={isLoading}
-          page={page}
-          setPage={setPage}
-          searchParams={searchParams}
-          onSetSearchParams={setSearchParams}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          loadMore={loadMore}
           onUpdateMerchant={updateMerchant}
           allMerchantCategories={merchantCategories}
           allMerchantGroups={allMerchantGroups}
           onUpdateMerchantGroup={handleUpdateMerchantGroup}
+          scrollCacheKey={scrollCacheKey}
         />
       )}
     </CollapsibleCard>

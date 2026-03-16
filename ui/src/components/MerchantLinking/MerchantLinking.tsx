@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button, Card, Text, TextInput, Textarea, Modal, Badge, Group, Stack, Alert, Loader, Select } from '@mantine/core';
 import { IconLink, IconUsers, IconPlus, IconX, IconCheck, IconArrowRight } from '@tabler/icons-react';
 import { Merchant, MerchantGroup, MerchantGroupSuggestion } from '@/utils/types';
-import { fetchMerchantGroupSuggestions, createMerchantGroup, fetchMerchant } from '@/api/merchant-client';
-import { addMerchantToGroup, removeMerchantFromGroup, setPrimaryMerchant, fetchMerchantGroups } from '@/api/merchant-groups-client';
+import { fetchMerchantGroupSuggestions, fetchMerchant } from '@/api/merchant-client';
+import { addMerchantToGroup, removeMerchantFromGroup, setPrimaryMerchant, fetchMerchantGroups, createMerchantGroup } from '@/api/merchant-groups-client';
 
 interface MerchantLinkingProps {
   merchant: Merchant;
@@ -64,8 +64,8 @@ export function MerchantLinking({ merchant, onMerchantUpdate }: MerchantLinkingP
     setLoading(true);
     try {
       await createMerchantGroup(merchant.id, {
-        groupName: groupName.trim(),
-        description: groupDescription.trim() || undefined
+        name: groupName.trim(),
+        description: groupDescription.trim() || undefined,
       });
       
       setCreateGroupModalOpen(false);

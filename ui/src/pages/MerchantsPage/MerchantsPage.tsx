@@ -14,14 +14,18 @@ export default function MerchantsPage() {
   const [allMerchantGroups, setAllMerchantGroups] = useState<MerchantGroup[]>([]);
 
   const setTitle = usePageTitle();
-  const { 
-    merchants, 
-    isLoading, 
-    page, 
-    setPage, 
-    searchParams, 
+  const {
+    merchants,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    page,
+    searchParams,
     setSearchParams,
+    clearSearchParams,
     updateMerchant,
+    scrollCacheKey,
   } = useMerchants({});
 
   useEffect(() => {
@@ -47,21 +51,18 @@ export default function MerchantsPage() {
   }, []);
 
   const handleGroupCreated = (newGroup: MerchantGroup) => {
-    // Add the new group to the existing groups list
     setAllMerchantGroups(prev => [...prev, newGroup]);
   };
 
   const handleUpdateMerchantGroup = async (merchantId: number, groupId: number | null) => {
     try {
-      // Find the current merchant to get their current group
       const merchant = merchants.find(m => m.id === merchantId);
       const currentGroupId = merchant?.merchantGroup?.id || null;
-      
+
       await updateMerchantGroup(merchantId, groupId, currentGroupId);
-      
-      // Refresh the merchants data to reflect the change
-      // Use setPage with current page to refresh without changing page
-      setPage(page.currentPage);
+
+      // Trigger re-fetch by re-setting current search params
+      setSearchParams({ ...searchParams });
     } catch (error) {
       console.error('Failed to update merchant group:', error);
     }
@@ -69,17 +70,17 @@ export default function MerchantsPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex justify-between mb-5">
-        <Search 
-          searchParams={searchParams} 
+      <div className="hidden md:block flex-shrink-0 mb-3">
+        <Search
+          searchParams={searchParams}
           onSetSearchParams={setSearchParams}
+          onClearSearchParams={clearSearchParams}
           allMerchantGroups={allMerchantGroups}
+          totalCount={page.totalCount}
+          isLoading={isLoading}
         />
-        <div className="flex justify-baseline items-baseline text-sm text-gray-500 self-end p-3">
-          {isLoading ? 'Loading...' : `Found ${page.totalCount.toLocaleString()} merchants`}
-        </div>
       </div>
-      <Card p={0} className="flex-1 min-h-0"> 
+      <Card p={0} className="flex-1 min-h-0">
         <MerchantsTable
           allMerchantCategories={allMerchantCategories}
           allMerchantGroups={allMerchantGroups}
@@ -88,10 +89,10 @@ export default function MerchantsPage() {
           onGroupCreated={handleGroupCreated}
           merchants={merchants}
           isLoading={isLoading}
-          page={page}
-          setPage={setPage}
-          searchParams={searchParams}
-          onSetSearchParams={setSearchParams}
+          isLoadingMore={isLoadingMore}
+          hasMore={hasMore}
+          loadMore={loadMore}
+          scrollCacheKey={scrollCacheKey}
         />
       </Card>
     </div>
