@@ -7,6 +7,16 @@ class MerchantGroupsController < ApplicationController
       .joins(:primary_merchant, :merchants)
   end
 
+  def update
+    @merchant_group = current_user.account.merchant_groups.find(params[:id])
+
+    if @merchant_group.update(merchant_group_params)
+      render :show
+    else
+      render json: { errors: @merchant_group.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   def spend_stats
     months_back = (params[:months_back] || 6).to_i
     merchant_group_id = params[:id]
@@ -51,4 +61,9 @@ class MerchantGroupsController < ApplicationController
     end
   end
 
+  private
+
+  def merchant_group_params
+    params.permit(:name, :description)
+  end
 end

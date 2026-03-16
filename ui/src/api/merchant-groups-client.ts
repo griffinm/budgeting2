@@ -33,6 +33,14 @@ export const createMerchantGroup = async (merchantId: number, params: CreateMerc
   return fullGroups.find((g: MerchantGroup) => g.id === groupId)!;
 };
 
+export const updateMerchantGroupDetails = async (
+  groupId: number,
+  params: { name?: string; description?: string },
+): Promise<MerchantGroup> => {
+  const response = await baseClient.patch(`/merchant_groups/${groupId}`, params);
+  return response.data;
+};
+
 export const addMerchantToGroup = async (groupId: number, merchantId: number): Promise<void> => {
   await baseClient.post(`/merchant_groups/${groupId}/add_merchant`, { merchant_id: merchantId });
 };

@@ -653,6 +653,21 @@ List all merchant groups for the current account.
 
 ---
 
+### PATCH /api/merchant_groups/:id
+
+Update a merchant group's name or description.
+
+**Request body:**
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | string | New group name |
+| `description` | string | New group description |
+
+**Response:** Updated merchant group object (same shape as show).
+
+---
+
 ### GET /api/merchant_groups/:id/spend_stats
 
 Get spending statistics for a merchant group.

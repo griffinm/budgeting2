@@ -26,7 +26,7 @@ Rails.application.routes.draw do
       post 'create_group', to: 'merchants#create_group'
     end
 
-    resources :merchant_groups, only: [:index] do
+    resources :merchant_groups, only: [:index, :update] do
       member do
         post 'add_merchant', to: 'merchant_groups#add_merchant'
         delete 'remove_merchant', to: 'merchant_groups#remove_merchant'

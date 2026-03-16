@@ -2,9 +2,11 @@ import { MerchantLinking } from "@/components/MerchantLinking";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { Merchant } from "@/utils/types";
 import { urls } from "@/utils/urls";
-import { Tooltip } from "@mantine/core";
-import { IconInfoCircle } from "@tabler/icons-react";
+import { Button, Input, Textarea, Tooltip } from "@mantine/core";
+import { IconCheck, IconInfoCircle, IconPencil, IconX } from "@tabler/icons-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { updateMerchantGroupDetails } from "@/api/merchant-groups-client";
 
 
 export function MerchantGroupCard({
@@ -14,6 +16,47 @@ export function MerchantGroupCard({
   merchant: Merchant;
   setMerchant: (merchant: Merchant) => void;
 }) {
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const startEditing = () => {
+    if (!merchant.merchantGroup) return;
+    setEditName(merchant.merchantGroup.name);
+    setEditDescription(merchant.merchantGroup.description || '');
+    setIsEditingName(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditingName(false);
+  };
+
+  const saveGroupDetails = async () => {
+    if (!merchant.merchantGroup || !editName.trim()) return;
+
+    setIsSaving(true);
+    try {
+      const updated = await updateMerchantGroupDetails(merchant.merchantGroup.id, {
+        name: editName.trim(),
+        description: editDescription.trim() || undefined,
+      });
+      setMerchant({
+        ...merchant,
+        merchantGroup: {
+          ...merchant.merchantGroup,
+          name: updated.name,
+          description: updated.description,
+        },
+      });
+      setIsEditingName(false);
+    } catch (error) {
+      console.error('Failed to update group:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-4">
@@ -45,11 +88,11 @@ export function MerchantGroupCard({
           <IconInfoCircle size={20} className="text-gray-500 dark:text-gray-400 cursor-help" />
         </Tooltip>
       </div>
-      
+
       {/* Merchant Linking Component */}
       <div className="mb-6">
-        <MerchantLinking 
-          merchant={merchant} 
+        <MerchantLinking
+          merchant={merchant}
           onMerchantUpdate={setMerchant}
         />
       </div>
@@ -58,17 +101,70 @@ export function MerchantGroupCard({
       {merchant.merchantGroup && (
         <div>
           <div className="mb-4">
-            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {merchant.merchantGroup.name}
-            </h3>
-            {merchant.merchantGroup.description && (
-              <p className="text-gray-600 dark:text-gray-400 mb-4">{merchant.merchantGroup.description}</p>
+            {isEditingName ? (
+              <div className="flex flex-col gap-3 max-w-md">
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  placeholder="Group name"
+                  size="md"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') cancelEditing();
+                  }}
+                />
+                <Textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="Description (optional)"
+                  size="sm"
+                  rows={2}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') cancelEditing();
+                  }}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="xs"
+                    onClick={saveGroupDetails}
+                    loading={isSaving}
+                    disabled={!editName.trim()}
+                    leftSection={<IconCheck size={14} />}
+                  >
+                    Save
+                  </Button>
+                  <Button size="xs" variant="outline" onClick={cancelEditing} leftSection={<IconX size={14} />}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 group">
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                    {merchant.merchantGroup.name}
+                  </h3>
+                  <button
+                    onClick={startEditing}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300
+                      opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    aria-label="Edit group name"
+                  >
+                    <IconPencil size={16} />
+                  </button>
+                </div>
+                {merchant.merchantGroup.description && (
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">{merchant.merchantGroup.description}</p>
+                )}
+              </>
             )}
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              {merchant.merchantGroup.merchants?.length || 0} merchants in this group
-            </div>
+            {!isEditingName && (
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                {merchant.merchantGroup.merchants?.length || 0} merchants in this group
+              </div>
+            )}
           </div>
-          
+
           <div className="space-y-2">
             <h4 className="font-medium text-gray-700 dark:text-gray-300">Merchants in this group:</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

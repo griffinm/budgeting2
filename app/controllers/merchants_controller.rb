@@ -17,7 +17,10 @@ class MerchantsController < ApplicationController
 
   # GET /api/merchants/:id
   def show
-    @merchant = current_user.account.merchants.includes(:merchant_tag, :default_tags, merchant_group: :merchants).find(params[:id])
+    @merchant = current_user.account.merchants
+      .select("merchants.*, (SELECT COUNT(*) FROM plaid_transactions WHERE merchant_id = merchants.id) AS transaction_count")
+      .includes(:default_merchant_tag, :default_tags, merchant_group: [:primary_merchant, :merchants])
+      .find(params[:id])
   end
 
   # PATCH /api/merchants/:id
@@ -52,7 +55,10 @@ class MerchantsController < ApplicationController
       end
     end
 
-    @merchant.reload
+    @merchant = current_user.account.merchants
+      .select("merchants.*, (SELECT COUNT(*) FROM plaid_transactions WHERE merchant_id = merchants.id) AS transaction_count")
+      .includes(:default_merchant_tag, :default_tags, merchant_group: [:primary_merchant, :merchants])
+      .find(@merchant.id)
     render :show
   end
 
