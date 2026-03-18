@@ -8,6 +8,7 @@ class UtilController < ApplicationController
       Rails.logger.info("Syncing transactions for account #{account.id}")
       service = PlaidService.new(account_id: account.id)
       service.sync_transactions
+      service.sync_balances(plaid_types: PlaidAccount::LOAN_ACCOUNT_TYPES + PlaidAccount::INVESTMENT_ACCOUNT_TYPES)
     end
 
     render json: { message: "Updates complete" }

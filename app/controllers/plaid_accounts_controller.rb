@@ -98,6 +98,7 @@ class PlaidAccountsController < ApplicationController
       # Trigger initial transaction sync
       Rails.logger.info("Triggering initial sync for newly connected accounts")
       service.sync_transactions
+      service.sync_balances(plaid_types: PlaidAccount::LOAN_ACCOUNT_TYPES + PlaidAccount::INVESTMENT_ACCOUNT_TYPES)
       
       render json: { 
         message: "Accounts connected successfully",
