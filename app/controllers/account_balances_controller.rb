@@ -16,8 +16,14 @@ class AccountBalancesController < ApplicationController
 
     return render json: { error: 'Account not found' }, status: :not_found unless plaid_accounts_user
 
+    # Deduplicate to latest entry per day to avoid duplicate chart points
     @account_balances = AccountBalance
       .where(plaid_accounts_user_id: plaid_accounts_user.id)
+      .where(id: AccountBalance
+        .select("DISTINCT ON (DATE(created_at)) id")
+        .where(plaid_accounts_user_id: plaid_accounts_user.id)
+        .order(Arel.sql("DATE(created_at), created_at DESC"))
+      )
       .order(created_at: :asc)
 
     # Apply time filter
@@ -69,12 +75,17 @@ class AccountBalancesController < ApplicationController
       query = query.where('created_at >= ?', months.months.ago)
     end
 
-    # Group by date and sum balances
-    # Using DATE to group by calendar date
-    @aggregated_balances = query
-      .select("DATE(created_at) as date, SUM(current_balance) as total_balance")
-      .group("DATE(created_at)")
-      .order("date ASC")
+    # First get the latest balance per account per day (deduplicate),
+    # then sum across accounts to avoid double-counting multiple snapshots per day
+    latest_per_account_per_day = query
+      .select("DISTINCT ON (plaid_accounts_user_id, DATE(created_at)) plaid_accounts_user_id, DATE(created_at) as date, current_balance")
+      .order(Arel.sql("plaid_accounts_user_id, DATE(created_at), created_at DESC"))
+
+    @aggregated_balances = AccountBalance
+      .from("(#{latest_per_account_per_day.to_sql}) as deduplicated")
+      .select("deduplicated.date, SUM(deduplicated.current_balance) as total_balance")
+      .group("deduplicated.date")
+      .order("deduplicated.date ASC")
   end
 
 end
