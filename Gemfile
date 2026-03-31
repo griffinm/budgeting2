@@ -16,6 +16,9 @@ gem "acts_as_paranoid"
 gem "audited"
 gem "plaid"
 gem "newrelic_rpm"
+gem "solid_queue"
+gem "gruff"
+gem "aws-sdk-sesv2"
 
 group :development, :test do
   gem "dotenv-rails"
@@ -28,4 +31,8 @@ group :development, :test do
   gem "rspec-rails"
   gem "factory_bot_rails"
   gem "faker"
+end
+
+group :development do
+  gem "letter_opener"
 end

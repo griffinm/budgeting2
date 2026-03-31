@@ -86,6 +86,21 @@ GEM
     audited (5.8.0)
       activerecord (>= 5.2, < 8.2)
       activesupport (>= 5.2, < 8.2)
+    aws-eventstream (1.4.0)
+    aws-partitions (1.1232.0)
+    aws-sdk-core (3.244.0)
+      aws-eventstream (~> 1, >= 1.3.0)
+      aws-partitions (~> 1, >= 1.992.0)
+      aws-sigv4 (~> 1.9)
+      base64
+      bigdecimal
+      jmespath (~> 1, >= 1.6.1)
+      logger
+    aws-sdk-sesv2 (1.97.0)
+      aws-sdk-core (~> 3, >= 3.244.0)
+      aws-sigv4 (~> 1.5)
+    aws-sigv4 (1.12.1)
+      aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.3.0)
     bcrypt (3.1.20)
     benchmark (0.4.1)
@@ -97,6 +112,8 @@ GEM
     builder (3.3.0)
     case_transform (0.2)
       activesupport
+    childprocess (5.1.0)
+      logger (~> 1.5)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.3)
     crass (1.0.6)
@@ -112,6 +129,8 @@ GEM
     drb (2.2.3)
     erb (5.0.1)
     erubi (1.13.1)
+    et-orbi (1.4.0)
+      tzinfo
     factory_bot (6.5.4)
       activesupport (>= 6.1.0)
     factory_bot_rails (6.5.0)
@@ -129,8 +148,16 @@ GEM
       net-http (>= 0.5.0)
     foreman (0.90.0)
       thor (~> 1.4)
+    fugit (1.12.1)
+      et-orbi (~> 1.4)
+      raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    gruff (0.29.0)
+      bigdecimal (>= 3.0)
+      histogram
+      rmagick (>= 5.5)
+    histogram (0.2.4.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)
@@ -141,6 +168,7 @@ GEM
     jbuilder (2.13.0)
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
+    jmespath (1.6.2)
     json (2.13.2)
     json-schema (6.2.0)
       addressable (~> 2.8)
@@ -149,6 +177,12 @@ GEM
     jwt (2.10.1)
       base64
     language_server-protocol (3.17.0.5)
+    launchy (3.1.1)
+      addressable (~> 2.8)
+      childprocess (~> 5.0)
+      logger (~> 1.6)
+    letter_opener (1.10.0)
+      launchy (>= 2.2, < 4)
     lint_roller (1.1.0)
     logger (1.7.0)
     lograge (0.14.0)
@@ -196,6 +230,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.18.8-x86_64-linux-musl)
       racc (~> 1.4)
+    observer (0.1.2)
     pagy (9.3.5)
     parallel (1.27.0)
     paranoia (3.0.1)
@@ -208,6 +243,7 @@ GEM
     pg (1.6.1-aarch64-linux-musl)
     pg (1.6.1-x86_64-linux)
     pg (1.6.1-x86_64-linux-musl)
+    pkg-config (1.6.5)
     plaid (40.0.0)
       faraday (>= 1.0.1, < 3.0)
       faraday-multipart (>= 1.0.1, < 2.0)
@@ -221,6 +257,7 @@ GEM
     public_suffix (7.0.5)
     puma (6.6.0)
       nio4r (~> 2.0)
+    raabro (1.4.0)
     racc (1.8.1)
     rack (3.2.0)
     rack-cors (3.0.0)
@@ -272,6 +309,9 @@ GEM
       io-console (~> 0.5)
     request_store (1.7.0)
       rack (>= 1.4)
+    rmagick (6.2.0)
+      observer (~> 0.1)
+      pkg-config (~> 1.4)
     rspec-core (3.13.5)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
@@ -320,6 +360,13 @@ GEM
       rubocop-rails (>= 2.30)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
+    solid_queue (1.4.0)
+      activejob (>= 7.1)
+      activerecord (>= 7.1)
+      concurrent-ruby (>= 1.3.1)
+      fugit (~> 1.11)
+      railties (>= 7.1)
+      thor (>= 1.3.1)
     stringio (3.1.7)
     thor (1.4.0)
     timeout (0.4.3)
@@ -350,6 +397,7 @@ DEPENDENCIES
   active_model_serializers
   acts_as_paranoid
   audited
+  aws-sdk-sesv2
   bcrypt (~> 3.1.7)
   bootsnap
   brakeman
@@ -358,8 +406,10 @@ DEPENDENCIES
   factory_bot_rails
   faker
   foreman
+  gruff
   jbuilder
   jwt
+  letter_opener
   lograge
   newrelic_rpm
   pagy
@@ -373,6 +423,7 @@ DEPENDENCIES
   rubocop
   rubocop-rails
   rubocop-rails-omakase
+  solid_queue
 
 BUNDLED WITH
    2.6.2
