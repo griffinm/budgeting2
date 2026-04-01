@@ -44,7 +44,7 @@ export function DetailsCard({
   return (
     <>
       <h2 className="text-lg font-semibold mb-4">Details</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <DetailRow label="Account">
           <span>{plaidAccount.nickname || plaidAccount.plaidOfficialName}</span>
         </DetailRow>
