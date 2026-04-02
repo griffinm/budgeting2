@@ -19,6 +19,9 @@ export interface User {
   accountId: string;
   account: Account;
   linkedAccounts: number;
+  reportEnabled: boolean;
+  reportFrequency: 'daily' | 'weekly' | 'monthly';
+  reportDayOfWeek: number | null;
 }
 
 export interface Page {

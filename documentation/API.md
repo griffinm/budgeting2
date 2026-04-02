@@ -172,10 +172,18 @@ Update the current user's profile. Returns the updated user and a new JWT token 
     "email": "new@example.com",
     "first_name": "Jane",
     "last_name": "Doe",
-    "password": "newpassword123"
+    "password": "newpassword123",
+    "report_frequency": "weekly",
+    "report_day_of_week": 1
   }
 }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `report_enabled` | boolean | Whether report emails are enabled. Default: `true` |
+| `report_frequency` | string | Email report frequency: `"daily"`, `"weekly"`, or `"monthly"`. Default: `"daily"` |
+| `report_day_of_week` | integer\|null | Day of week (0=Sunday, 6=Saturday). Required when frequency is `"weekly"` or `"monthly"`. For monthly, the report sends on the first occurrence of that day in the month. |
 
 **Response (200):**
 
@@ -188,7 +196,10 @@ Update the current user's profile. Returns the updated user and a new JWT token 
     "lastName": "Doe",
     "accountId": 1,
     "createdAt": "2025-01-15T12:00:00.000Z",
-    "linkedAccounts": 3
+    "linkedAccounts": 3,
+    "reportEnabled": true,
+    "reportFrequency": "weekly",
+    "reportDayOfWeek": 1
   },
   "token": "eyJhbGciOiJIUzI1NiJ9..."
 }

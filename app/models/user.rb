@@ -13,6 +13,9 @@ class User < ApplicationRecord
   validates :first_name, presence: true
   validates :last_name, presence: true
   validates :password, length: { minimum: 8 }, allow_nil: true
+  validates :report_frequency, inclusion: { in: %w[daily weekly monthly] }
+  validates :report_day_of_week, inclusion: { in: 0..6 }, allow_nil: true
+  validates :report_day_of_week, presence: true, if: -> { report_enabled? && report_frequency.in?(%w[weekly monthly]) }
   before_save :apply_defaults
 
   private def apply_defaults
@@ -30,6 +33,9 @@ class User < ApplicationRecord
       accountId: account_id,
       createdAt: created_at,
       linkedAccounts: plaid_accounts.count,
+      reportEnabled: report_enabled,
+      reportFrequency: report_frequency,
+      reportDayOfWeek: report_day_of_week,
     }
   end
 end

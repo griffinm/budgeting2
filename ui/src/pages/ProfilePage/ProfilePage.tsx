@@ -1,7 +1,7 @@
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { urls } from "@/utils/urls";
-import { Alert, Button, Card, SegmentedControl, Text, TextInput, useMantineColorScheme } from "@mantine/core";
-import { useEffect, useState, useContext } from "react";
+import { Alert, Button, Card, Select, SegmentedControl, Switch, Text, TextInput, useMantineColorScheme } from "@mantine/core";
+import { useEffect, useState, useContext, useCallback } from "react";
 import { CurrentUserContext } from "@/providers/CurrentUser/CurrentUserContext";
 import { Errors } from "@/components/Errors";
 import { updateCurrentUser, UpdateCurrentUserParams } from "@/api";
@@ -16,9 +16,22 @@ export default function ProfilePage() {
   const [email, setEmail] = useState(user?.email || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [reportEnabled, setReportEnabled] = useState(user?.reportEnabled ?? true);
+  const [reportFrequency, setReportFrequency] = useState(user?.reportFrequency || 'daily');
+  const [reportDayOfWeek, setReportDayOfWeek] = useState<string | null>(user?.reportDayOfWeek?.toString() ?? null);
   const [error, setError] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  const saveEmailPreferences = useCallback((params: UpdateCurrentUserParams) => {
+    updateCurrentUser({ params })
+      .then((response: LoginResponse | ErrorResponse) => {
+        if ('user' in response) {
+          setUser(response.user);
+          setToken(response.token);
+        }
+      });
+  }, [setUser, setToken]);
 
   const setTitle = usePageTitle();
   useEffect(() => {
@@ -123,6 +136,72 @@ export default function ProfilePage() {
             { label: 'Dark', value: 'dark' },
           ]}
         />
+      </Card>
+
+      <Card className="max-w-sm">
+        <Text fw={500} mb="xs">Email Preferences</Text>
+        <div className="flex flex-col gap-3 w-full md:max-w-xs">
+          <Switch
+            label="Enable report emails"
+            checked={reportEnabled}
+            onChange={(e) => {
+              const enabled = e.currentTarget.checked;
+              setReportEnabled(enabled);
+              saveEmailPreferences({
+                reportEnabled: enabled,
+                reportFrequency: reportFrequency as 'daily' | 'weekly' | 'monthly',
+                reportDayOfWeek: reportDayOfWeek !== null ? parseInt(reportDayOfWeek) : null,
+              });
+            }}
+          />
+          {reportEnabled && (
+            <>
+              <Select
+                label="Report Frequency"
+                value={reportFrequency}
+                onChange={(value) => {
+                  const freq = value || 'daily';
+                  const day = freq === 'daily' ? null : reportDayOfWeek;
+                  setReportFrequency(freq);
+                  if (freq === 'daily') setReportDayOfWeek(null);
+                  saveEmailPreferences({
+                    reportEnabled,
+                    reportFrequency: freq as 'daily' | 'weekly' | 'monthly',
+                    reportDayOfWeek: day !== null ? parseInt(day) : null,
+                  });
+                }}
+                data={[
+                  { label: 'Daily', value: 'daily' },
+                  { label: 'Weekly', value: 'weekly' },
+                  { label: 'Monthly', value: 'monthly' },
+                ]}
+              />
+              {reportFrequency !== 'daily' && (
+                <Select
+                  label={reportFrequency === 'weekly' ? 'Day of Week' : 'First Occurrence of Day'}
+                  value={reportDayOfWeek}
+                  onChange={(value) => {
+                    setReportDayOfWeek(value);
+                    saveEmailPreferences({
+                      reportEnabled,
+                      reportFrequency: reportFrequency as 'daily' | 'weekly' | 'monthly',
+                      reportDayOfWeek: value !== null ? parseInt(value) : null,
+                    });
+                  }}
+                  data={[
+                    { label: 'Sunday', value: '0' },
+                    { label: 'Monday', value: '1' },
+                    { label: 'Tuesday', value: '2' },
+                    { label: 'Wednesday', value: '3' },
+                    { label: 'Thursday', value: '4' },
+                    { label: 'Friday', value: '5' },
+                    { label: 'Saturday', value: '6' },
+                  ]}
+                />
+              )}
+            </>
+          )}
+        </div>
       </Card>
     </div>
   );
