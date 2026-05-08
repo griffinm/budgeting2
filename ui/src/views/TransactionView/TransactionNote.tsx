@@ -52,31 +52,33 @@ function NoteEditor({ note, onSave }: { note: string; onSave: (note: string) => 
 
   return (
     <form onSubmit={onSubmit} className="flex flex-row sm:flex-col gap-2">
-      <textarea
-        className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        rows={3}
-        autoFocus
-      />
+      <div className="flex-1 flex-col sm:flex-row">
+        <textarea
+          className="flex-1 border border-gray-300 rounded px-2 py-1 text-sm w-full"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          rows={3}
+          autoFocus
+        />
 
-      <div className="flex flex-row justify-end gap-1">
-        <Button
-          variant="outline"
-          leftSection={<IconX size={16} />}
-          onClick={() => {
-            setValue(note);
-            setEditing(false);
-          }}
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          leftSection={<IconCheck size={16} />}
-        >
-          Save
-        </Button>
+        <div className="flex flex-row justify-end gap-1">
+          <Button
+            variant="outline"
+            leftSection={<IconX size={16} />}
+            onClick={() => {
+              setValue(note);
+              setEditing(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            leftSection={<IconCheck size={16} />}
+          >
+            Save
+          </Button>
+        </div>
       </div>
     </form>
   );

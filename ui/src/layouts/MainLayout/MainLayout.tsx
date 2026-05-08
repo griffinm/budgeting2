@@ -17,7 +17,8 @@ import {
   IconTag, 
   IconUser,
   IconCreditCard,
-  IconBookmarks
+  IconBookmarks,
+  IconReportAnalytics
 } from '@tabler/icons-react';
 import { MainNavLinks, urls } from '@/utils/urls';
 import { useContext } from 'react';
@@ -47,6 +48,8 @@ const getNavIcon = (label: string) => {
       return IconUser;
     case 'Accounts':
       return IconCreditCard;
+    case 'Reports':
+      return IconReportAnalytics;
     default:
       return IconDashboard;
   }

@@ -19,6 +19,7 @@ const LoginPage = lazy(() => import('@/pages/LoginPage/LoginPage'));
 const SignupPage = lazy(() => import('@/pages/SignupPage/SignupPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage/ProfilePage'));
 const PlaidAccountsPage = lazy(() => import('@/pages/AccountsPage/AccountPage'));
+const ReportsPage = lazy(() => import('@/pages/ReportsPage/ReportsPage'));
 
 interface Url {
   path: (...args: any[]) => string;
@@ -112,6 +113,13 @@ export const urls: Record<string, Url> = {
     label: 'Accounts',
     title: () => 'Accounts' + TITLE_SUFFIX,
     component: PlaidAccountsPage,
+    section: 'main',
+  },
+  reports: {
+    path: () => '/reports',
+    label: 'Reports',
+    title: () => 'Reports' + TITLE_SUFFIX,
+    component: ReportsPage,
     section: 'main',
   },
 }

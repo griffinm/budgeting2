@@ -191,7 +191,9 @@ export interface MerchantSpendStats {
 }
 
 export interface ProfitAndLossItem {
-  date: Date;
+  date: string;
+  year: number;
+  month: number;
   expense: number;
   income: number;
   profit: number;

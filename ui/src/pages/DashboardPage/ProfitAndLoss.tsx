@@ -3,11 +3,12 @@ import { Loading } from "@/components/Loading";
 import { ProfitAndLossItem } from "@/utils/types";
 import { BarChart } from "@mantine/charts";
 import { Group, Select, Table, Text } from "@mantine/core";
-import { 
-  format as formatDate,
-  addDays,
-} from 'date-fns';
+import { format as formatDate } from 'date-fns';
 import { useMemo } from "react";
+
+function monthLabel(item: ProfitAndLossItem) {
+  return formatDate(new Date(item.year, item.month - 1, 1), 'MMM yyyy');
+}
 
 export function ProfitAndLoss({
   profitAndLoss,
@@ -21,7 +22,7 @@ export function ProfitAndLoss({
   loading: boolean;
 }) {
   const sortedProfitAndLoss = useMemo(() => {
-    return profitAndLoss.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return [...profitAndLoss].sort((a, b) => (a.year - b.year) || (a.month - b.month));
   }, [profitAndLoss]);
   const averageExpense = useMemo(() => {
     return sortedProfitAndLoss.reduce((acc, item) => acc + item.expense, 0) / sortedProfitAndLoss.length;
@@ -41,7 +42,7 @@ export function ProfitAndLoss({
             title={`Profit and Loss for ${monthsBack} months`}
             h={350}
             data={sortedProfitAndLoss.map((item) => ({
-              month: formatDate(new Date(item.date), 'MMM yyyy'),
+              month: monthLabel(item),
               expense: item.expense,
               income: item.income,
             }))}
@@ -81,8 +82,8 @@ export function ProfitAndLoss({
             </Table.Thead>
             <Table.Tbody>
               {sortedProfitAndLoss.map((item) => (
-                <Table.Tr key={item.date.toString()}>
-                  <Table.Td>{formatDate(addDays(new Date(item.date), 1), 'MMM yyyy')}</Table.Td>
+                <Table.Tr key={`${item.year}-${item.month}`}>
+                  <Table.Td>{monthLabel(item)}</Table.Td>
                   <Table.Td>
                     <Currency
                       amount={item.expense}

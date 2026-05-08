@@ -1,62 +1,71 @@
 class ProfitAndLossService
-  def initialize(account_id:)
-    @account = Account.find(account_id)
-
-    if @account.nil?
-      raise "Account not found for Account ID: '#{account_id}'"
-    end
+  def initialize(user_id:)
+    @user = User.find(user_id)
+    @account = @user.account
+    @tz = @user.time_zone
+    @iana_tz = ActiveSupport::TimeZone[@tz].tzinfo.name
   end
 
   def profit_and_loss(months_back: 12)
-    begin
-      months_back = months_back.to_i
-    rescue
-      raise "Invalid months_back: '#{months_back}'"
-    end
-    
-    expenses_by_month = @account.plaid_transactions.expense
-      .not_pending
-      .where('plaid_transactions.date >= ? AND plaid_transactions.date <= ?', Date.today - months_back.months, Date.today.end_of_day)
-      .group("DATE_PART('month', plaid_transactions.date)")
-      .group("DATE_PART('year', plaid_transactions.date)")
-      .select("sum(amount) as amount, DATE_PART('month', plaid_transactions.date) as month, DATE_PART('year', plaid_transactions.date) as year")
+    months_back = Integer(months_back)
 
-    income_by_month = @account.plaid_transactions.income
-      .not_pending
-      .where('plaid_transactions.date >= ? AND plaid_transactions.date <= ?', Date.today - months_back.months, Date.today.end_of_day)
-      .group("DATE_PART('month', plaid_transactions.date)")
-      .group("DATE_PART('year', plaid_transactions.date)")
-      .select("sum(amount) as amount, DATE_PART('month', plaid_transactions.date) as month, DATE_PART('year', plaid_transactions.date) as year")
+    start_time, end_time = Time.use_zone(@tz) do
+      [(Time.zone.now - months_back.months).beginning_of_month, Time.zone.now.end_of_day]
+    end
 
-    all_months = {}
-    
-    expenses_by_month.each do |expense|
-      key = "#{expense.year.to_i}-#{expense.month.to_i}"
-      all_months[key] ||= { year: expense.year.to_i, month: expense.month.to_i, expense: 0, income: 0 }
-      all_months[key][:expense] = (expense.amount || 0).abs.round(2)
+    quoted_tz = ActiveRecord::Base.connection.quote(@iana_tz)
+    tz_date = "(plaid_transactions.date AT TIME ZONE 'UTC' AT TIME ZONE #{quoted_tz})"
+
+    base = @account.plaid_transactions
+      .not_pending
+      .where('plaid_transactions.date >= ? AND plaid_transactions.date <= ?', start_time, end_time)
+      .group("DATE_PART('month', #{tz_date}), DATE_PART('year', #{tz_date})")
+      .select("sum(amount) as amount, DATE_PART('month', #{tz_date}) as month, DATE_PART('year', #{tz_date}) as year")
+
+    expenses_by_month = base.expense
+    income_by_month = base.income
+
+    months = month_keys(start_time, end_time).index_with { { expense: 0.0, income: 0.0 } }
+
+    expenses_by_month.each do |row|
+      key = [row.year.to_i, row.month.to_i]
+      months[key] ||= { expense: 0.0, income: 0.0 }
+      months[key][:expense] = (row.amount || 0).abs.round(2)
     end
-    
-    income_by_month.each do |income|
-      key = "#{income.year.to_i}-#{income.month.to_i}"
-      all_months[key] ||= { year: income.year.to_i, month: income.month.to_i, expense: 0, income: 0 }
-      all_months[key][:income] = (income.amount || 0).abs.round(2)
+
+    income_by_month.each do |row|
+      key = [row.year.to_i, row.month.to_i]
+      months[key] ||= { expense: 0.0, income: 0.0 }
+      months[key][:income] = (row.amount || 0).abs.round(2)
     end
-    
-    # Build the final data array
-    data = all_months.values.map do |month_data|
-      expense_abs = month_data[:expense]
-      income_abs = month_data[:income]
-      month_date = Date.new(month_data[:year], month_data[:month], 1)
-      
+
+    months.map do |(year, month), data|
+      expense = data[:expense]
+      income = data[:income]
       {
-        date: month_date,
-        expense: expense_abs,
-        income: income_abs,
-        profit: (income_abs - expense_abs).round(2),
-        profitPercentage: expense_abs > 0 ? ((income_abs - expense_abs) / expense_abs * 100).round(2) : 0,
+        date: Date.new(year, month, 1),
+        year: year,
+        month: month,
+        expense: expense,
+        income: income,
+        profit: (income - expense).round(2),
+        profitPercentage: expense > 0 ? ((income - expense) / expense * 100).round(2) : 0,
       }
-    end
+    end.sort_by { |item| [item[:year], item[:month]] }
+  end
 
-    data.sort_by { |item| item[:date] }
+  private
+
+  def month_keys(start_time, end_time)
+    Time.use_zone(@tz) do
+      cursor = start_time.in_time_zone(@tz).beginning_of_month
+      stop = end_time.in_time_zone(@tz).beginning_of_month
+      keys = []
+      while cursor <= stop
+        keys << [cursor.year, cursor.month]
+        cursor = cursor + 1.month
+      end
+      keys
+    end
   end
 end
