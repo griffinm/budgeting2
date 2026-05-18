@@ -6,7 +6,7 @@ import { Loading } from "@/components/Loading";
 import { useAccount, usePlaidAccount } from "@/hooks";
 import { useAccountBalances } from "@/hooks/useAccountBalance";
 import { CurrentUserContext } from '@/providers/CurrentUser/CurrentUserContext';
-import { ConnectPlaidAccount } from "@/components/ConnectPlaidAccount";
+import { ConnectPlaidAccount, ReconnectPlaidAccount } from "@/components/ConnectPlaidAccount";
 import { PlaidAccount, AccountBalance, AccountType, User } from "@/utils/types";
 import { ChangeAccountAccessProps } from "@/hooks";
 import { EditableLabel } from "@/components/EditableLabel/EditableLabel";
@@ -21,6 +21,7 @@ import {
   IconChevronRight,
   IconUsers,
   IconShieldCheck,
+  IconAlertTriangle,
 } from '@tabler/icons-react';
 
 type AccountTypeConfig = {
@@ -152,6 +153,7 @@ export default function AccountsPage() {
               currentUser={user!}
               onAccountAccessChange={updateAccountAccess}
               onNicknameChange={updatePlaidAccountNickname}
+              onReconnectSuccess={handleConnectionSuccess}
               balancesLoading={balancesLoading}
             />
           );
@@ -186,6 +188,7 @@ function AccountSection({
   currentUser,
   onAccountAccessChange,
   onNicknameChange,
+  onReconnectSuccess,
   balancesLoading,
 }: {
   config: AccountTypeConfig;
@@ -196,6 +199,7 @@ function AccountSection({
   currentUser: User;
   onAccountAccessChange: (props: ChangeAccountAccessProps) => void;
   onNicknameChange: (id: number, nickname: string) => Promise<void>;
+  onReconnectSuccess: () => void;
   balancesLoading: boolean;
 }) {
   const sectionTotal = getTotalForType(accountBalances, config.type);
@@ -237,6 +241,7 @@ function AccountSection({
             currentUser={currentUser}
             onAccountAccessChange={onAccountAccessChange}
             onNicknameChange={onNicknameChange}
+            onReconnectSuccess={onReconnectSuccess}
             balancesLoading={balancesLoading}
           />
         ))}
@@ -253,6 +258,7 @@ function AccountRow({
   currentUser,
   onAccountAccessChange,
   onNicknameChange,
+  onReconnectSuccess,
   balancesLoading,
 }: {
   account: PlaidAccount;
@@ -262,6 +268,7 @@ function AccountRow({
   currentUser: User;
   onAccountAccessChange: (props: ChangeAccountAccessProps) => void;
   onNicknameChange: (id: number, nickname: string) => Promise<void>;
+  onReconnectSuccess: () => void;
   balancesLoading: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -289,8 +296,27 @@ function AccountRow({
             <span className="text-xs text-gray-400 dark:text-gray-500 capitalize">
               {account.plaidSubtype || account.plaidType}
             </span>
+            {account.needsReconnect && (
+              <>
+                <span className="text-xs text-gray-300 dark:text-gray-600">|</span>
+                <span className="flex items-center gap-1 text-xs text-red-500 font-medium">
+                  <IconAlertTriangle size={12} />
+                  Connection lost
+                </span>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Reconnect action */}
+        {account.needsReconnect && (
+          <div className="mr-2">
+            <ReconnectPlaidAccount
+              plaidAccessTokenId={account.plaidAccessTokenId}
+              onSuccess={onReconnectSuccess}
+            />
+          </div>
+        )}
 
         {/* Balance */}
         <div className="text-right mr-4">

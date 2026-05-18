@@ -2,6 +2,24 @@
 <p style="color: #495057; font-size: 16px;">Hi <%= @user.first_name %>,</p>
 <p style="color: #495057; font-size: 16px; margin-bottom: 24px;">Here is your daily financial summary for <%= @today.strftime('%B %d, %Y') %>.</p>
 
+<%# Connection Warnings %>
+<% if @connection_warnings.present? %>
+  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+    <tr>
+      <td style="background-color: #fff5f5; border: 1px solid #ffc9c9; border-radius: 8px; padding: 16px 20px;">
+        <div style="color: #e03131; font-size: 14px; font-weight: 700; margin-bottom: 4px;">
+          &#9888; Action needed: bank connection lost
+        </div>
+        <div style="color: #495057; font-size: 14px;">
+          We can no longer sync <%= @connection_warnings.to_sentence %>.
+          Open the Accounts page and use <strong>Reconnect</strong> to restore syncing.
+          New transactions for <%= @connection_warnings.length == 1 ? 'this account' : 'these accounts' %> won't appear until you do.
+        </div>
+      </td>
+    </tr>
+  </table>
+<% end %>
+
 <%# Monthly Summary %>
 <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
   <tr>

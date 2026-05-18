@@ -200,6 +200,8 @@ export interface ProfitAndLossItem {
   profitPercentage: number;
 }
 
+export type PlaidConnectionStatus = 'active' | 'login_required' | 'error';
+
 export interface PlaidAccount {
   id: number;
   plaidOfficialName: string;
@@ -210,6 +212,9 @@ export interface PlaidAccount {
   createdAt: string;
   updatedAt: string;
   users: User[];
+  plaidAccessTokenId: number;
+  connectionStatus: PlaidConnectionStatus | null;
+  needsReconnect: boolean;
 }
 
 export interface SyncEvent {

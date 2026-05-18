@@ -35,16 +35,24 @@ class PlaidService < BaseService
     Rails.logger.info "Syncing transactions for account #{@account.id}"
 
     access_tokens = @account.plaid_access_tokens
-    
+
+    # Each access token is an independent Plaid Item. A failure on one Item
+    # (e.g. a broken bank login) must not abort syncing for the others.
     access_tokens.each do |access_token|
-      plaid_sync_event = PlaidSyncEvent.create!(
-        account_id: @account.id,
-        plaid_access_token_id: access_token.id,
-        event_type: "STARTED",
-        started_at: Time.now,
-        cursor: access_token.next_cursor,
-      )
-      
+      sync_transactions_for_token(access_token)
+    end
+  end
+
+  private def sync_transactions_for_token(access_token)
+    plaid_sync_event = PlaidSyncEvent.create!(
+      account_id: @account.id,
+      plaid_access_token_id: access_token.id,
+      event_type: "STARTED",
+      started_at: Time.now,
+      cursor: access_token.next_cursor,
+    )
+
+    begin
       sync_request = Plaid::TransactionsSyncRequest.new(
         client_id: ENV["PLAID_CLIENT_ID"],
         secret: ENV["PLAID_SECRET"],
@@ -94,7 +102,28 @@ class PlaidService < BaseService
       end
 
       plaid_sync_event.update(event_type: "COMPLETED", completed_at: Time.now)
+      access_token.mark_healthy!
+    rescue Plaid::ApiError => exception
+      error_code = extract_plaid_error_code(exception)
+      Rails.logger.error "Plaid sync failed for access token #{access_token.id} (item #{access_token.item_id}): #{error_code || exception.message}"
+      plaid_sync_event.update(event_type: "ERROR", completed_at: Time.now)
+      access_token.mark_error!(error_code) if error_code
+    rescue => exception
+      Rails.logger.error "Error syncing transactions for access token #{access_token.id}: #{exception.message}"
+      Rails.logger.error exception.backtrace.join("\n")
+      plaid_sync_event.update(event_type: "ERROR", completed_at: Time.now)
     end
+  end
+
+  # Extracts the Plaid `error_code` from an ApiError's JSON response body so we
+  # can distinguish a broken Item (needs reconnect) from a transient failure.
+  private def extract_plaid_error_code(api_error)
+    body = api_error.response_body
+    return nil if body.blank?
+
+    JSON.parse(body)["error_code"]
+  rescue JSON::ParserError
+    nil
   end
 
   private def add_transactions(transactions, plaid_sync_event)
@@ -215,6 +244,10 @@ class PlaidService < BaseService
             )
           end
         end
+      rescue Plaid::ApiError => exception
+        error_code = extract_plaid_error_code(exception)
+        Rails.logger.error "Plaid balance sync failed for access token #{access_token.id} (item #{access_token.item_id}): #{error_code || exception.message}"
+        access_token.mark_error!(error_code) if error_code
       rescue => exception
         Rails.logger.error "Error syncing balances for access token #{access_token.id}: #{exception.message}"
         Rails.logger.error exception.backtrace.join("\n")
@@ -222,24 +255,32 @@ class PlaidService < BaseService
     end
   end
 
-  def create_link_token(user:)
-    request = Plaid::LinkTokenCreateRequest.new(
-      {
-        client_id: ENV["PLAID_CLIENT_ID"],
-        secret: ENV["PLAID_SECRET"],
-        client_name: 'Budgeting App',
-        products: ['transactions'],
-        country_codes: ['US'],
-        language: 'en',
-        user: {
-          client_user_id: user.id.to_s,
-          legal_name: "#{user.first_name} #{user.last_name}",
-          email_address: user.email
-        }
+  # Creates a Plaid Link token. When +access_token+ is provided, Link opens in
+  # "update mode": it re-authenticates the existing Item in place (same token,
+  # item_id, accounts and cursor) rather than creating a new Item. This is the
+  # correct way to recover from a broken connection without duplicating data.
+  def create_link_token(user:, access_token: nil)
+    params = {
+      client_id: ENV["PLAID_CLIENT_ID"],
+      secret: ENV["PLAID_SECRET"],
+      client_name: 'Budgeting App',
+      country_codes: ['US'],
+      language: 'en',
+      user: {
+        client_user_id: user.id.to_s,
+        legal_name: "#{user.first_name} #{user.last_name}",
+        email_address: user.email
       }
-    )
-    
-    response = api_client.link_token_create(request)
+    }
+
+    if access_token.present?
+      # In update mode `products` must be omitted and `access_token` supplied.
+      params[:access_token] = access_token
+    else
+      params[:products] = ['transactions']
+    end
+
+    response = api_client.link_token_create(Plaid::LinkTokenCreateRequest.new(params))
     response.link_token
   end
 
@@ -265,6 +306,20 @@ class PlaidService < BaseService
     )
     
     api_client.accounts_get(request)
+  end
+
+  # Removes a Plaid Item so it stops counting toward billing and is no longer
+  # accessible. Use when retiring a stale/duplicate connection.
+  def remove_item(access_token)
+    request = Plaid::ItemRemoveRequest.new(
+      {
+        client_id: ENV["PLAID_CLIENT_ID"],
+        secret: ENV["PLAID_SECRET"],
+        access_token: access_token
+      }
+    )
+
+    api_client.item_remove(request)
   end
 
   def api_client

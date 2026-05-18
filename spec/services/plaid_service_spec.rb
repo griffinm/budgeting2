@@ -255,6 +255,57 @@ RSpec.describe PlaidService do
         service.sync_transactions
       end
     end
+
+    context 'when a Plaid Item has a broken connection' do
+      let(:login_required_error) do
+        Plaid::ApiError.new(response_body: '{"error_code":"ITEM_LOGIN_REQUIRED"}')
+      end
+
+      before do
+        plaid_access_token
+        allow(mock_api_client).to receive(:transactions_sync).and_raise(login_required_error)
+      end
+
+      it 'flags the access token for reconnection' do
+        service.sync_transactions
+        expect(plaid_access_token.reload.status).to eq('login_required')
+        expect(plaid_access_token.error_code).to eq('ITEM_LOGIN_REQUIRED')
+      end
+
+      it 'marks the sync event as ERROR instead of raising' do
+        expect { service.sync_transactions }.not_to raise_error
+        expect(PlaidSyncEvent.last.event_type).to eq('ERROR')
+      end
+
+      it 'still syncs other healthy Items' do
+        healthy_token = create(:plaid_access_token, account: account)
+        # The first Item (plaid_access_token) fails; the second succeeds.
+        call_count = 0
+        allow(mock_api_client).to receive(:transactions_sync) do
+          call_count += 1
+          raise login_required_error if call_count == 1
+          mock_sync_response
+        end
+
+        service.sync_transactions
+
+        expect(plaid_access_token.reload.status).to eq('login_required')
+        expect(healthy_token.reload.status).to eq('active')
+      end
+    end
+
+    context 'when a sync succeeds' do
+      before { plaid_access_token }
+
+      it 'marks the access token healthy and records the sync time' do
+        plaid_access_token.mark_error!('ITEM_LOGIN_REQUIRED')
+        service.sync_transactions
+
+        expect(plaid_access_token.reload.status).to eq('active')
+        expect(plaid_access_token.error_code).to be_nil
+        expect(plaid_access_token.last_synced_at).to be_present
+      end
+    end
   end
 
   describe '#api_client' do

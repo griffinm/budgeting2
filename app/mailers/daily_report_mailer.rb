@@ -15,6 +15,7 @@ class DailyReportMailer < ApplicationMailer
     compute_monthly_summary
     compute_recent_transactions
     compute_category_spending
+    compute_connection_warnings
 
     attachments.inline["monthly_spend.png"] = Charts::MonthlySpendChartService.new(user.id).to_png
 
@@ -22,6 +23,17 @@ class DailyReportMailer < ApplicationMailer
   end
 
   private
+
+  # Names of the user's accounts whose Plaid connection is unhealthy and needs
+  # to be repaired via Link update mode.
+  def compute_connection_warnings
+    @connection_warnings = @user.plaid_accounts
+      .active
+      .includes(:plaid_access_token)
+      .select { |pa| pa.plaid_access_token && !pa.plaid_access_token.healthy? }
+      .map(&:pick_name)
+      .uniq
+  end
 
   def compute_monthly_summary
     current_day = @today.day

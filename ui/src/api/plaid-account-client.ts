@@ -29,8 +29,22 @@ export const removeUserFromPlaidAccount = async ({
   return response.data;
 };
 
-export const createLinkToken = async (): Promise<{ link_token: string }> => {
-  const response = await baseClient.post("/plaid_accounts/create_link_token");
+export const createLinkToken = async (
+  plaidAccessTokenId?: number
+): Promise<{ link_token: string }> => {
+  const response = await baseClient.post(
+    "/plaid_accounts/create_link_token",
+    plaidAccessTokenId ? { plaid_access_token_id: plaidAccessTokenId } : {}
+  );
+  return response.data;
+};
+
+export const reconnectPlaidAccount = async (
+  plaidAccessTokenId: number
+): Promise<{ message: string; status: string }> => {
+  const response = await baseClient.post("/plaid_accounts/reconnect", {
+    plaid_access_token_id: plaidAccessTokenId,
+  });
   return response.data;
 };
 

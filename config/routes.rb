@@ -46,6 +46,7 @@ Rails.application.routes.draw do
       collection do
         post 'create_link_token', to: 'plaid_accounts#create_link_token'
         post 'exchange_public_token', to: 'plaid_accounts#exchange_public_token'
+        post 'reconnect', to: 'plaid_accounts#reconnect'
         get 'update_all', to: 'plaid_accounts#update_all'
         get 'account_balance', to: 'account_balances#index'
         get 'account_balance_history', to: 'account_balances#history'
