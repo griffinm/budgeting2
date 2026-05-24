@@ -112,6 +112,9 @@ class PlaidService < BaseService
       Rails.logger.error "Error syncing transactions for access token #{access_token.id}: #{exception.message}"
       Rails.logger.error exception.backtrace.join("\n")
       plaid_sync_event.update(event_type: "ERROR", completed_at: Time.now)
+      # Flip the token so a silent crash still surfaces on the Accounts page and
+      # in the daily report instead of leaving the token forever "active".
+      access_token.mark_error!("INTERNAL_ERROR")
     end
   end
 
@@ -130,7 +133,11 @@ class PlaidService < BaseService
     Rails.logger.info("Adding #{transactions.count} transactions for account #{@account.id} sync event #{plaid_sync_event.id}")
     transactions.each do |transaction|
       plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: @account.id)
-      
+      if plaid_account.nil?
+        Rails.logger.warn("Skipping transaction #{transaction.transaction_id}: no PlaidAccount for plaid_id=#{transaction.account_id} on account #{@account.id}")
+        next
+      end
+
       transaction_attrs = PlaidTransaction.parse_plaid_transaction(transaction, @account, plaid_account, plaid_sync_event)
       new_transaction = PlaidTransaction.new(transaction_attrs)
 
@@ -144,8 +151,17 @@ class PlaidService < BaseService
     Rails.logger.info("Updating #{transactions.count} transactions for account #{@account.id} sync event #{plaid_sync_event.id}")
     transactions.each do |transaction|
       existing_transaction = PlaidTransaction.find_by(plaid_id: transaction.transaction_id)
+      if existing_transaction.nil?
+        Rails.logger.warn("Skipping update for transaction #{transaction.transaction_id}: no existing PlaidTransaction found")
+        next
+      end
+
       plaid_account = PlaidAccount.find_by(plaid_id: transaction.account_id, account_id: @account.id)
-      
+      if plaid_account.nil?
+        Rails.logger.warn("Skipping update for transaction #{transaction.transaction_id}: no PlaidAccount for plaid_id=#{transaction.account_id} on account #{@account.id}")
+        next
+      end
+
       transaction_attrs = PlaidTransaction.parse_plaid_transaction(transaction, @account, plaid_account, plaid_sync_event)
       existing_transaction.update(transaction_attrs)
     end

@@ -215,6 +215,7 @@ export interface PlaidAccount {
   plaidAccessTokenId: number;
   connectionStatus: PlaidConnectionStatus | null;
   needsReconnect: boolean;
+  errorCode: string | null;
 }
 
 export interface SyncEvent {

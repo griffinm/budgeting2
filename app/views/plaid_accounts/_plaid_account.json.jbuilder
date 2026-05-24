@@ -9,5 +9,6 @@ json.updatedAt plaid_account.updated_at
 json.nickname plaid_account.nickname
 json.plaidAccessTokenId plaid_account.plaid_access_token_id
 json.connectionStatus plaid_account.plaid_access_token&.status
-json.needsReconnect plaid_account.plaid_access_token&.needs_reconnect? || false
+json.needsReconnect plaid_account.plaid_access_token.present? && !plaid_account.plaid_access_token.healthy?
+json.errorCode plaid_account.plaid_access_token&.error_code
 json.users plaid_account.users, partial: 'users/user', as: :user
