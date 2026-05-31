@@ -22,14 +22,14 @@ import {
 import { useRef, useState } from "react";
 import { MerchantGroup } from "@/utils/types";
 
-interface SortOption {
+export interface SortOption {
   sort_by: 'name' | 'transaction_count';
   sort_direction: 'asc' | 'desc';
   label: string;
   icon: React.ReactNode;
 }
 
-const SORT_OPTIONS: SortOption[] = [
+export const SORT_OPTIONS: SortOption[] = [
   { sort_by: 'name', sort_direction: 'asc', label: 'Name A → Z', icon: <IconSortAscendingLetters size={16} /> },
   { sort_by: 'name', sort_direction: 'desc', label: 'Name Z → A', icon: <IconSortDescendingLetters size={16} /> },
   { sort_by: 'transaction_count', sort_direction: 'desc', label: 'Most transactions', icon: <IconSortDescendingNumbers size={16} /> },

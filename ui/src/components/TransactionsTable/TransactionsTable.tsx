@@ -128,7 +128,7 @@ export function TransactionsTable({
   }, [hasMore, isLoadingMore, loadMore, displayTransactions.length]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col min-h-[500px]">
       <div ref={scrollContainerRef} className="flex-1 flex flex-col gap-3 overflow-y-auto scrollbar-hide">
         {isLoading && displayTransactions.length === 0 ? (
           <div className="flex flex-row justify-center transition-opacity duration-300 ease-in-out">

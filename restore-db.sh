@@ -5,7 +5,7 @@ BACKUP_DIR="/mnt/nas/backup/automated"
 BACKUP_NAME="budgeting2_production"
 DB_NAME="budgeting2_development"
 DB_USER="griffin"
-CONTAINER="budgeting-db-1"
+CONTAINER="budgeting2-db-1"
 COMPOSE_FILE="$(dirname "$0")/docker-compose.yml"
 
 # Find the latest backup for this database

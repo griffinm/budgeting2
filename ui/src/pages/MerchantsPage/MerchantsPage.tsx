@@ -8,6 +8,7 @@ import { fetchMerchantCategories } from "@/api/merchant-categories-client";
 import { fetchMerchantGroups, updateMerchantGroup } from "@/api/merchant-groups-client";
 import { Card } from "@mantine/core";
 import { Search } from "@/components/MerchantsTable/Search";
+import { FooterActionBar } from "@/components/MerchantsTable/FooterActionBar";
 
 export default function MerchantsPage() {
   const [allMerchantCategories, setAllMerchantCategories] = useState<MerchantCategory[]>([]);
@@ -80,7 +81,7 @@ export default function MerchantsPage() {
           isLoading={isLoading}
         />
       </div>
-      <Card p={0} className="flex-1 min-h-0">
+      <Card p={0} className="flex-1 min-h-0 pb-16 md:pb-0">
         <MerchantsTable
           allMerchantCategories={allMerchantCategories}
           allMerchantGroups={allMerchantGroups}
@@ -95,6 +96,15 @@ export default function MerchantsPage() {
           scrollCacheKey={scrollCacheKey}
         />
       </Card>
+
+      <FooterActionBar
+        searchParams={searchParams}
+        onSetSearchParams={setSearchParams}
+        onClearSearchParams={clearSearchParams}
+        allMerchantGroups={allMerchantGroups}
+        totalCount={page.totalCount}
+        isLoading={isLoading}
+      />
     </div>
   );
 }

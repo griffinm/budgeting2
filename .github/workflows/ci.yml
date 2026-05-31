@@ -113,7 +113,7 @@ jobs:
       - name: Deploy to production
         uses: appleboy/ssh-action@v1
         with:
-          host: layla.malfin.com
+          host: server-vm
           username: griffin
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
