@@ -8,9 +8,11 @@ import { useMemo } from "react";
 export function SpendSummary({
   spendStats,
   loading,
+  mode = "expense",
 }: {
   spendStats: MerchantSpendStats | null;
   loading: boolean;
+  mode?: "expense" | "income";
 }) {
   const cards = useMemo(() => {
     if (!spendStats) return [];
@@ -42,7 +44,13 @@ export function SpendSummary({
           <Text size="sm" c="dimmed">{card.title}</Text>
           <Text size="xxl" fw={700} mt={4} style={{ fontSize: '1.75rem' }}>{formatDollars(card.value, { sign: 'never' })}</Text>
           {card.diff !== undefined && (
-            <Text size="xs" mt={4} c={card.diff >= 0 ? "red" : "teal"} className="flex items-center gap-1">
+            // More spending is bad, more income is good
+            <Text
+              size="xs"
+              mt={4}
+              c={(card.diff >= 0) === (mode === "income") ? "teal" : "red"}
+              className="flex items-center gap-1"
+            >
               {card.diff >= 0 ? <IconTrendingUp size={14} /> : <IconTrendingDown size={14} />}
               {Math.abs(card.diff).toFixed(0)}% vs last month
             </Text>

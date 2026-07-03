@@ -10,12 +10,14 @@ export function TrendChart({
   monthsBack=6,
   onChangeMonthsBack,
   averageSpendForChart,
+  mode = "expense",
 }: {
   merchantSpendStats?: MerchantSpendStats;
   loading: boolean;
   monthsBack: number;
   onChangeMonthsBack: (monthsBack: number) => void;
   averageSpendForChart?: number;
+  mode?: "expense" | "income";
 }) {
 
   if (loading || !merchantSpendStats) {
@@ -25,7 +27,7 @@ export function TrendChart({
   return (
     <div className="flex flex-col gap-2">
       <Group justify="space-between" align="flex-end" mb="md">
-        <Text size="lg" fw={600}>Spending Trend</Text>
+        <Text size="lg" fw={600}>{mode === "income" ? "Income Trend" : "Spending Trend"}</Text>
         <Select
           value={monthsBack.toString()}
           onChange={(value) => onChangeMonthsBack(parseInt(value || '6'))}
@@ -45,7 +47,9 @@ export function TrendChart({
           }))}
           dataKey="month"
           series={[
-            { name: 'amount', color: 'blue', label: 'Amount' },
+            mode === "income"
+              ? { name: 'amount', color: 'green', label: 'Income' }
+              : { name: 'amount', color: 'blue', label: 'Amount' },
           ]}
           withLegend={false}
           referenceLines={averageSpendForChart ? [{

@@ -1,24 +1,11 @@
 import { baseClient } from '@/api/base-client';
-import { ProfitAndLossItem, TransactionType, TotalForDateRange } from '@/utils/types';
+import { ProfitAndLossItem } from '@/utils/types';
 
 export interface SpendMovingAverage {
   dayOfMonth: number;
   dayAverage: number;
   cumulativeTotal: number;
   cumulativeAveragePerDay: number;
-}
-
-export interface TotalForDateRangeParams {
-  transactionType: TransactionType;
-  startDate: Date;
-  endDate: Date;
-}
-
-export async function getTotalForDateRange(params: TotalForDateRangeParams): Promise<TotalForDateRange> {
-  const url = '/data/total_for_date_range';
-  const date = params.startDate && params.endDate ? `start_date=${params.startDate}&end_date=${params.endDate}` : undefined;
-  const response = await baseClient.get(`${url}?${date}`);
-  return response.data;
 }
 
 export async function getProfitAndLoss({

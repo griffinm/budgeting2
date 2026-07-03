@@ -1,15 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CompositeChart } from "@mantine/charts";
 import { Paper, Text } from "@mantine/core";
 import { format as formatDate } from "date-fns";
-import { getProfitAndLoss } from "@/api";
 import { Loading } from "@/components/Loading";
 import { chartCurrencyFormatter } from "@/utils/currencyUtils";
 import { ProfitAndLossItem } from "@/utils/types";
 
 const DISPLAY_MONTHS = 24;
 const MA_WINDOW = 6;
-const FETCH_MONTHS_BACK = DISPLAY_MONTHS + MA_WINDOW - 1;
+export const FETCH_MONTHS_BACK = DISPLAY_MONTHS + MA_WINDOW - 1;
 
 function monthLabel(item: ProfitAndLossItem) {
   return formatDate(new Date(item.year, item.month - 1, 1), "MMM yyyy");
@@ -17,17 +16,16 @@ function monthLabel(item: ProfitAndLossItem) {
 
 const currencyFormatter = chartCurrencyFormatter({ cents: true });
 
-export function SixMonthMovingAverage() {
-  const [items, setItems] = useState<ProfitAndLossItem[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    getProfitAndLoss({ monthsBack: FETCH_MONTHS_BACK }).then((data) => {
-      setItems(data);
-      setLoading(false);
-    });
-  }, []);
+export function SixMonthMovingAverage({
+  transactionType,
+  items,
+  loading,
+}: {
+  transactionType: "expense" | "income";
+  items: ProfitAndLossItem[];
+  loading: boolean;
+}) {
+  const isIncome = transactionType === "income";
 
   const chartData = useMemo(() => {
     const now = new Date();
@@ -41,26 +39,27 @@ export function SixMonthMovingAverage() {
       );
 
     const enriched = sorted.map((item, i) => {
+      const valueOf = (row: ProfitAndLossItem) => (isIncome ? row.income : row.expense);
       let movingAverage: number | undefined;
       if (i >= MA_WINDOW - 1) {
         const window = sorted.slice(i - (MA_WINDOW - 1), i + 1);
-        const sum = window.reduce((acc, w) => acc + w.expense, 0);
+        const sum = window.reduce((acc, w) => acc + valueOf(w), 0);
         movingAverage = Math.round((sum / MA_WINDOW) * 100) / 100;
       }
       return {
         month: monthLabel(item),
-        expense: item.expense,
+        value: valueOf(item),
         movingAverage,
       };
     });
 
     return enriched.slice(-DISPLAY_MONTHS);
-  }, [items]);
+  }, [items, isIncome]);
 
   return (
     <Paper p="md" withBorder>
       <Text size="lg" fw={600} mb="md">
-        6-Month Moving Average
+        6-Month Moving Average — {isIncome ? "Income" : "Spending"}
       </Text>
       {loading ? (
         <Loading fullHeight={false} />
@@ -70,7 +69,12 @@ export function SixMonthMovingAverage() {
           data={chartData}
           dataKey="month"
           series={[
-            { name: "expense", color: "red", label: "Monthly Spend", type: "bar" },
+            {
+              name: "value",
+              color: isIncome ? "green" : "red",
+              label: isIncome ? "Monthly Income" : "Monthly Spend",
+              type: "bar",
+            },
             {
               name: "movingAverage",
               color: "blue",

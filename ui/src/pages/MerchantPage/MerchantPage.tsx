@@ -40,6 +40,12 @@ export default function MerchantPage() {
   const { tags: allTags, createTag } = useTags();
   const [chartMonthsBack, setChartMonthsBack] = useState(6);
 
+  // Income merchants (payroll, employers) display their income series instead
+  // of the (empty) expense series
+  const isIncomeMerchant =
+    merchant?.defaultTransactionType === "income" ||
+    merchant?.defaultMerchantTag?.tagType === "income";
+
   // Slice the full 24-month data for the chart view
   const chartSpendStats = useMemo(() => {
     if (!merchantSpendStats) return undefined;
@@ -86,18 +92,23 @@ export default function MerchantPage() {
 
       fetchStats
         .then((data) => {
+          // Income merchants show the income series through the same
+          // monthlySpend/allTimeSpend state shape
+          const activeMonths = (isIncomeMerchant && data.monthlyIncome) || data.monthlySpend;
+          const activeTotal = isIncomeMerchant ? (data.allTimeIncome ?? 0) : data.allTimeSpend;
+
           setMerchantSpendStats({
             monthsBack: data.monthsBack,
-            monthlySpend: data.monthlySpend.map((month) => ({
+            monthlySpend: activeMonths.map((month) => ({
               month: month.month,
               amount: Math.abs(month.amount || 0),
             })),
-            allTimeSpend: data.allTimeSpend,
+            allTimeSpend: activeTotal,
           });
         })
         .finally(() => setMerchantSpendStatsLoading(false));
     }
-  }, [merchant, id]);
+  }, [merchant, id, isIncomeMerchant]);
 
   if (merchantLoading || !merchant) {
     return <Loading />
@@ -120,7 +131,11 @@ export default function MerchantPage() {
           onCreateTag={createTag}
         />
 
-        <SpendSummary spendStats={merchantSpendStats} loading={merchantSpendStatsLoading} />
+        <SpendSummary
+          spendStats={merchantSpendStats}
+          loading={merchantSpendStatsLoading}
+          mode={isIncomeMerchant ? "income" : "expense"}
+        />
 
         <Paper withBorder p="md" radius="md">
           <TrendChart
@@ -129,6 +144,7 @@ export default function MerchantPage() {
             monthsBack={chartMonthsBack}
             onChangeMonthsBack={setChartMonthsBack}
             averageSpendForChart={averageSpendForChart}
+            mode={isIncomeMerchant ? "income" : "expense"}
           />
         </Paper>
 

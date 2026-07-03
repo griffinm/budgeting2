@@ -197,6 +197,8 @@ export interface MerchantSpendStats {
   monthsBack: number;
   monthlySpend: MerchantSpendMonth[];
   allTimeSpend: number;
+  monthlyIncome?: MerchantSpendMonth[];
+  allTimeIncome?: number;
 }
 
 export interface ProfitAndLossItem {
@@ -283,9 +285,3 @@ export interface MovingAverage {
   cumulativeAveragePerDay: number;
 }
 
-export interface TotalForDateRange {
-  transactionType: TransactionType;
-  startDate: Date;
-  endDate: Date;
-  total: number;
-}
