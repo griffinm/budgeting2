@@ -6,3 +6,4 @@ json.createdAt merchant_tag.created_at
 json.updatedAt merchant_tag.updated_at
 json.targetBudget merchant_tag.target_budget || 0
 json.isLeaf merchant_tag.is_leaf? || false
+json.tagType merchant_tag.tag_type

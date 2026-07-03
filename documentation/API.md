@@ -812,10 +812,13 @@ List all categories for the current account, sorted alphabetically.
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z",
     "targetBudget": 500,
-    "isLeaf": true
+    "isLeaf": true,
+    "tagType": "expense"
   }
 ]
 ```
+
+`tagType` is `"expense"` or `"income"`. Every category in a tree shares its root's type — children always inherit. `targetBudget` is a monthly spending cap on expense categories and the expected monthly income on income categories.
 
 ---
 
@@ -842,7 +845,8 @@ Create a new category.
   "merchant_tag": {
     "name": "Groceries",
     "parent_merchant_tag_id": null,
-    "target_budget": 500
+    "target_budget": 500,
+    "tag_type": "expense"
   }
 }
 ```
@@ -851,7 +855,8 @@ Create a new category.
 |---|---|
 | `merchant_tag[name]` | Category name (required) |
 | `merchant_tag[parent_merchant_tag_id]` | Parent category ID for nesting (optional) |
-| `merchant_tag[target_budget]` | Monthly budget target (optional) |
+| `merchant_tag[target_budget]` | Monthly budget target: spending cap for expense categories, expected income for income categories (optional) |
+| `merchant_tag[tag_type]` | `"expense"` (default) or `"income"`. Only meaningful on root categories — children always inherit the root's type |
 
 **Response (200):** Returns the created category object.
 
@@ -878,10 +883,13 @@ Update an existing category.
   "merchant_tag": {
     "name": "Groceries & Food",
     "parent_merchant_tag_id": null,
-    "target_budget": 600
+    "target_budget": 600,
+    "tag_type": "expense"
   }
 }
 ```
+
+Changing `tag_type` on a root category cascades to all of its descendants; on a child it is ignored (the parent's type wins).
 
 **Response (200):** Returns the updated category object.
 
@@ -897,7 +905,7 @@ Update an existing category.
 
 ### DELETE /api/merchant_tags/:id
 
-Delete a category. Its child categories are promoted one level up (to the deleted category's parent, or to top-level), its transactions become uncategorized, and merchants defaulting to it lose that default.
+Delete a category. Its child categories are promoted one level up (to the deleted category's parent, or to top-level) and keep their tag type, its transactions become uncategorized, and merchants defaulting to it lose that default.
 
 **Auth required:** Yes
 
