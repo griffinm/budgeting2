@@ -39,9 +39,12 @@ export function FullRow({
   const navigate = useNavigate();
 
   return (
-    <div className="w-full px-3 py-2 relative border-b border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-[var(--mantine-color-dark-5)] transition-colors">
+    <div className="group relative w-full border-b border-gray-100 dark:border-[var(--mantine-color-dark-4)] hover:bg-gray-50 dark:hover:bg-[var(--mantine-color-dark-6)] transition-colors">
+      {/* Hover accent rail — echoes the sidebar's active indicator */}
+      <span className="pointer-events-none absolute left-0 top-0 bottom-0 w-[3px] bg-primary-400 dark:bg-primary-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+
       {/* Desktop layout */}
-      <div className="hidden md:flex flex-row items-center gap-3">
+      <div className="hidden md:flex flex-row items-center gap-3 px-4 py-2.5">
         {/* Logo */}
         <div className="h-[40px] w-[40px] flex-shrink-0 flex items-center">
           <Logo merchant={transaction.merchant} isCheck={transaction.isCheck} />
@@ -49,22 +52,20 @@ export function FullRow({
 
         {/* Merchant + account */}
         <div className="flex flex-col min-w-0 w-[200px] flex-shrink-0">
-          <div className="text-sm font-medium truncate">
+          <div className="text-sm font-semibold truncate leading-tight">
             <Link to={urls.merchant.path(transaction.merchant.id)}>
               {merchantDisplayName(transaction.merchant)}
             </Link>
           </div>
-          <div className="flex flex-col gap-2 pt-1">
-            <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
-              {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
-            </span>
-            <div className="flex items-center gap-1">
-              <TransactionType
-                transaction={transaction}
-                onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
-              />
-              <ConfirmTypeButton transaction={transaction} updateTransaction={updateTransaction} />
-            </div>
+          <span className="text-xs text-gray-400 dark:text-gray-500 truncate mt-0.5">
+            {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
+          </span>
+          <div className="flex items-center gap-1 mt-1.5">
+            <TransactionType
+              transaction={transaction}
+              onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
+            />
+            <ConfirmTypeButton transaction={transaction} updateTransaction={updateTransaction} />
           </div>
         </div>
 
@@ -81,7 +82,7 @@ export function FullRow({
 
         {/* Tags */}
         {allTags && addTransactionTag && removeTransactionTag && createAndAddTag && (
-          <div className="flex flex-1 justify-center">
+          <div className="flex flex-1 justify-start min-w-0">
             <TransactionTags
               transaction={transaction}
               allTags={allTags}
@@ -93,19 +94,19 @@ export function FullRow({
         )}
 
         {/* Amount — right-aligned */}
-        <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto pl-3">
+        <div className="flex items-center gap-2 flex-shrink-0 ml-auto pl-3">
           {transaction.pending && <PendingBadge />}
           {transaction.parentTransactionId && <SplitBadge />}
-          <div className="text-right cursor-pointer hover:underline" onClick={() => navigate(urls.transaction.path(transaction.id))}>
+          <div className="text-right cursor-pointer hover:underline underline-offset-2 decoration-1" onClick={() => navigate(urls.transaction.path(transaction.id))}>
             <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
           </div>
         </div>
 
-        {/* Menu */}
-        <div className="flex-shrink-0 flex items-center">
+        {/* Menu — rests hidden, reveals on row hover / keyboard focus */}
+        <div className="flex-shrink-0 flex items-center opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
           <Menu>
             <Menu.Target>
-              <ActionIcon variant="subtle" size="xs">
+              <ActionIcon variant="subtle" color="gray" size="sm">
                 <IconDotsVertical size={16} />
               </ActionIcon>
             </Menu.Target>
@@ -122,7 +123,7 @@ export function FullRow({
       </div>
 
       {/* Mobile layout */}
-      <div className="flex md:hidden flex-col justify-between">
+      <div className="flex md:hidden flex-col justify-between px-4 py-2.5">
         {/* Collapsed: Merchant + Amount */}
         <div
           className="flex items-start justify-between cursor-pointer"
@@ -134,7 +135,7 @@ export function FullRow({
               className={`flex-shrink-0 text-gray-400 dark:text-gray-500 transition-transform ${isMobileExpanded ? "rotate-0" : "-rotate-90"}`}
             />
             <div className="min-w-0">
-              <div className="text-sm font-medium truncate">
+              <div className="text-sm font-semibold truncate leading-tight">
                 <Link to={urls.merchant.path(transaction.merchant.id)} onClick={(e) => e.stopPropagation()}>
                   {merchantDisplayName(transaction.merchant)}
                 </Link>
@@ -145,7 +146,7 @@ export function FullRow({
             </div>
           </div>
           <div
-            className="flex items-center gap-1.5 flex-shrink-0 pl-3 cursor-pointer"
+            className="flex items-center gap-2 flex-shrink-0 pl-3 cursor-pointer"
             onClick={(e) => { e.stopPropagation(); navigate(urls.transaction.path(transaction.id)); }}
           >
             {transaction.pending && <PendingBadge />}
@@ -156,7 +157,7 @@ export function FullRow({
 
         {/* Expanded: Type + Category + Tags */}
         {isMobileExpanded && (
-          <div className="flex items-center flex-wrap w-full">
+          <div className="flex items-center flex-wrap w-full mt-2 pt-2 border-t border-gray-100 dark:border-[var(--mantine-color-dark-4)]">
             <div className="w-1/4 flex items-center gap-1">
               <TransactionType
                 transaction={transaction}
@@ -188,16 +189,18 @@ export function FullRow({
         )}
       </div>
 
-      {/* Note row */}
-      <div className="pt-2">
-      <TransactionNote
-        transaction={transaction}
-        updateTransaction={updateTransaction}
-        isEditing={isEditingNote}
-        onCancel={() => setIsEditingNote(false)}
-        onEdit={() => setIsEditingNote(true)}
-      />
-      </div>
+      {/* Note row — only rendered when a note exists or is being edited */}
+      {(isEditingNote || transaction.note) && (
+        <div className="px-4 pb-2.5 -mt-1 md:pl-[3.25rem]">
+          <TransactionNote
+            transaction={transaction}
+            updateTransaction={updateTransaction}
+            isEditing={isEditingNote}
+            onCancel={() => setIsEditingNote(false)}
+            onEdit={() => setIsEditingNote(true)}
+          />
+        </div>
+      )}
     </div>
   )
 }

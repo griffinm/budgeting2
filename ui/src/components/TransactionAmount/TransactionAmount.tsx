@@ -14,7 +14,7 @@ export function TransactionAmount({
   const isNegative = amount < 0;
   const isIncome = transactionType === 'income';
   const isTransfer = transactionType === 'transfer';
-  const amountClass = classNames('font-semibold', {
+  const amountClass = classNames('font-semibold tabular-nums tracking-tight', {
     'text-green-600 dark:text-green-400': isIncome,
     'text-gray-400 dark:text-gray-500': isTransfer,
     'text-neutral-600 dark:text-neutral-300': !isIncome && !isTransfer && !isNegative,
