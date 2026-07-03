@@ -52,7 +52,7 @@ RSpec.describe MerchantTagService do
       )
     end
 
-    it 'excludes income and transfer transactions from spend' do
+    it 'excludes income and transfer transactions from expense tag spend' do
       tag = make_tag
       make_transaction(tag: tag, date: Date.new(2026, 3, 15), amount: 25.00)
       make_transaction(tag: tag, date: Date.new(2026, 3, 16), amount: -2000.00, transaction_type: 'income')
@@ -62,6 +62,19 @@ RSpec.describe MerchantTagService do
 
       expect(results).to contain_exactly(
         { tag_id: tag.id, year: 2026, month: 3, total_amount: 25.00 },
+      )
+    end
+
+    it 'reports received income as positive on income tags, excluding expense rows' do
+      income_tag = make_tag(tag_type: 'income')
+      make_transaction(tag: income_tag, date: Date.new(2026, 3, 15), amount: -1000.00, transaction_type: 'income')
+      make_transaction(tag: income_tag, date: Date.new(2026, 3, 20), amount: -500.00, transaction_type: 'income')
+      make_transaction(tag: income_tag, date: Date.new(2026, 3, 21), amount: 40.00) # expense row, excluded
+
+      results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+
+      expect(results).to contain_exactly(
+        { tag_id: income_tag.id, year: 2026, month: 3, total_amount: 1500.00 },
       )
     end
 
@@ -137,6 +150,23 @@ RSpec.describe MerchantTagService do
       expect(row[:total_transaction_amount]).to eq(30.00)
     end
 
+    it 'handles an expense tree and an income tree simultaneously' do
+      expense_root = make_tag
+      expense_child = make_tag(parent_merchant_tag: expense_root)
+      income_root = make_tag(tag_type: 'income')
+      income_child = make_tag(parent_merchant_tag: income_root)
+
+      make_transaction(tag: expense_child, date: Date.new(2026, 3, 15), amount: 75.00)
+      make_transaction(tag: income_child, date: Date.new(2026, 3, 16), amount: -1200.00, transaction_type: 'income')
+
+      results = service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+
+      expect(results.find { |r| r[:id] == expense_root.id }[:total_transaction_amount]).to eq(75.00)
+      expect(results.find { |r| r[:id] == expense_child.id }[:total_transaction_amount]).to eq(75.00)
+      expect(results.find { |r| r[:id] == income_root.id }[:total_transaction_amount]).to eq(1200.00)
+      expect(results.find { |r| r[:id] == income_child.id }[:total_transaction_amount]).to eq(1200.00)
+    end
+
     it 'only includes tags belonging to the account' do
       other_account = create(:account)
       other_user = create(:user, account: other_account)
@@ -175,6 +205,18 @@ RSpec.describe MerchantTagService do
 
       expect(results).to contain_exactly(
         { month: last_month.month, year: last_month.year, tag_id: tag.id, total_amount: 30.00 },
+      )
+    end
+
+    it 'reports received income as positive for an income tag' do
+      income_tag = make_tag(tag_type: 'income')
+      make_transaction(tag: income_tag, date: last_month + 4.days, amount: -1000.00, transaction_type: 'income')
+      make_transaction(tag: income_tag, date: last_month + 5.days, amount: 40.00) # expense row, excluded
+
+      results = service.spend_stats_for_tag(tag_id: income_tag.id, months_back: 6)
+
+      expect(results).to contain_exactly(
+        { month: last_month.month, year: last_month.year, tag_id: income_tag.id, total_amount: 1000.00 },
       )
     end
   end

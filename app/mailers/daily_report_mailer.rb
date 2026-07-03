@@ -76,7 +76,9 @@ class DailyReportMailer < ApplicationMailer
     )
 
     all_tags = @account.merchant_tags.active.index_by(&:id)
-    top_level_tags = @account.merchant_tags.active.where(parent_merchant_tag_id: nil)
+    # Expense categories only: income targets mean "expected income", which
+    # would corrupt a budget-vs-actual table built around spending caps
+    top_level_tags = @account.merchant_tags.active.where(parent_merchant_tag_id: nil, tag_type: 'expense')
 
     @category_spending = top_level_tags.filter_map do |tag|
       budget = recursive_budget(tag.id, all_tags)

@@ -929,7 +929,7 @@ Delete a category. Its child categories are promoted one level up (to the delete
 
 ### GET /api/merchant_tags/spend_stats
 
-Get spend statistics for all categories in a date range. Totals (including `uncategorizedTotal`) count expense transactions only — refunds net out, income and transfers are excluded.
+Get spend statistics for all categories in a date range. A transaction counts only when its type matches its category's `tagType`: expense categories report signed spend (refunds net out), income categories report received income as a positive number, transfers count in neither. `uncategorizedTotal` remains expense-only.
 
 **Auth required:** Yes
 
@@ -979,7 +979,7 @@ Get spend statistics for all categories in a date range. Totals (including `unca
 
 ### GET /api/merchant_tags/:merchant_tag_id/spend_stats
 
-Get monthly spend statistics for a single category. Totals count expense transactions only — refunds net out, income and transfers are excluded.
+Get monthly spend statistics for a single category. A transaction counts only when its type matches the category's `tagType`: expense categories report signed spend (refunds net out), income categories report received income as a positive number.
 
 **Auth required:** Yes
 

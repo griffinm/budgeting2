@@ -47,19 +47,24 @@ class MerchantTagService < BaseService
       ),
 
       tagged_transactions AS (
-        -- Spend convention (see PlaidTransaction.spend_total): expense rows
-        -- only, signed sum so refunds net out
+        -- Type-aware convention: expense tags sum signed spend (refunds net
+        -- out); income tags sum received income as a positive number (Plaid
+        -- stores income negative). A transaction counts only when its type
+        -- matches its own tag's type — descendants always share the root's
+        -- type, so the rollup stays single-orientation.
         SELECT
           t.merchant_tag_id AS merchant_tag_id,
           EXTRACT(MONTH FROM t.date) AS month,
           EXTRACT(YEAR FROM t.date) AS year,
-          t.amount AS amount
+          CASE WHEN tag.tag_type = 'income' THEN -t.amount ELSE t.amount END AS amount
         FROM
-          merchants m INNER JOIN plaid_transactions t ON t.merchant_id = m.id
+          merchants m
+          INNER JOIN plaid_transactions t ON t.merchant_id = m.id
+          INNER JOIN merchant_tags tag ON tag.id = t.merchant_tag_id
         WHERE
           t.date <= #{sanitized_end_date}
         AND t.date >= #{sanitized_start_date}
-        AND t.transaction_type = 'expense'
+        AND t.transaction_type = tag.tag_type
       )
 
       -- Roll descendant spend up into each ancestor, bucketed by month
@@ -95,14 +100,16 @@ class MerchantTagService < BaseService
           EXTRACT(MONTH FROM pt.date) AS month,
           EXTRACT(YEAR FROM pt.date) AS year,
           mt.id AS tag_id,
-          SUM(pt.amount) AS total_amount
+          -- Type-aware convention: income tags report received income as a
+          -- positive number; expense tags report signed spend
+          SUM(CASE WHEN mt.tag_type = 'income' THEN -pt.amount ELSE pt.amount END) AS total_amount
         FROM
             merchant_tags mt INNER JOIN plaid_transactions pt ON mt.id = pt.merchant_tag_id
         WHERE
             (mt.id = #{tag_id} OR pt.merchant_tag_id IN (#{child_ids.join(',')}))
             AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
             AND pt.date < #{ActiveRecord::Base.connection.quote(end_date)}
-            AND pt.transaction_type = 'expense'
+            AND pt.transaction_type = mt.tag_type
         GROUP BY
             year, month, tag_id
         ORDER BY
@@ -144,18 +151,22 @@ class MerchantTagService < BaseService
       ),
 
       tagged_transactions AS (
-        -- Join tags to merchants, and merchants to transactions.
-        -- Spend convention (see PlaidTransaction.spend_total): expense rows
-        -- only, signed sum so refunds net out
+        -- Type-aware convention: expense tags sum signed spend (refunds net
+        -- out); income tags sum received income as a positive number (Plaid
+        -- stores income negative). A transaction counts only when its type
+        -- matches its own tag's type — descendants always share the root's
+        -- type, so the rollup stays single-orientation.
         SELECT
           t.merchant_tag_id AS merchant_tag_id,
-          t.amount AS amount
+          CASE WHEN tag.tag_type = 'income' THEN -t.amount ELSE t.amount END AS amount
         FROM
-          merchants m INNER JOIN plaid_transactions t ON t.merchant_id = m.id
+          merchants m
+          INNER JOIN plaid_transactions t ON t.merchant_id = m.id
+          INNER JOIN merchant_tags tag ON tag.id = t.merchant_tag_id
         WHERE
           t.date <= #{ActiveRecord::Base.connection.quote(sanitized_end_date)}
         AND t.date >= #{ActiveRecord::Base.connection.quote(sanitized_start_date)}
-        AND t.transaction_type = 'expense'
+        AND t.transaction_type = tag.tag_type
       ),
 
       rolled_up AS (
