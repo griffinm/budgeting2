@@ -31,7 +31,9 @@ class TagService < BaseService
         EXTRACT(MONTH FROM pt.date) AS month,
         EXTRACT(YEAR FROM pt.date) AS year,
         tpt.tag_id AS tag_id,
-        ROUND(SUM(ABS(pt.amount))::NUMERIC, 2) AS total_amount
+        -- Spend convention (see PlaidTransaction.spend_total): expense rows
+        -- only, signed sum so refunds net out
+        ROUND(SUM(pt.amount)::NUMERIC, 2) AS total_amount
       FROM
         tag_plaid_transactions tpt
         INNER JOIN plaid_transactions pt ON tpt.plaid_transaction_id = pt.id
@@ -41,6 +43,7 @@ class TagService < BaseService
         AND tpt.tag_id IN (#{sanitized_tag_ids})
         AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
         AND pt.date <= #{ActiveRecord::Base.connection.quote(end_date)}
+        AND pt.transaction_type = 'expense'
         #{omit_clause}
       GROUP BY
         year, month, tag_id

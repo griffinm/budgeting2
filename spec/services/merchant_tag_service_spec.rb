@@ -12,7 +12,7 @@ RSpec.describe MerchantTagService do
     create(:merchant_tag, account: account, user: user, **attrs)
   end
 
-  def make_transaction(tag:, date:, amount:, target_account: account)
+  def make_transaction(tag:, date:, amount:, target_account: account, **attrs)
     create(
       :plaid_transaction,
       account: target_account,
@@ -20,15 +20,16 @@ RSpec.describe MerchantTagService do
       merchant_tag: tag,
       date: date,
       amount: amount,
+      **attrs,
     )
   end
 
   describe '#monthly_spend_stats_for_all_tags' do
     it 'buckets spend by month per tag' do
       tag = make_tag
-      make_transaction(tag: tag, date: Date.new(2026, 3, 15), amount: -25.00)
-      make_transaction(tag: tag, date: Date.new(2026, 3, 20), amount: -10.00)
-      make_transaction(tag: tag, date: Date.new(2026, 4, 5), amount: -40.00)
+      make_transaction(tag: tag, date: Date.new(2026, 3, 15), amount: 25.00)
+      make_transaction(tag: tag, date: Date.new(2026, 3, 20), amount: 10.00)
+      make_transaction(tag: tag, date: Date.new(2026, 4, 5), amount: 40.00)
 
       results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
 
@@ -41,7 +42,7 @@ RSpec.describe MerchantTagService do
     it 'rolls descendant spend up into ancestors' do
       parent = make_tag
       child = make_tag(parent_merchant_tag: parent)
-      make_transaction(tag: child, date: Date.new(2026, 5, 10), amount: -60.00)
+      make_transaction(tag: child, date: Date.new(2026, 5, 10), amount: 60.00)
 
       results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
 
@@ -51,10 +52,35 @@ RSpec.describe MerchantTagService do
       )
     end
 
+    it 'excludes income and transfer transactions from spend' do
+      tag = make_tag
+      make_transaction(tag: tag, date: Date.new(2026, 3, 15), amount: 25.00)
+      make_transaction(tag: tag, date: Date.new(2026, 3, 16), amount: -2000.00, transaction_type: 'income')
+      make_transaction(tag: tag, date: Date.new(2026, 3, 17), amount: 500.00, transaction_type: 'transfer')
+
+      results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+
+      expect(results).to contain_exactly(
+        { tag_id: tag.id, year: 2026, month: 3, total_amount: 25.00 },
+      )
+    end
+
+    it 'nets refunds against spend' do
+      tag = make_tag
+      make_transaction(tag: tag, date: Date.new(2026, 3, 15), amount: 40.00)
+      make_transaction(tag: tag, date: Date.new(2026, 3, 20), amount: -10.00) # refund: expense-typed, negative
+
+      results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+
+      expect(results).to contain_exactly(
+        { tag_id: tag.id, year: 2026, month: 3, total_amount: 30.00 },
+      )
+    end
+
     it 'excludes transactions outside the date range' do
       tag = make_tag
-      make_transaction(tag: tag, date: Date.new(2025, 12, 31), amount: -100.00)
-      make_transaction(tag: tag, date: Date.new(2026, 7, 2), amount: -100.00)
+      make_transaction(tag: tag, date: Date.new(2025, 12, 31), amount: 100.00)
+      make_transaction(tag: tag, date: Date.new(2026, 7, 2), amount: 100.00)
 
       results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
 
@@ -63,8 +89,8 @@ RSpec.describe MerchantTagService do
 
     it 'includes transactions on the range boundaries' do
       tag = make_tag
-      make_transaction(tag: tag, date: start_date, amount: -10.00)
-      make_transaction(tag: tag, date: end_date, amount: -20.00)
+      make_transaction(tag: tag, date: start_date, amount: 10.00)
+      make_transaction(tag: tag, date: end_date, amount: 20.00)
 
       results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
 
@@ -75,7 +101,7 @@ RSpec.describe MerchantTagService do
       other_account = create(:account)
       other_user = create(:user, account: other_account)
       other_tag = create(:merchant_tag, account: other_account, user: other_user)
-      make_transaction(tag: other_tag, date: Date.new(2026, 3, 15), amount: -25.00, target_account: other_account)
+      make_transaction(tag: other_tag, date: Date.new(2026, 3, 15), amount: 25.00, target_account: other_account)
 
       results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
 
@@ -87,8 +113,8 @@ RSpec.describe MerchantTagService do
     it 'sums spend within the range, rolled up into ancestors' do
       parent = make_tag
       child = make_tag(parent_merchant_tag: parent)
-      make_transaction(tag: child, date: Date.new(2026, 3, 15), amount: -25.00)
-      make_transaction(tag: child, date: Date.new(2026, 4, 15), amount: -15.00)
+      make_transaction(tag: child, date: Date.new(2026, 3, 15), amount: 25.00)
+      make_transaction(tag: child, date: Date.new(2026, 4, 15), amount: 15.00)
 
       results = service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
 
@@ -96,6 +122,19 @@ RSpec.describe MerchantTagService do
       parent_row = results.find { |r| r[:id] == parent.id }
       expect(child_row[:total_transaction_amount]).to eq(40.00)
       expect(parent_row[:total_transaction_amount]).to eq(40.00)
+    end
+
+    it 'excludes income and transfers and nets refunds' do
+      tag = make_tag
+      make_transaction(tag: tag, date: Date.new(2026, 3, 15), amount: 40.00)
+      make_transaction(tag: tag, date: Date.new(2026, 3, 16), amount: -10.00) # refund
+      make_transaction(tag: tag, date: Date.new(2026, 3, 17), amount: -2000.00, transaction_type: 'income')
+      make_transaction(tag: tag, date: Date.new(2026, 3, 18), amount: 500.00, transaction_type: 'transfer')
+
+      results = service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+
+      row = results.find { |r| r[:id] == tag.id }
+      expect(row[:total_transaction_amount]).to eq(30.00)
     end
 
     it 'only includes tags belonging to the account' do
@@ -107,6 +146,36 @@ RSpec.describe MerchantTagService do
       results = service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
 
       expect(results.map { |r| r[:id] }).to contain_exactly(mine.id)
+    end
+  end
+
+  describe '#spend_stats_for_tag' do
+    let(:current_month) { Date.today.beginning_of_month }
+    let(:last_month) { current_month - 1.month }
+
+    it 'sums expense spend per month for the tag and its descendants' do
+      parent = make_tag
+      child = make_tag(parent_merchant_tag: parent)
+      make_transaction(tag: parent, date: last_month + 4.days, amount: 25.00)
+      make_transaction(tag: child, date: last_month + 10.days, amount: 15.00)
+
+      results = service.spend_stats_for_tag(tag_id: parent.id, months_back: 6)
+
+      expect(results.sum { |r| r[:total_amount] }).to eq(40.00)
+    end
+
+    it 'excludes income and transfers and nets refunds' do
+      tag = make_tag
+      make_transaction(tag: tag, date: last_month + 4.days, amount: 40.00)
+      make_transaction(tag: tag, date: last_month + 5.days, amount: -10.00) # refund
+      make_transaction(tag: tag, date: last_month + 6.days, amount: -2000.00, transaction_type: 'income')
+      make_transaction(tag: tag, date: last_month + 7.days, amount: 500.00, transaction_type: 'transfer')
+
+      results = service.spend_stats_for_tag(tag_id: tag.id, months_back: 6)
+
+      expect(results).to contain_exactly(
+        { month: last_month.month, year: last_month.year, tag_id: tag.id, total_amount: 30.00 },
+      )
     end
   end
 end

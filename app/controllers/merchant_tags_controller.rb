@@ -66,7 +66,7 @@ class MerchantTagsController < ApplicationController
       @uncategorized_total = current_user.account.plaid_transactions
         .where(merchant_tag_id: nil)
         .where('date >= ? AND date <= ?', start_date, end_date)
-        .sum('ABS(amount)')
+        .spend_total
         .to_f
         .round(2)
       render :spend_stats_for_all

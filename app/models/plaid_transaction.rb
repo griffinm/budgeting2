@@ -31,6 +31,18 @@ class PlaidTransaction < ApplicationRecord
   scope :transfer, -> { where(transaction_type: TRANSACTION_TYPES[:transfer]) }
   scope :in_month, -> (month, year) { where(date: Date.new(year, month, 1)..Date.new(year, month, -1)) }
 
+  # Canonical aggregation convention (raw-SQL services replicate this inline):
+  #   spend  = SUM(amount) over expense rows  (positive; refunds net out)
+  #   income = -SUM(amount) over income rows  (positive; Plaid stores income negative)
+  #   transfers are excluded from both, everywhere.
+  def self.spend_total
+    expense.sum(:amount)
+  end
+
+  def self.income_total
+    -income.sum(:amount)
+  end
+
   def self.base_query_for_api(account_id)
     joins(:plaid_account, :merchant)
       .includes(:plaid_account, :merchant_tag, tag_plaid_transactions: :tag, merchant: [:default_merchant_tag])

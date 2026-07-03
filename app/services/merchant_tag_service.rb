@@ -47,16 +47,19 @@ class MerchantTagService < BaseService
       ),
 
       tagged_transactions AS (
+        -- Spend convention (see PlaidTransaction.spend_total): expense rows
+        -- only, signed sum so refunds net out
         SELECT
           t.merchant_tag_id AS merchant_tag_id,
           EXTRACT(MONTH FROM t.date) AS month,
           EXTRACT(YEAR FROM t.date) AS year,
-          ABS(t.amount) AS amount
+          t.amount AS amount
         FROM
           merchants m INNER JOIN plaid_transactions t ON t.merchant_id = m.id
         WHERE
           t.date <= #{sanitized_end_date}
         AND t.date >= #{sanitized_start_date}
+        AND t.transaction_type = 'expense'
       )
 
       -- Roll descendant spend up into each ancestor, bucketed by month
@@ -99,6 +102,7 @@ class MerchantTagService < BaseService
             (mt.id = #{tag_id} OR pt.merchant_tag_id IN (#{child_ids.join(',')}))
             AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
             AND pt.date < #{ActiveRecord::Base.connection.quote(end_date)}
+            AND pt.transaction_type = 'expense'
         GROUP BY
             year, month, tag_id
         ORDER BY
@@ -110,7 +114,7 @@ class MerchantTagService < BaseService
         month: row['month'].to_i,
         year: row['year'].to_i,
         tag_id: row['tag_id'].to_i,
-        total_amount: (row['total_amount'] || 0).abs.to_f
+        total_amount: (row['total_amount'] || 0).to_f
       }
     end
   end
@@ -140,15 +144,18 @@ class MerchantTagService < BaseService
       ),
 
       tagged_transactions AS (
-        -- Join tags to merchants, and merchants to transactions
-        SELECT 
+        -- Join tags to merchants, and merchants to transactions.
+        -- Spend convention (see PlaidTransaction.spend_total): expense rows
+        -- only, signed sum so refunds net out
+        SELECT
           t.merchant_tag_id AS merchant_tag_id,
-          ABS(t.amount) AS amount
+          t.amount AS amount
         FROM
           merchants m INNER JOIN plaid_transactions t ON t.merchant_id = m.id
-        WHERE 
+        WHERE
           t.date <= #{ActiveRecord::Base.connection.quote(sanitized_end_date)}
         AND t.date >= #{ActiveRecord::Base.connection.quote(sanitized_start_date)}
+        AND t.transaction_type = 'expense'
       ),
 
       rolled_up AS (
