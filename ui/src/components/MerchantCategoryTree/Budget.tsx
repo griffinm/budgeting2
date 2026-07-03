@@ -18,12 +18,17 @@ export function Budget({
   merchantCategory: MerchantCategory;
   monthsMultiplier: number;
 }) {
+  const isIncome = merchantCategory.tagType === 'income';
   const targetBudget = totalBudgetForChildren(merchantCategory) * monthsMultiplier;
   const totalTransactionAmount = merchantCategory.totalTransactionAmount || 0;
   const spentRatio = targetBudget > 0 ? Math.abs(totalTransactionAmount) / targetBudget : 0;
   const isOverBudget = spentRatio > 1;
   const progressValue = Math.min(spentRatio * 100, 100);
-  const progressColor = isOverBudget ? 'red' : spentRatio >= 0.85 ? 'yellow' : 'green';
+  // Income targets invert the semantics: reaching 100% is the goal, falling
+  // short is neutral progress rather than an alarm
+  const progressColor = isIncome
+    ? spentRatio >= 1 ? 'green' : 'blue'
+    : isOverBudget ? 'red' : spentRatio >= 0.85 ? 'yellow' : 'green';
 
   if (!targetBudget || targetBudget <= 0) {
     return <NoBudget merchantCategory={merchantCategory} />;

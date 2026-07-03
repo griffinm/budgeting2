@@ -125,6 +125,9 @@ export const View = () => {
     },
   };
 
+  const expenseTree = tree.filter((category) => category.tagType !== "income");
+  const incomeTree = tree.filter((category) => category.tagType === "income");
+
   const draggingCategory =
     draggingId !== null ? findCategoryInTree(tree, draggingId) : undefined;
   const draggingDescendants = useMemo(
@@ -210,7 +213,8 @@ export const View = () => {
       ) : (
         <>
           <SummaryStrip
-            tree={tree}
+            expenseTree={expenseTree}
+            incomeTree={incomeTree}
             uncategorizedTotal={uncategorizedTotal}
             monthsInRange={monthsInRange}
           />
@@ -220,7 +224,10 @@ export const View = () => {
           )}
 
           <div className="flex flex-col gap-3">
-            {tree.map((category) => (
+            {incomeTree.length > 0 && expenseTree.length > 0 && (
+              <SectionHeading label="Spending" />
+            )}
+            {expenseTree.map((category) => (
               <CategoryCard
                 key={category.id}
                 category={category}
@@ -256,6 +263,23 @@ export const View = () => {
                 </div>
               </Paper>
             )}
+
+            {incomeTree.length > 0 && (
+              <>
+                <SectionHeading label="Income" />
+                {incomeTree.map((category) => (
+                  <CategoryCard
+                    key={category.id}
+                    category={category}
+                    monthsMultiplier={monthsInRange}
+                    sparklineData={buildSparklineData(monthlyByTagId.get(category.id))}
+                    defaultExpanded={tree.length <= 3}
+                    handlers={handlers}
+                    dnd={dnd}
+                  />
+                ))}
+              </>
+            )}
           </div>
         </>
       )}
@@ -278,6 +302,14 @@ export const View = () => {
     </div>
   );
 };
+
+function SectionHeading({ label }: { label: string }) {
+  return (
+    <div className="text-xs font-medium tracking-wide uppercase text-gray-500 dark:text-gray-400 mt-2 first:mt-0">
+      {label}
+    </div>
+  );
+}
 
 function TopLevelDropZone({ onDropTopLevel }: { onDropTopLevel: () => void }) {
   const [dragOver, setDragOver] = useState(false);

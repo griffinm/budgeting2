@@ -171,6 +171,7 @@ export interface MerchantCategory {
   children: MerchantCategory[];
   targetBudget?: number | null;
   isLeaf: boolean;
+  tagType: 'expense' | 'income';
 }
 
 export interface MantineTreeNode {

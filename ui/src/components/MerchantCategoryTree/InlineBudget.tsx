@@ -19,6 +19,7 @@ export function InlineBudget({
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState<number | string>("");
 
+  const isIncome = category.tagType === "income";
   const hasBudget = Number(category.targetBudget) > 0;
 
   const startEditing = (e: React.MouseEvent) => {
@@ -66,7 +67,7 @@ export function InlineBudget({
       <div className="flex items-center justify-between gap-2 w-full">
         <Budget merchantCategory={category} monthsMultiplier={monthsMultiplier} />
         <Button size="compact-xs" variant="light" onClick={startEditing}>
-          Set budget
+          {isIncome ? "Set expected" : "Set budget"}
         </Button>
       </div>
     );
@@ -77,12 +78,16 @@ export function InlineBudget({
       <div className="flex-1 min-w-0 cursor-pointer" onClick={startEditing}>
         <Budget merchantCategory={category} monthsMultiplier={monthsMultiplier} />
       </div>
-      <Tooltip label="Edit monthly budget" withArrow openDelay={300}>
+      <Tooltip
+        label={isIncome ? "Edit expected monthly income" : "Edit monthly budget"}
+        withArrow
+        openDelay={300}
+      >
         <ActionIcon
           size="sm"
           variant="subtle"
           color="gray"
-          aria-label="Edit monthly budget"
+          aria-label={isIncome ? "Edit expected monthly income" : "Edit monthly budget"}
           onClick={startEditing}
           className="sm:opacity-0 sm:group-hover/budget:opacity-100 transition-opacity"
         >
