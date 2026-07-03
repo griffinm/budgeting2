@@ -89,6 +89,9 @@ foreman start          # or: bin/dev
 # API on port 3000, UI via Vite dev server
 ```
 
+For how the app is built and deployed to production (CI/CD, images, the production host,
+config, and secrets), see [Deployment & Production Environment](docs/DEPLOYMENT.md).
+
 ## API Conventions
 
 - **Base path:** `/api`
@@ -110,5 +113,6 @@ Uses RSpec with FactoryBot and Faker.
 ## Documentation
 
 - [API Endpoints](documentation/API.md) — Complete REST API reference
+- [Deployment & Production Environment](docs/DEPLOYMENT.md) — CI/CD pipeline, Docker images, production host, config & secrets
 
 When API endpoints are added, modified, or removed, update `documentation/API.md` to keep it in sync.
