@@ -10,6 +10,7 @@ import { TransactionUpdateParams } from "@/api/transaction-client";
 import { Logo } from "../Logo";
 import { ConfirmTypeButton } from "./ConfirmTypeButton";
 import { PendingBadge } from "./PendingBadge";
+import { SplitBadge } from "./SplitBadge";
 import { TransactionNote } from "./TransactionNote";
 import { ActionIcon, Menu } from "@mantine/core";
 import { IconChevronDown, IconDotsVertical, IconEye, IconPencil } from "@tabler/icons-react";
@@ -94,6 +95,7 @@ export function FullRow({
         {/* Amount — right-aligned */}
         <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto pl-3">
           {transaction.pending && <PendingBadge />}
+          {transaction.parentTransactionId && <SplitBadge />}
           <div className="text-right cursor-pointer hover:underline" onClick={() => navigate(urls.transaction.path(transaction.id))}>
             <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
           </div>
@@ -147,6 +149,7 @@ export function FullRow({
             onClick={(e) => { e.stopPropagation(); navigate(urls.transaction.path(transaction.id)); }}
           >
             {transaction.pending && <PendingBadge />}
+            {transaction.parentTransactionId && <SplitBadge />}
             <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
           </div>
         </div>

@@ -13,6 +13,7 @@ class DataController < ApplicationController
     end_date = params[:end_date] || Date.today
 
     amount = PlaidTransaction.base_query_for_api(current_user.account.id)
+      .not_split_parent
       .where(transaction_type: transaction_type)
       .where(date: start_date..end_date)
       .sum(:amount)

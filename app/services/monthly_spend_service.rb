@@ -40,6 +40,7 @@ class MonthlySpendService
         WHERE
             pt.date >= CURRENT_DATE - INTERVAL '#{months_back.to_i} months'
             AND pt.transaction_type = #{ActiveRecord::Base.connection.quote(transaction_type)}
+            AND pt.split = FALSE
         GROUP BY
             EXTRACT(DAY FROM pt.date)
     ) subquery

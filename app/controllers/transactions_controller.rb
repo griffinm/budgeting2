@@ -104,6 +104,41 @@ class TransactionsController < ApplicationController
     end
   end
 
+  # POST /transactions/:id/split
+  def split
+    transaction = current_user.account.plaid_transactions.find(params[:id])
+    result = TransactionSplitService
+      .new(transaction: transaction, account: current_user.account)
+      .split(split_params[:children])
+
+    render_split_result(result)
+  end
+
+  # DELETE /transactions/:id/split
+  def unsplit
+    transaction = current_user.account.plaid_transactions.find(params[:id])
+    result = TransactionSplitService
+      .new(transaction: transaction, account: current_user.account)
+      .unsplit
+
+    render_split_result(result)
+  end
+
+  private def render_split_result(result)
+    if result[:errors].present?
+      render json: { errors: result[:errors] }, status: :unprocessable_entity
+    else
+      @transaction = PlaidTransaction
+        .base_query_for_api(current_user.account_id)
+        .find(result[:transaction].id)
+      render :show
+    end
+  end
+
+  private def split_params
+    params.permit(children: [:amount, :name, :merchant_tag_id])
+  end
+
   private def search_params
     params.permit(
       :start_date,

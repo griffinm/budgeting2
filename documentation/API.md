@@ -295,6 +295,8 @@ List transactions with filtering and pagination.
       "categoryPrimary": "Shopping",
       "categoryDetail": "Supermarkets and Groceries",
       "categoryConfidenceLevel": "VERY_HIGH",
+      "split": false,
+      "parentTransactionId": null,
       "merchant": { ... },
       "plaidAccount": { ... },
       "merchantTag": { ... },
@@ -327,6 +329,8 @@ The nested `merchant`, `plaidAccount`, and `merchantTag` objects follow the shap
 
 `classificationSource` records how the transaction type was set: `"user"` (manual), `"merchant_default"`, `"category_default"`, `"plaid_category"`, `"sign_inference"` (amount-sign guess), or `null` (legacy, never classified).
 
+`split` is true for a transaction that has been split into children (see [POST /api/transactions/:id/split](#post-apitransactionsidsplit)). **Split parents are excluded from this list and from all spend/income statistics endpoints; their children count as normal transactions.** `parentTransactionId` is set on the children.
+
 ---
 
 ### GET /api/transactions/:id
@@ -335,7 +339,10 @@ Get a single transaction by ID.
 
 **Auth required:** Yes
 
-**Response (200):** Same shape as a single item in the list response above.
+**Response (200):** Same shape as a single item in the list response above, plus:
+
+- On a split parent: `childTransactions` — array of the child transactions (same shape, one level deep).
+- On a split child: `parentTransaction` — the parent transaction (same shape, one level deep).
 
 ---
 
@@ -376,6 +383,55 @@ Update a transaction's category, notes, or transaction type.
   "errors": "Merchant ID is required when updating all transactions"
 }
 ```
+
+---
+
+### POST /api/transactions/:id/split
+
+Split a transaction into two or more child transactions (e.g. an ATM withdrawal used for several purchases). The parent keeps its original amount but is excluded from transaction lists and all spend statistics; the children take its place. Calling this on an already-split transaction **replaces** its existing children.
+
+**Auth required:** Yes
+
+**Request body:**
+
+```json
+{
+  "children": [
+    { "amount": 60.0, "name": "Groceries", "merchant_tag_id": 12 },
+    { "amount": 40.0 }
+  ]
+}
+```
+
+| Field | Description |
+|---|---|
+| `children[][amount]` | Required, nonzero. All child amounts must sum to the parent's amount (within $0.005) |
+| `children[][name]` | Optional; defaults to the parent's name |
+| `children[][merchant_tag_id]` | Optional category. A categorized child takes its category's transaction type; an uncategorized child inherits the parent's type |
+
+Children inherit the parent's merchant, account, date, and currency. Constraints: at least 2 children; the parent cannot be pending; a child cannot be split again (single-level).
+
+**Response (200):** The parent transaction (show shape) including `split: true` and `childTransactions`.
+
+**Error (422):**
+
+```json
+{
+  "errors": ["Child amounts must sum to the parent amount"]
+}
+```
+
+---
+
+### DELETE /api/transactions/:id/split
+
+Un-split a transaction: deletes its children and restores the parent to lists and statistics.
+
+**Auth required:** Yes
+
+**Response (200):** The parent transaction (show shape) with `split: false`.
+
+**Error (422):** `{ "errors": ["Transaction is not split"] }`
 
 ---
 

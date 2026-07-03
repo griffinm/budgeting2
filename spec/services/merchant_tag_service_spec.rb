@@ -220,4 +220,44 @@ RSpec.describe MerchantTagService do
       )
     end
   end
+
+  describe 'split transaction exclusion' do
+    let(:last_month) { Date.today.beginning_of_month - 1.month }
+
+    def split_with_categorized_children(tag:, date:)
+      parent = make_transaction(tag: tag, date: date, amount: 50.00)
+      create(:plaid_transaction, :split_child, parent: parent, merchant_tag: tag, amount: 30.00)
+      create(:plaid_transaction, :split_child, parent: parent, merchant_tag: tag, amount: 20.00)
+      parent.update!(split: true)
+    end
+
+    it 'spend_stats_for_tag counts categorized children, not the split parent' do
+      tag = make_tag
+      split_with_categorized_children(tag: tag, date: last_month + 4.days)
+
+      results = service.spend_stats_for_tag(tag_id: tag.id, months_back: 6)
+
+      expect(results.sum { |r| r[:total_amount] }).to eq(50.00)
+    end
+
+    it 'spend_stats_for_all_tags counts categorized children, not the split parent' do
+      tag = make_tag
+      split_with_categorized_children(tag: tag, date: Date.new(2026, 3, 15))
+
+      results = service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+
+      expect(results.find { |r| r[:id] == tag.id }[:total_transaction_amount]).to eq(50.00)
+    end
+
+    it 'monthly_spend_stats_for_all_tags counts categorized children, not the split parent' do
+      tag = make_tag
+      split_with_categorized_children(tag: tag, date: Date.new(2026, 3, 15))
+
+      results = service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+
+      expect(results).to contain_exactly(
+        { tag_id: tag.id, year: 2026, month: 3, total_amount: 50.00 },
+      )
+    end
+  end
 end

@@ -49,6 +49,85 @@ RSpec.describe 'Transactions', type: :request do
     end
   end
 
+  describe 'POST /api/transactions/:id/split' do
+    let(:income_tag) { create(:merchant_tag, :income, account: account, user: user) }
+
+    it 'splits the transaction and returns the parent with its children' do
+      post "/api/transactions/#{transaction.id}/split",
+        params: { children: [
+          { amount: 30.00, name: 'Groceries', merchantTagId: income_tag.id },
+          { amount: 20.00 }
+        ] },
+        headers: headers, as: :json
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['split']).to be(true)
+      expect(body['childTransactions'].size).to eq(2)
+      groceries = body['childTransactions'].find { |c| c['name'] == 'Groceries' }
+      expect(groceries['amount']).to eq(30.00)
+      expect(groceries['parentTransactionId']).to eq(transaction.id)
+      expect(groceries['merchantTag']['id']).to eq(income_tag.id)
+    end
+
+    it 'returns 422 with error messages when amounts do not sum to the parent' do
+      post "/api/transactions/#{transaction.id}/split",
+        params: { children: [{ amount: 1.00 }, { amount: 2.00 }] },
+        headers: headers, as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body)['errors']).to include('Child amounts must sum to the parent amount')
+    end
+
+    it 'cannot split a transaction belonging to another account' do
+      other_transaction = create(:plaid_transaction)
+
+      post "/api/transactions/#{other_transaction.id}/split",
+        params: { children: [{ amount: 30.00 }, { amount: 20.00 }] },
+        headers: headers, as: :json
+
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
+  describe 'DELETE /api/transactions/:id/split' do
+    it 'removes the children and restores the parent' do
+      post "/api/transactions/#{transaction.id}/split",
+        params: { children: [{ amount: 30.00 }, { amount: 20.00 }] },
+        headers: headers, as: :json
+
+      delete "/api/transactions/#{transaction.id}/split", headers: headers, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)['split']).to be(false)
+      expect(transaction.reload.child_transactions).to be_empty
+    end
+
+    it 'returns 422 for a transaction that is not split' do
+      delete "/api/transactions/#{transaction.id}/split", headers: headers, as: :json
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body)['errors']).to include('Transaction is not split')
+    end
+  end
+
+  describe 'GET /api/transactions/:id for split transactions' do
+    it 'includes the parent summary on a child' do
+      post "/api/transactions/#{transaction.id}/split",
+        params: { children: [{ amount: 30.00 }, { amount: 20.00 }] },
+        headers: headers, as: :json
+      child = transaction.reload.child_transactions.first
+
+      get "/api/transactions/#{child.id}.json", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body['parentTransactionId']).to eq(transaction.id)
+      expect(body['parentTransaction']['id']).to eq(transaction.id)
+      expect(body['parentTransaction']['amount']).to eq(50.00)
+    end
+  end
+
   describe 'PATCH /api/transactions/:id' do
     it 'reclassifies the transaction and records the user as the source' do
       patch "/api/transactions/#{transaction.id}",

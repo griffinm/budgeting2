@@ -146,5 +146,20 @@ RSpec.describe ProfitAndLossService do
 
       expect(march[:expense]).to eq(0)
     end
+
+    it 'counts split children once, not the parent' do
+      parent = create_transaction(
+        date: Time.use_zone(user.time_zone) { Time.zone.local(2026, 3, 10, 12, 0) },
+        amount: 100,
+      )
+      create(:plaid_transaction, :split_child, parent: parent, amount: 60)
+      create(:plaid_transaction, :split_child, parent: parent, amount: 40)
+      parent.update!(split: true)
+
+      result = call(months_back: 12)
+      march = result.find { |m| m[:year] == 2026 && m[:month] == 3 }
+
+      expect(march[:expense]).to eq(100)
+    end
   end
 end

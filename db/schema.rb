@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_03_125205) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_03_141731) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -218,10 +218,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_03_125205) do
     t.string "plaid_category_confidence_level"
     t.string "plaid_categories"
     t.string "classification_source"
+    t.bigint "parent_plaid_transaction_id"
+    t.boolean "split", default: false, null: false
     t.index ["account_id"], name: "index_plaid_transactions_on_account_id"
     t.index ["date"], name: "index_plaid_transactions_on_date"
     t.index ["merchant_id"], name: "index_plaid_transactions_on_merchant_id"
     t.index ["merchant_tag_id"], name: "index_plaid_transactions_on_merchant_tag_id"
+    t.index ["parent_plaid_transaction_id"], name: "index_plaid_transactions_on_parent_plaid_transaction_id"
     t.index ["plaid_account_id"], name: "index_plaid_transactions_on_plaid_account_id"
     t.index ["plaid_sync_event_id"], name: "index_plaid_transactions_on_plaid_sync_event_id"
   end
@@ -431,6 +434,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_03_125205) do
   add_foreign_key "plaid_transactions", "merchants"
   add_foreign_key "plaid_transactions", "plaid_accounts"
   add_foreign_key "plaid_transactions", "plaid_sync_events"
+  add_foreign_key "plaid_transactions", "plaid_transactions", column: "parent_plaid_transaction_id", on_delete: :cascade
   add_foreign_key "solid_queue_blocked_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_claimed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_failed_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade

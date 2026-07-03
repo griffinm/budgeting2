@@ -166,6 +166,10 @@ export interface Transaction {
   categoryConfidenceLevel: string | null;
   isCheck: boolean;
   transactionTags: TransactionTag[];
+  split: boolean;
+  parentTransactionId: number | null;
+  childTransactions?: Transaction[]; // present on show for a split parent
+  parentTransaction?: Transaction; // present on show for a split child
 }
 
 export interface MerchantCategory {

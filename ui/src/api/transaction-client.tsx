@@ -71,3 +71,31 @@ export const updateTransaction = async ({
   });
   return response.data;
 };
+
+export interface SplitChildParams {
+  amount: number;
+  name: string;
+  merchantCategoryId?: number | null;
+}
+
+export const splitTransaction = async ({
+  id,
+  children,
+}: {
+  id: number;
+  children: SplitChildParams[];
+}): Promise<Transaction> => {
+  const response = await baseClient.post<Transaction>(`/transactions/${id}/split`, {
+    children: children.map((child) => ({
+      amount: child.amount,
+      name: child.name,
+      merchantTagId: child.merchantCategoryId,
+    })),
+  });
+  return response.data;
+};
+
+export const unsplitTransaction = async ({ id }: { id: number }): Promise<Transaction> => {
+  const response = await baseClient.delete<Transaction>(`/transactions/${id}/split`);
+  return response.data;
+};

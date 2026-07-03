@@ -41,4 +41,28 @@ FactoryBot.define do
   trait :with_check_number do
     check_number { "1234" }
   end
+
+  trait :split_parent do
+    split { true }
+
+    after(:create) do |parent|
+      [30.00, 20.00].each do |child_amount|
+        create(:plaid_transaction, :split_child, parent: parent, amount: child_amount)
+      end
+    end
+  end
+
+  trait :split_child do
+    transient do
+      parent { nil }
+    end
+
+    parent_transaction { parent }
+    account { parent&.account }
+    plaid_sync_event { parent&.plaid_sync_event }
+    plaid_account { parent&.plaid_account }
+    merchant { parent&.merchant }
+    date { parent&.date }
+    plaid_id { "split:#{parent&.id}:#{SecureRandom.hex(8)}" }
+  end
 end 

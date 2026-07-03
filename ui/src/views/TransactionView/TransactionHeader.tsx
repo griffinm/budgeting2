@@ -13,6 +13,7 @@ interface TransactionHeaderProps {
   allTags: Tag[];
   onMerchantUpdated: (merchant: Merchant) => void;
   onTagCreated: (tag: Tag) => void;
+  actions?: React.ReactNode;
 }
 
 export function TransactionHeader({
@@ -21,6 +22,7 @@ export function TransactionHeader({
   allTags,
   onMerchantUpdated,
   onTagCreated,
+  actions,
 }: TransactionHeaderProps) {
   return (
     <div className="flex items-center gap-4">
@@ -45,7 +47,8 @@ export function TransactionHeader({
         </div>
       </MerchantHoverCard>
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-3">
+        {actions}
         <div className="text-3xl">
           <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
         </div>

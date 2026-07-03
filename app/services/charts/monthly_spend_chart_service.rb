@@ -37,6 +37,7 @@ module Charts
       transactions = @user.plaid_transactions
                           .expense
                           .not_pending
+                          .not_split_parent
                           .in_month(@today.month, @today.year)
 
       daily_amounts = Hash.new(0.0)

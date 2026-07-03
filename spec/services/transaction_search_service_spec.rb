@@ -146,4 +146,27 @@ RSpec.describe TransactionSearchService do
       expect(results).not_to include(both_tags_txn)
     end
   end
+
+  describe 'split transactions' do
+    it 'excludes split parents but returns their children' do
+      parent = create_transaction(amount: 50.00)
+      child = create(:plaid_transaction, :split_child, parent: parent, amount: 50.00, name: 'Cash groceries')
+      parent.update!(split: true)
+
+      results = search
+
+      expect(results).to include(child)
+      expect(results).not_to include(parent)
+    end
+
+    it 'children match search filters like normal transactions' do
+      parent = create_transaction(amount: 50.00)
+      child = create(:plaid_transaction, :split_child, parent: parent, amount: 50.00, name: 'Cash groceries')
+      parent.update!(split: true)
+
+      results = search(search_term: 'groceries')
+
+      expect(results).to contain_exactly(child)
+    end
+  end
 end

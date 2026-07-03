@@ -18,6 +18,7 @@ class ProfitAndLossService
 
     base = @account.plaid_transactions
       .not_pending
+      .not_split_parent
       .where('plaid_transactions.date >= ? AND plaid_transactions.date <= ?', start_time, end_time)
       .group("DATE_PART('month', #{tz_date}), DATE_PART('year', #{tz_date})")
       .select("sum(amount) as amount, DATE_PART('month', #{tz_date}) as month, DATE_PART('year', #{tz_date}) as year")

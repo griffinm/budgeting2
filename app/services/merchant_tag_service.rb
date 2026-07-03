@@ -65,6 +65,7 @@ class MerchantTagService < BaseService
           t.date <= #{sanitized_end_date}
         AND t.date >= #{sanitized_start_date}
         AND t.transaction_type = tag.tag_type
+        AND t.split = FALSE
       )
 
       -- Roll descendant spend up into each ancestor, bucketed by month
@@ -110,6 +111,7 @@ class MerchantTagService < BaseService
             AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
             AND pt.date < #{ActiveRecord::Base.connection.quote(end_date)}
             AND pt.transaction_type = mt.tag_type
+            AND pt.split = FALSE
         GROUP BY
             year, month, tag_id
         ORDER BY
@@ -167,6 +169,7 @@ class MerchantTagService < BaseService
           t.date <= #{ActiveRecord::Base.connection.quote(sanitized_end_date)}
         AND t.date >= #{ActiveRecord::Base.connection.quote(sanitized_start_date)}
         AND t.transaction_type = tag.tag_type
+        AND t.split = FALSE
       ),
 
       rolled_up AS (

@@ -12,20 +12,28 @@ class PlaidTransaction < ApplicationRecord
   belongs_to :plaid_account
   belongs_to :merchant
   belongs_to :merchant_tag, optional: true
+  belongs_to :parent_transaction, class_name: 'PlaidTransaction',
+    foreign_key: 'parent_plaid_transaction_id', optional: true
+  has_many :child_transactions, class_name: 'PlaidTransaction',
+    foreign_key: 'parent_plaid_transaction_id', dependent: :destroy
   has_many :tag_plaid_transactions
   has_many :tags, through: :tag_plaid_transactions
-  
+
   validates :transaction_type, presence: true, inclusion: { in: TRANSACTION_TYPES.values }
+  validate :no_nested_splits
   validates :classification_source, inclusion: { in: CLASSIFICATION_SOURCES }, allow_nil: true
   validates :plaid_id,
     presence: true,
     uniqueness: { scope: :account_id, message: "Transaction already exists" }
   # before_validation (not before_create) so the type is set before the
   # presence validation runs — synced transactions arrive with no type.
-  before_validation :set_default_categories, on: :create
+  # Skipped for split children: their category/type are chosen by the user
+  # at split time and must not be clobbered by merchant defaults.
+  before_validation :set_default_categories, on: :create, unless: :split_child?
   after_create :apply_merchant_default_tags
 
   scope :not_pending, -> { where(pending: false) }
+  scope :not_split_parent, -> { where(split: false) }
   scope :expense, -> { where(transaction_type: TRANSACTION_TYPES[:expense]) }
   scope :income, -> { where(transaction_type: TRANSACTION_TYPES[:income]) }
   scope :transfer, -> { where(transaction_type: TRANSACTION_TYPES[:transfer]) }
@@ -36,18 +44,24 @@ class PlaidTransaction < ApplicationRecord
   #   income = -SUM(amount) over income rows  (positive; Plaid stores income negative)
   #   transfers are excluded from both, everywhere.
   def self.spend_total
-    expense.sum(:amount)
+    expense.not_split_parent.sum(:amount)
   end
 
   def self.income_total
-    -income.sum(:amount)
+    -income.not_split_parent.sum(:amount)
   end
 
+  # Split parents are NOT excluded here — show pages need them. Callers that
+  # aggregate over this query must add .not_split_parent themselves.
   def self.base_query_for_api(account_id)
     joins(:plaid_account, :merchant)
       .includes(:plaid_account, :merchant_tag, tag_plaid_transactions: :tag, merchant: [:default_merchant_tag])
       .where(plaid_transactions: { account_id: account_id })
       .order(date: :desc)
+  end
+
+  def split_child?
+    parent_plaid_transaction_id.present?
   end
 
   def is_check?
@@ -154,6 +168,14 @@ class PlaidTransaction < ApplicationRecord
       plaid_category_confidence_level: plaid_transaction.personal_finance_category.confidence_level,
       plaid_categories: plaid_transaction.category,
     }
+  end
+
+  # Splits are single-level: a child can never be a parent, and vice versa.
+  private def no_nested_splits
+    return unless split_child?
+
+    errors.add(:base, 'A split child cannot itself be split') if split
+    errors.add(:base, 'Cannot split a child of another split') if parent_transaction&.split_child?
   end
 
   def self.get_transaction_date(plaid_transaction)

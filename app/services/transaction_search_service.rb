@@ -62,6 +62,8 @@ class TransactionSearchService < BaseService
           { merchant_group: [:primary_merchant, :merchants] }
         ]
       )
+      # Split parents are represented by their children in every list
+      .not_split_parent
       .order(date: :desc)
       
     if @merchant_group_id.present? || @merchant_id.present?

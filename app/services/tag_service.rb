@@ -44,6 +44,7 @@ class TagService < BaseService
         AND pt.date >= #{ActiveRecord::Base.connection.quote(start_date)}
         AND pt.date <= #{ActiveRecord::Base.connection.quote(end_date)}
         AND pt.transaction_type = 'expense'
+        AND pt.split = FALSE
         #{omit_clause}
       GROUP BY
         year, month, tag_id

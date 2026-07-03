@@ -8,6 +8,7 @@
     "test": "test"
   },
   "scripts": {
+    "dev": "foreman start",
     "build": "cd ui && npm run build",
     "lint": "cd ui && npm run lint"
   },

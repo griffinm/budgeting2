@@ -36,6 +36,7 @@ class MerchantSpendService < BaseService
     # stored negative, so it is negated to read as a positive magnitude
     sign = type == :income ? -1 : 1
     data = scope.public_send(type)
+      .not_split_parent
       .where(date: months_back.months.ago..Time.current)
       .group_by { |t| t.date.strftime('%Y-%m') }
       .map { |month, transactions| [month, sign * transactions.sum(&:amount)] }

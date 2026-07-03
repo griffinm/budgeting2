@@ -7,6 +7,7 @@ import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { ConfirmTypeButton } from "./ConfirmTypeButton";
+import { SplitBadge } from "./SplitBadge";
 
 export function CondensedRow({
   transaction,
@@ -45,8 +46,11 @@ export function CondensedRow({
         </div>
 
         {/* Amount — right-aligned */}
-        <div className="flex-shrink-0 ml-auto text-right">
-          <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
+        <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto">
+          {transaction.parentTransactionId && <SplitBadge />}
+          <div className="text-right">
+            <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
+          </div>
         </div>
       </div>
     </div>

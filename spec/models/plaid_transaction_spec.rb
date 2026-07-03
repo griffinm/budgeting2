@@ -153,6 +153,80 @@ RSpec.describe PlaidTransaction, type: :model do
     end
   end
 
+  describe 'split transactions' do
+    let(:parent) { create(:plaid_transaction, account: account, merchant: merchant, amount: 50.00) }
+
+    def create_child(**attrs)
+      create(:plaid_transaction, :split_child, parent: parent, **attrs)
+    end
+
+    it 'links children to their parent' do
+      child = create_child(amount: 30.00)
+
+      expect(child.parent_transaction).to eq(parent)
+      expect(child.split_child?).to be(true)
+      expect(parent.child_transactions).to contain_exactly(child)
+    end
+
+    it 'destroys children when the parent is destroyed' do
+      child = create_child(amount: 30.00)
+
+      parent.destroy
+
+      expect(PlaidTransaction.exists?(child.id)).to be(false)
+    end
+
+    it 'rejects splitting a child of another split' do
+      child = create_child(amount: 30.00)
+      grandchild = build(:plaid_transaction, :split_child, parent: child)
+
+      expect(grandchild).not_to be_valid
+      expect(grandchild.errors[:base]).to include('Cannot split a child of another split')
+    end
+
+    it 'rejects marking a child as itself split' do
+      child = create_child(amount: 30.00)
+
+      child.split = true
+
+      expect(child).not_to be_valid
+      expect(child.errors[:base]).to include('A split child cannot itself be split')
+    end
+
+    describe '.not_split_parent' do
+      it 'excludes split parents but keeps children and normal transactions' do
+        child = create_child(amount: 50.00)
+        parent.update!(split: true)
+        normal = create(:plaid_transaction, account: account, merchant: merchant)
+
+        expect(PlaidTransaction.not_split_parent).to include(child, normal)
+        expect(PlaidTransaction.not_split_parent).not_to include(parent)
+      end
+    end
+
+    describe 'default category classification' do
+      it 'is skipped for children so the chosen category is not clobbered by merchant defaults' do
+        default_tag = create(:merchant_tag, account: account, user: user)
+        chosen_tag = create(:merchant_tag, account: account, user: user)
+        merchant.update!(default_merchant_tag_id: default_tag.id)
+
+        child = create_child(amount: 30.00, merchant_tag_id: chosen_tag.id)
+
+        expect(child.merchant_tag_id).to eq(chosen_tag.id)
+      end
+    end
+
+    describe 'aggregation totals' do
+      it 'excludes split parents from spend_total and income_total' do
+        create_child(amount: 30.00)
+        create_child(amount: 20.00)
+        parent.update!(split: true)
+
+        expect(PlaidTransaction.where(account_id: account.id).spend_total).to eq(50.00)
+      end
+    end
+  end
+
   describe 'parse_plaid_transaction' do
     it 'does not set a transaction type, leaving classification to the model' do
       plaid_transaction = double(

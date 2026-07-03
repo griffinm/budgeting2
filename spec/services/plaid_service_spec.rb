@@ -245,6 +245,23 @@ RSpec.describe PlaidService do
             expect(existing_transaction.merchant_tag_id).to eq(merchant_tag.id)
           end
         end
+
+        context 'when the transaction is a split parent and the amount changed' do
+          before do
+            create(:plaid_transaction, :split_child, parent: existing_transaction, amount: 50.00)
+            existing_transaction.update!(split: true)
+          end
+
+          it 'still updates the parent but warns about the drift' do
+            allow(Rails.logger).to receive(:warn).and_call_original
+
+            service.sync_transactions
+
+            expect(existing_transaction.reload.amount).to eq(-75.00)
+            expect(Rails.logger).to have_received(:warn)
+              .with(a_string_including("Split transaction #{existing_transaction.id} amount changed"))
+          end
+        end
       end
 
       context 'when there are removed transactions' do
@@ -257,6 +274,18 @@ RSpec.describe PlaidService do
 
         it 'removes the transaction' do
           expect { service.sync_transactions }.to change(PlaidTransaction, :count).by(-1)
+        end
+
+        context 'when the removed transaction is a split parent' do
+          before do
+            create(:plaid_transaction, :split_child, parent: existing_transaction, amount: 30.00)
+            create(:plaid_transaction, :split_child, parent: existing_transaction, amount: 20.00)
+            existing_transaction.update!(split: true)
+          end
+
+          it 'removes the children along with the parent' do
+            expect { service.sync_transactions }.to change(PlaidTransaction, :count).by(-3)
+          end
         end
       end
 
