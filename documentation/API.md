@@ -921,7 +921,7 @@ Delete a category. Its child categories are promoted one level up (to the delete
 
 ### GET /api/merchant_tags/spend_stats
 
-Get spend statistics for all categories in a date range.
+Get spend statistics for all categories in a date range. Totals (including `uncategorizedTotal`) count expense transactions only — refunds net out, income and transfers are excluded.
 
 **Auth required:** Yes
 
@@ -971,7 +971,7 @@ Get spend statistics for all categories in a date range.
 
 ### GET /api/merchant_tags/:merchant_tag_id/spend_stats
 
-Get monthly spend statistics for a single category.
+Get monthly spend statistics for a single category. Totals count expense transactions only — refunds net out, income and transfers are excluded.
 
 **Auth required:** Yes
 
@@ -1054,7 +1054,7 @@ Create a new tag.
 
 ### GET /api/tags/spend_stats
 
-Get monthly spend statistics filtered by tags.
+Get monthly spend statistics filtered by tags. Totals count expense transactions only — refunds net out, income and transfers are excluded.
 
 **Auth required:** Yes
 
@@ -1512,7 +1512,7 @@ Each entry represents the summed balance across all accounts of the given type f
 
 ### GET /api/data/total_for_date_range
 
-Get the total spend or income for a date range.
+Get the total spend or income for a date range. `total` is a positive magnitude for both types; refunds net against expense spend.
 
 **Auth required:** Yes
 
@@ -1520,7 +1520,7 @@ Get the total spend or income for a date range.
 
 | Param | Type | Default | Description |
 |---|---|---|---|
-| `transaction_type` | string | `"expense"` | `"expense"` or `"income"` |
+| `transaction_type` | string | `"expense"` | `"expense"`, `"income"`, or `"transfer"` |
 | `start_date` | date | 1 month ago | Start of date range |
 | `end_date` | date | today | End of date range |
 
@@ -1535,11 +1535,19 @@ Get the total spend or income for a date range.
 }
 ```
 
+**Error (422):**
+
+```json
+{
+  "error": "Invalid transaction type"
+}
+```
+
 ---
 
 ### GET /api/data/profit_and_loss
 
-Get a monthly breakdown of income, expenses, and profit.
+Get a monthly breakdown of income, expenses, and profit. `expense` sums expense-typed transactions (refunds net out), `income` sums income-typed transactions, both as positive magnitudes; transfers are excluded.
 
 **Auth required:** Yes
 
@@ -1592,13 +1600,13 @@ Get the daily spending moving average, averaged over the last 6 months. Used for
 ]
 ```
 
-Returns one entry for each day of the month (1–31). Missing days are filled with the previous day's values.
+Returns one entry for each day of the month (1–31). Missing days are filled with the previous day's values. Values are positive magnitudes; a day dominated by refunds can be negative.
 
 ---
 
 ### GET /api/data/income_moving_average
 
-Same as spend moving average, but for income transactions.
+Same as spend moving average, but for income transactions (normalized to positive values).
 
 **Auth required:** Yes
 

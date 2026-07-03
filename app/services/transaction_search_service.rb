@@ -82,16 +82,18 @@ class TransactionSearchService < BaseService
       transactions = transactions.where(merchant_tag_id: nil)
     end
 
+    # Amount filters compare magnitudes — income is stored negative (Plaid
+    # convention), and users filter by "how big", not by sign.
     if @amount_greater_than.present?
-      transactions = transactions.where("amount > ?", @amount_greater_than)
+      transactions = transactions.where("ABS(plaid_transactions.amount) > ?", @amount_greater_than)
     end
 
     if @amount_equal_to.present?
-      transactions = transactions.where("amount = ?", @amount_equal_to)
+      transactions = transactions.where("ABS(plaid_transactions.amount) = ?", @amount_equal_to)
     end
 
     if @amount_less_than.present?
-      transactions = transactions.where("amount < ?", @amount_less_than)
+      transactions = transactions.where("ABS(plaid_transactions.amount) < ?", @amount_less_than)
     end
 
     if @start_date.present? || @end_date.present?
@@ -123,8 +125,8 @@ class TransactionSearchService < BaseService
 
     if @search_term.present?
       if @search_term.to_f.to_s == @search_term
-        # If the search term is a number, search for the amount
-        transactions = transactions.where("plaid_transactions.amount = ?", @search_term.to_f)
+        # If the search term is a number, search for the amount by magnitude
+        transactions = transactions.where("ABS(plaid_transactions.amount) = ?", @search_term.to_f)
       else
         # If the search term is not a number, search for the name or merchant name
         transactions = transactions.where("plaid_transactions.name ILIKE ? OR merchants.merchant_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")

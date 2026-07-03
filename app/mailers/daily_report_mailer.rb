@@ -38,11 +38,10 @@ class DailyReportMailer < ApplicationMailer
   def compute_monthly_summary
     current_day = @today.day
 
-    expenses = @user.plaid_transactions.expense.not_pending.in_month(@today.month, @today.year)
-    income = @user.plaid_transactions.income.not_pending.in_month(@today.month, @today.year)
+    base = @user.plaid_transactions.not_pending.in_month(@today.month, @today.year)
 
-    @expenses_this_month = expenses.sum { |t| t.amount.abs }
-    @income_this_month = income.sum { |t| t.amount.abs }
+    @expenses_this_month = base.spend_total
+    @income_this_month = base.income_total
     @profit_this_month = @income_this_month - @expenses_this_month
 
     moving_avg = MonthlySpendService.new(@user.id)

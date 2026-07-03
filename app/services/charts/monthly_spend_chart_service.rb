@@ -41,7 +41,7 @@ module Charts
 
       daily_amounts = Hash.new(0.0)
       transactions.each do |txn|
-        daily_amounts[txn.date.day] += txn.amount.abs
+        daily_amounts[txn.date.day] += txn.amount
       end
 
       cumulative = 0.0
