@@ -254,13 +254,14 @@ List transactions with filtering and pagination.
 | `end_date` | date | Filter to this date |
 | `merchant_id` | integer | Filter by merchant |
 | `merchant_name` | string | Filter by merchant name |
-| `transaction_type` | string | `"expense"` or `"income"` |
+| `transaction_type` | string | `"expense"`, `"income"`, or `"transfer"` |
 | `check_number` | string | Filter by check number |
 | `search_term` | string | Free text search |
-| `amount_greater_than` | decimal | Min amount |
-| `amount_less_than` | decimal | Max amount |
-| `amount_equal_to` | decimal | Exact amount |
+| `amount_greater_than` | decimal | Min amount (magnitude) |
+| `amount_less_than` | decimal | Max amount (magnitude) |
+| `amount_equal_to` | decimal | Exact amount (magnitude) |
 | `has_no_category` | boolean | Only uncategorized transactions |
+| `needs_review` | boolean | Only transactions whose type was never user-confirmed (`classificationSource` null or `"sign_inference"`) |
 | `merchant_tag_id` | integer | Filter by category |
 | `merchant_group_id` | integer | Filter by merchant group |
 | `plaid_account_ids` | integer[] | Filter by account IDs |
@@ -284,6 +285,7 @@ List transactions with filtering and pagination.
       "plaidCategoryDetail": "Supermarkets and Groceries",
       "paymentChannel": "in store",
       "transactionType": "expense",
+      "classificationSource": "plaid_category",
       "isCheck": false,
       "checkNumber": null,
       "currencyCode": "USD",
@@ -322,6 +324,8 @@ List transactions with filtering and pagination.
 ```
 
 The nested `merchant`, `plaidAccount`, and `merchantTag` objects follow the shapes documented in their respective sections. `merchantTag` will be an empty object `{}` when the transaction has no category assigned.
+
+`classificationSource` records how the transaction type was set: `"user"` (manual), `"merchant_default"`, `"category_default"`, `"plaid_category"`, `"sign_inference"` (amount-sign guess), or `null` (legacy, never classified).
 
 ---
 

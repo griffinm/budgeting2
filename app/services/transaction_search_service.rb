@@ -13,6 +13,7 @@ class TransactionSearchService < BaseService
     amount_less_than: nil,
     amount_equal_to: nil,
     has_no_category: nil,
+    needs_review: nil,
     merchant_tag_id: nil,
     merchant_group_id: nil,
     plaid_account_ids: nil,
@@ -32,6 +33,7 @@ class TransactionSearchService < BaseService
     @amount_less_than = amount_less_than
     @amount_equal_to = amount_equal_to
     @has_no_category = has_no_category
+    @needs_review = needs_review
     @merchant_tag_id = merchant_tag_id
     @merchant_group_id = merchant_group_id
     @plaid_account_ids = plaid_account_ids
@@ -80,6 +82,15 @@ class TransactionSearchService < BaseService
 
     if @has_no_category.present? && @has_no_category == "true"
       transactions = transactions.where(merchant_tag_id: nil)
+    end
+
+    # "Needs review" = the type was never confirmed or set deliberately:
+    # legacy rows (nil) and amount-sign guesses
+    if @needs_review.present? && @needs_review == "true"
+      transactions = transactions.where(
+        "plaid_transactions.classification_source IS NULL OR plaid_transactions.classification_source = ?",
+        'sign_inference'
+      )
     end
 
     # Amount filters compare magnitudes — income is stored negative (Plaid

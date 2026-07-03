@@ -13,6 +13,42 @@ RSpec.describe 'Transactions', type: :request do
       merchant: create(:merchant, account: account, merchant_name: 'Other Merchant'))
   end
 
+  describe 'GET /api/transactions' do
+    let(:plaid_access_token) { create(:plaid_access_token, account: account) }
+    let(:plaid_account) { create(:plaid_account, account: account, plaid_access_token: plaid_access_token) }
+
+    before do
+      create(:plaid_accounts_user, user: user, plaid_account: plaid_account)
+    end
+
+    it 'filters to unconfirmed classifications with needs_review and exposes classificationSource' do
+      legacy = create(:plaid_transaction, account: account, plaid_account: plaid_account, classification_source: nil)
+      confirmed = create(:plaid_transaction, account: account, plaid_account: plaid_account, classification_source: 'user')
+
+      get '/api/transactions.json', params: { needs_review: 'true' }, headers: headers
+
+      expect(response).to have_http_status(:ok)
+      items = JSON.parse(response.body)['items']
+      ids = items.map { |t| t['id'] }
+      expect(ids).to include(legacy.id)
+      expect(ids).not_to include(confirmed.id)
+      expect(items.find { |t| t['id'] == legacy.id }['classificationSource']).to be_nil
+    end
+
+    it 'returns classificationSource user after a manual type change' do
+      transaction = create(:plaid_transaction, account: account, plaid_account: plaid_account, classification_source: nil)
+
+      patch "/api/transactions/#{transaction.id}",
+        params: { transaction: { transaction_type: 'expense' } },
+        headers: headers, as: :json
+      get '/api/transactions.json', params: { needs_review: 'true' }, headers: headers
+
+      ids = JSON.parse(response.body)['items'].map { |t| t['id'] }
+      expect(ids).not_to include(transaction.id)
+      expect(transaction.reload.classification_source).to eq('user')
+    end
+  end
+
   describe 'PATCH /api/transactions/:id' do
     it 'reclassifies the transaction and records the user as the source' do
       patch "/api/transactions/#{transaction.id}",

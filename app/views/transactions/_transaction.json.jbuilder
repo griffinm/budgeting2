@@ -9,6 +9,7 @@ json.plaidCategoryPrimary transaction.plaid_category_primary
 json.plaidCategoryDetail transaction.plaid_category_detail
 json.paymentChannel transaction.payment_channel
 json.transactionType transaction.transaction_type
+json.classificationSource transaction.classification_source
 json.isCheck transaction.is_check?
 json.checkNumber transaction.check_number
 json.currencyCode transaction.currency_code

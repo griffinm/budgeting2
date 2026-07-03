@@ -64,6 +64,29 @@ RSpec.describe TransactionSearchService do
     end
   end
 
+  describe 'needs_review filtering' do
+    it 'returns only unconfirmed classifications' do
+      legacy = create_transaction(classification_source: nil)
+      guessed = create_transaction(classification_source: 'sign_inference')
+      user_set = create_transaction(classification_source: 'user')
+      merchant_set = create_transaction(classification_source: 'merchant_default')
+      plaid_set = create_transaction(classification_source: 'plaid_category')
+
+      results = search(needs_review: 'true')
+
+      expect(results).to include(legacy, guessed)
+      expect(results).not_to include(user_set, merchant_set, plaid_set)
+    end
+
+    it 'returns everything when off or absent' do
+      legacy = create_transaction(classification_source: nil)
+      user_set = create_transaction(classification_source: 'user')
+
+      expect(search).to include(legacy, user_set)
+      expect(search(needs_review: 'false')).to include(legacy, user_set)
+    end
+  end
+
   describe 'amount filtering' do
     it 'compares magnitudes so income matches alongside expenses' do
       big_income = create_transaction(amount: -500.00, transaction_type: 'income')
