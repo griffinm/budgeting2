@@ -1,12 +1,8 @@
 import { Paper, SimpleGrid } from "@mantine/core";
 import classNames from "classnames";
+import { formatDollars } from "@/utils/currencyUtils";
 import { MerchantCategory } from "@/utils/types";
 import { totalBudgetForChildren } from "@/utils/merchantCategoryUtils";
-
-function formatDollars(value: number): string {
-  const prefix = value < 0 ? "-$" : "$";
-  return `${prefix}${Math.abs(value).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-}
 
 export function SummaryStrip({
   expenseTree,

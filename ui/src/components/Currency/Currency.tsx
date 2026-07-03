@@ -1,6 +1,7 @@
 import classNames from 'classnames';
+import { formatDollars } from '@/utils/currencyUtils';
 
-export function Currency({ 
+export function Currency({
   amount,
   applyColor = true,
   useBold = true,
@@ -18,12 +19,9 @@ export function Currency({
     'text-green-500': applyColor && !isNegative,
     'text-gray-600 dark:text-gray-400': !applyColor,
   });
-  const minFractionDigits = showCents ? 2 : 0;
-  const maxFractionDigits = showCents ? 2 : 0;
-
   return (
     <span className={classes}>
-      {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: minFractionDigits, maximumFractionDigits: maxFractionDigits }).format(amount)}
+      {formatDollars(amount, { cents: showCents })}
     </span>
   )
 }

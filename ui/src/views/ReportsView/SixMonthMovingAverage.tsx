@@ -4,6 +4,7 @@ import { Paper, Text } from "@mantine/core";
 import { format as formatDate } from "date-fns";
 import { getProfitAndLoss } from "@/api";
 import { Loading } from "@/components/Loading";
+import { chartCurrencyFormatter } from "@/utils/currencyUtils";
 import { ProfitAndLossItem } from "@/utils/types";
 
 const DISPLAY_MONTHS = 24;
@@ -14,9 +15,7 @@ function monthLabel(item: ProfitAndLossItem) {
   return formatDate(new Date(item.year, item.month - 1, 1), "MMM yyyy");
 }
 
-function currencyFormatter(value: number) {
-  return `$${value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`;
-}
+const currencyFormatter = chartCurrencyFormatter({ cents: true });
 
 export function SixMonthMovingAverage() {
   const [items, setItems] = useState<ProfitAndLossItem[]>([]);

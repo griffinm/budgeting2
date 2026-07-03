@@ -1,15 +1,8 @@
 import { MerchantCategory } from "@/utils/types";
 import { Progress } from "@mantine/core";
 import { Currency } from "../Currency";
+import { formatDollars } from "@/utils/currencyUtils";
 import { totalBudgetForChildren } from "@/utils/merchantCategoryUtils";
-
-const formatDollars = (value: number) =>
-  new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
 
 export function Budget({
   merchantCategory,

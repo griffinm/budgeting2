@@ -2,6 +2,7 @@ import { Loading } from "@/components/Loading";
 import { MerchantSpendStats } from "@/utils/types";
 import { BarChart } from "@mantine/charts";
 import { Group, Select, Text } from "@mantine/core";
+import { chartCurrencyFormatter, formatDollars } from "@/utils/currencyUtils";
 
 export function TrendChart({
   merchantSpendStats,
@@ -49,12 +50,12 @@ export function TrendChart({
           withLegend={false}
           referenceLines={averageSpendForChart ? [{
             y: averageSpendForChart,
-            label: `Average: $${averageSpendForChart.toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+            label: `Average: ${formatDollars(averageSpendForChart)}`,
             color: 'red',
             strokeWidth: 2,
             strokeDasharray: '3 3',
           }] : []}
-          valueFormatter={(value: number) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
+          valueFormatter={chartCurrencyFormatter()}
         />
       </div>
     </div>

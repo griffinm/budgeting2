@@ -1,12 +1,9 @@
 import { Loading } from "@/components/Loading";
+import { formatDollars } from "@/utils/currencyUtils";
 import { MerchantSpendStats } from "@/utils/types";
 import { Paper, SimpleGrid, Text } from "@mantine/core";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
 import { useMemo } from "react";
-
-function formatDollars(value: number): string {
-  return `$${Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-}
 
 export function SpendSummary({
   spendStats,
@@ -43,7 +40,7 @@ export function SpendSummary({
       {cards.map((card) => (
         <Paper withBorder p="md" radius="md" key={card.title}>
           <Text size="sm" c="dimmed">{card.title}</Text>
-          <Text size="xxl" fw={700} mt={4} style={{ fontSize: '1.75rem' }}>{formatDollars(card.value)}</Text>
+          <Text size="xxl" fw={700} mt={4} style={{ fontSize: '1.75rem' }}>{formatDollars(card.value, { sign: 'never' })}</Text>
           {card.diff !== undefined && (
             <Text size="xs" mt={4} c={card.diff >= 0 ? "red" : "teal"} className="flex items-center gap-1">
               {card.diff >= 0 ? <IconTrendingUp size={14} /> : <IconTrendingDown size={14} />}

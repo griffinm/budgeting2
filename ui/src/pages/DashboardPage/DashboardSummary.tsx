@@ -1,12 +1,8 @@
 import { HeroBox } from "@/components/HeroBox";
 import { Loading } from "@/components/Loading";
+import { formatDollars } from "@/utils/currencyUtils";
 import { SimpleGrid } from "@mantine/core";
 import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react";
-
-function formatDollars(value: number): string {
-  const prefix = value < 0 ? '-$' : '$';
-  return `${prefix}${Math.abs(value).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
-}
 
 interface DashboardSummaryProps {
   availableCash: number;
