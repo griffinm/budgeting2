@@ -251,11 +251,11 @@ export function CategoryEdit({
       overlayProps={{ backgroundOpacity: 0.55, blur: 2 }}
     >
       <div
-        className="flex flex-col h-[460px] -mt-1"
+        className="flex flex-col h-[460px] pt-1"
         onKeyDown={onKeyDown}
       >
         {/* Search */}
-        <div className="relative mb-3">
+        <div className="relative mb-3 mt-0.5">
           <IconSearch
             size={16}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none"
