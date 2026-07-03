@@ -24,7 +24,7 @@ class MerchantGroupsController < ApplicationController
 
     render json: {
       monthlySpend: merchant_group_service.monthly_spend(months_back: months_back),
-      allTimeSpend: (merchant_group_service.all_time_spend || 0).abs,
+      allTimeSpend: merchant_group_service.all_time_spend || 0,
     }
   end
 

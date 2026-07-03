@@ -8,11 +8,11 @@ class MerchantGroupSpendService < BaseService
   end
 
   def all_time_spend
-    @merchant_group.all_transactions.sum(:amount)
+    @merchant_group.all_transactions.spend_total
   end
 
   def monthly_spend(months_back: 6)
-    data = @merchant_group.all_transactions
+    data = @merchant_group.all_transactions.expense
       .where(date: months_back.months.ago..Time.current)
       .group_by { |t| t.date.strftime('%Y-%m') }
       .map { |month, transactions| [month, transactions.sum(&:amount)] }

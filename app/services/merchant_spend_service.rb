@@ -8,25 +8,25 @@ class MerchantSpendService < BaseService
   end
 
   def all_time_spend
-    @merchant.plaid_transactions.sum(:amount)
+    @merchant.plaid_transactions.spend_total
   end
 
   def monthly_spend(months_back: 6, include_group: false)
     if include_group && @merchant.merchant_group.present?
-      data = @merchant.merchant_group.all_transactions
+      data = @merchant.merchant_group.all_transactions.expense
         .where(date: months_back.months.ago..Time.current)
         .group_by { |t| t.date.strftime('%Y-%m') }
         .map { |month, transactions| [month, transactions.sum(&:amount)] }
         .to_h
     elsif @merchant.merchant_group.present?
-      data = @merchant.merchant_group.group_transactions
+      data = @merchant.merchant_group.group_transactions.expense
         .where(date: months_back.months.ago..Time.current)
         .group_by { |t| t.date.strftime('%Y-%m') }
         .map { |month, transactions| [month, transactions.sum(&:amount)] }
         .to_h
     else
       # Merchant has no group, use its own transactions
-      data = @merchant.plaid_transactions
+      data = @merchant.plaid_transactions.expense
         .where(date: months_back.months.ago..Time.current)
         .group_by { |t| t.date.strftime('%Y-%m') }
         .map { |month, transactions| [month, transactions.sum(&:amount)] }
