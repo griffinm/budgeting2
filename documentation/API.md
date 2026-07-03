@@ -254,13 +254,14 @@ List transactions with filtering and pagination.
 | `end_date` | date | Filter to this date |
 | `merchant_id` | integer | Filter by merchant |
 | `merchant_name` | string | Filter by merchant name |
-| `transaction_type` | string | `"expense"` or `"income"` |
+| `transaction_type` | string | `"expense"`, `"income"`, or `"transfer"` |
 | `check_number` | string | Filter by check number |
 | `search_term` | string | Free text search |
-| `amount_greater_than` | decimal | Min amount |
-| `amount_less_than` | decimal | Max amount |
-| `amount_equal_to` | decimal | Exact amount |
+| `amount_greater_than` | decimal | Min amount (magnitude) |
+| `amount_less_than` | decimal | Max amount (magnitude) |
+| `amount_equal_to` | decimal | Exact amount (magnitude) |
 | `has_no_category` | boolean | Only uncategorized transactions |
+| `needs_review` | boolean | Only transactions whose type was never user-confirmed (`classificationSource` null or `"sign_inference"`) |
 | `merchant_tag_id` | integer | Filter by category |
 | `merchant_group_id` | integer | Filter by merchant group |
 | `plaid_account_ids` | integer[] | Filter by account IDs |
@@ -284,6 +285,7 @@ List transactions with filtering and pagination.
       "plaidCategoryDetail": "Supermarkets and Groceries",
       "paymentChannel": "in store",
       "transactionType": "expense",
+      "classificationSource": "plaid_category",
       "isCheck": false,
       "checkNumber": null,
       "currencyCode": "USD",
@@ -293,6 +295,8 @@ List transactions with filtering and pagination.
       "categoryPrimary": "Shopping",
       "categoryDetail": "Supermarkets and Groceries",
       "categoryConfidenceLevel": "VERY_HIGH",
+      "split": false,
+      "parentTransactionId": null,
       "merchant": { ... },
       "plaidAccount": { ... },
       "merchantTag": { ... },
@@ -323,6 +327,10 @@ List transactions with filtering and pagination.
 
 The nested `merchant`, `plaidAccount`, and `merchantTag` objects follow the shapes documented in their respective sections. `merchantTag` will be an empty object `{}` when the transaction has no category assigned.
 
+`classificationSource` records how the transaction type was set: `"user"` (manual), `"merchant_default"`, `"category_default"`, `"plaid_category"`, `"sign_inference"` (amount-sign guess), or `null` (legacy, never classified).
+
+`split` is true for a transaction that has been split into children (see [POST /api/transactions/:id/split](#post-apitransactionsidsplit)). **Split parents are excluded from this list and from all spend/income statistics endpoints; their children count as normal transactions.** `parentTransactionId` is set on the children.
+
 ---
 
 ### GET /api/transactions/:id
@@ -331,7 +339,10 @@ Get a single transaction by ID.
 
 **Auth required:** Yes
 
-**Response (200):** Same shape as a single item in the list response above.
+**Response (200):** Same shape as a single item in the list response above, plus:
+
+- On a split parent: `childTransactions` — array of the child transactions (same shape, one level deep).
+- On a split child: `parentTransaction` — the parent transaction (same shape, one level deep).
 
 ---
 
@@ -359,9 +370,9 @@ Update a transaction's category, notes, or transaction type.
 |---|---|
 | `transaction[merchant_tag_id]` | Category ID to assign |
 | `transaction[note]` | Free text note |
-| `transaction[transaction_type]` | `"expense"` or `"income"` |
+| `transaction[transaction_type]` | `"expense"`, `"income"`, or `"transfer"` |
 | `merchant_id` | Required when `use_as_default` is true |
-| `use_as_default` | When true, applies the category to all transactions for the merchant and sets it as the merchant's default |
+| `use_as_default` | When true, applies the category — and, if `transaction[transaction_type]` is present in the same request, the transaction type — to all of the merchant's transactions and sets them as the merchant's defaults |
 
 **Response (200):** Returns the full transaction object (same shape as show).
 
@@ -372,6 +383,55 @@ Update a transaction's category, notes, or transaction type.
   "errors": "Merchant ID is required when updating all transactions"
 }
 ```
+
+---
+
+### POST /api/transactions/:id/split
+
+Split a transaction into two or more child transactions (e.g. an ATM withdrawal used for several purchases). The parent keeps its original amount but is excluded from transaction lists and all spend statistics; the children take its place. Calling this on an already-split transaction **replaces** its existing children.
+
+**Auth required:** Yes
+
+**Request body:**
+
+```json
+{
+  "children": [
+    { "amount": 60.0, "name": "Groceries", "merchant_tag_id": 12 },
+    { "amount": 40.0 }
+  ]
+}
+```
+
+| Field | Description |
+|---|---|
+| `children[][amount]` | Required, nonzero. All child amounts must sum to the parent's amount (within $0.005) |
+| `children[][name]` | Optional; defaults to the parent's name |
+| `children[][merchant_tag_id]` | Optional category. A categorized child takes its category's transaction type; an uncategorized child inherits the parent's type |
+
+Children inherit the parent's merchant, account, date, and currency. Constraints: at least 2 children; the parent cannot be pending; a child cannot be split again (single-level).
+
+**Response (200):** The parent transaction (show shape) including `split: true` and `childTransactions`.
+
+**Error (422):**
+
+```json
+{
+  "errors": ["Child amounts must sum to the parent amount"]
+}
+```
+
+---
+
+### DELETE /api/transactions/:id/split
+
+Un-split a transaction: deletes its children and restores the parent to lists and statistics.
+
+**Auth required:** Yes
+
+**Response (200):** The parent transaction (show shape) with `split: false`.
+
+**Error (422):** `{ "errors": ["Transaction is not split"] }`
 
 ---
 
@@ -509,7 +569,7 @@ Update a merchant's custom name, default transaction type, default category, and
 
 ### GET /api/merchants/:merchant_id/spend_stats
 
-Get spending statistics for a merchant, including monthly breakdown.
+Get spending and income statistics for a merchant, including monthly breakdowns. `monthlySpend`/`allTimeSpend` count expense transactions (refunds net out); `monthlyIncome`/`allTimeIncome` count income transactions as positive magnitudes; transfers are excluded from both.
 
 **Auth required:** Yes
 
@@ -527,7 +587,11 @@ Get spending statistics for a merchant, including monthly breakdown.
   "monthlySpend": [
     { "month": "2025-01", "amount": 150.00 }
   ],
-  "allTimeSpend": 2500.00
+  "allTimeSpend": 2500.00,
+  "monthlyIncome": [
+    { "month": "2025-01", "amount": 0 }
+  ],
+  "allTimeIncome": 0
 }
 ```
 
@@ -670,7 +734,7 @@ Update a merchant group's name or description.
 
 ### GET /api/merchant_groups/:id/spend_stats
 
-Get spending statistics for a merchant group.
+Get spending and income statistics for a merchant group. `monthlySpend`/`allTimeSpend` count expense transactions (refunds net out); `monthlyIncome`/`allTimeIncome` count income transactions as positive magnitudes; transfers are excluded from both.
 
 **Auth required:** Yes
 
@@ -687,7 +751,11 @@ Get spending statistics for a merchant group.
   "monthlySpend": [
     { "month": "2025-01", "amount": 450.00 }
   ],
-  "allTimeSpend": 7500.00
+  "allTimeSpend": 7500.00,
+  "monthlyIncome": [
+    { "month": "2025-01", "amount": 0 }
+  ],
+  "allTimeIncome": 0
 }
 ```
 
@@ -812,10 +880,13 @@ List all categories for the current account, sorted alphabetically.
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z",
     "targetBudget": 500,
-    "isLeaf": true
+    "isLeaf": true,
+    "tagType": "expense"
   }
 ]
 ```
+
+`tagType` is `"expense"` or `"income"`. Every category in a tree shares its root's type — children always inherit. `targetBudget` is a monthly spending cap on expense categories and the expected monthly income on income categories.
 
 ---
 
@@ -842,7 +913,8 @@ Create a new category.
   "merchant_tag": {
     "name": "Groceries",
     "parent_merchant_tag_id": null,
-    "target_budget": 500
+    "target_budget": 500,
+    "tag_type": "expense"
   }
 }
 ```
@@ -851,7 +923,8 @@ Create a new category.
 |---|---|
 | `merchant_tag[name]` | Category name (required) |
 | `merchant_tag[parent_merchant_tag_id]` | Parent category ID for nesting (optional) |
-| `merchant_tag[target_budget]` | Monthly budget target (optional) |
+| `merchant_tag[target_budget]` | Monthly budget target: spending cap for expense categories, expected income for income categories (optional) |
+| `merchant_tag[tag_type]` | `"expense"` (default) or `"income"`. Only meaningful on root categories — children always inherit the root's type |
 
 **Response (200):** Returns the created category object.
 
@@ -878,10 +951,13 @@ Update an existing category.
   "merchant_tag": {
     "name": "Groceries & Food",
     "parent_merchant_tag_id": null,
-    "target_budget": 600
+    "target_budget": 600,
+    "tag_type": "expense"
   }
 }
 ```
+
+Changing `tag_type` on a root category cascades to all of its descendants; on a child it is ignored (the parent's type wins).
 
 **Response (200):** Returns the updated category object.
 
@@ -897,7 +973,7 @@ Update an existing category.
 
 ### DELETE /api/merchant_tags/:id
 
-Delete a category.
+Delete a category. Its child categories are promoted one level up (to the deleted category's parent, or to top-level) and keep their tag type, its transactions become uncategorized, and merchants defaulting to it lose that default.
 
 **Auth required:** Yes
 
@@ -913,7 +989,7 @@ Delete a category.
 
 ```json
 {
-  "errors": ["Cannot delete category with associated transactions"]
+  "errors": ["..."]
 }
 ```
 
@@ -921,7 +997,7 @@ Delete a category.
 
 ### GET /api/merchant_tags/spend_stats
 
-Get spend statistics for all categories in a date range.
+Get spend statistics for all categories in a date range. A transaction counts only when its type matches its category's `tagType`: expense categories report signed spend (refunds net out), income categories report received income as a positive number, transfers count in neither. `uncategorizedTotal` remains expense-only.
 
 **Auth required:** Yes
 
@@ -931,21 +1007,38 @@ Get spend statistics for all categories in a date range.
 |---|---|---|---|
 | `start_date` | date | 6 months ago | Start of date range |
 | `end_date` | date | today | End of date range |
+| `group_by` | string | — | Pass `month` to get a monthly breakdown per category instead |
 
-**Response (200):** Returns all categories with their total transaction amounts:
+**Response (200):** Returns all categories with their total transaction amounts (rolled up from descendants), plus the total of uncategorized transactions in the range:
+
+```json
+{
+  "tags": [
+    {
+      "id": 5,
+      "name": "Groceries",
+      "parentMerchantTagId": null,
+      "color": "#4CAF50",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "targetBudget": 500,
+      "isLeaf": true,
+      "totalTransactionAmount": 2345.67
+    }
+  ],
+  "uncategorizedTotal": 210.55
+}
+```
+
+**Response (200) with `group_by=month`:** one row per category per month with activity, amounts rolled up to include descendants:
 
 ```json
 [
   {
-    "id": 5,
-    "name": "Groceries",
-    "parentMerchantTagId": null,
-    "color": "#4CAF50",
-    "createdAt": "2025-01-01T00:00:00.000Z",
-    "updatedAt": "2025-01-01T00:00:00.000Z",
-    "targetBudget": 500,
-    "isLeaf": true,
-    "totalTransactionAmount": 2345.67
+    "month": 1,
+    "year": 2025,
+    "tagId": 5,
+    "totalAmount": 487.50
   }
 ]
 ```
@@ -954,7 +1047,7 @@ Get spend statistics for all categories in a date range.
 
 ### GET /api/merchant_tags/:merchant_tag_id/spend_stats
 
-Get monthly spend statistics for a single category.
+Get monthly spend statistics for a single category. A transaction counts only when its type matches the category's `tagType`: expense categories report signed spend (refunds net out), income categories report received income as a positive number.
 
 **Auth required:** Yes
 
@@ -1037,7 +1130,7 @@ Create a new tag.
 
 ### GET /api/tags/spend_stats
 
-Get monthly spend statistics filtered by tags.
+Get monthly spend statistics filtered by tags. Totals count expense transactions only — refunds net out, income and transfers are excluded.
 
 **Auth required:** Yes
 
@@ -1495,7 +1588,7 @@ Each entry represents the summed balance across all accounts of the given type f
 
 ### GET /api/data/total_for_date_range
 
-Get the total spend or income for a date range.
+Get the total spend or income for a date range. `total` is a positive magnitude for both types; refunds net against expense spend.
 
 **Auth required:** Yes
 
@@ -1503,7 +1596,7 @@ Get the total spend or income for a date range.
 
 | Param | Type | Default | Description |
 |---|---|---|---|
-| `transaction_type` | string | `"expense"` | `"expense"` or `"income"` |
+| `transaction_type` | string | `"expense"` | `"expense"`, `"income"`, or `"transfer"` |
 | `start_date` | date | 1 month ago | Start of date range |
 | `end_date` | date | today | End of date range |
 
@@ -1518,11 +1611,19 @@ Get the total spend or income for a date range.
 }
 ```
 
+**Error (422):**
+
+```json
+{
+  "error": "Invalid transaction type"
+}
+```
+
 ---
 
 ### GET /api/data/profit_and_loss
 
-Get a monthly breakdown of income, expenses, and profit.
+Get a monthly breakdown of income, expenses, and profit. `expense` sums expense-typed transactions (refunds net out), `income` sums income-typed transactions, both as positive magnitudes; transfers are excluded.
 
 **Auth required:** Yes
 
@@ -1575,13 +1676,13 @@ Get the daily spending moving average, averaged over the last 6 months. Used for
 ]
 ```
 
-Returns one entry for each day of the month (1–31). Missing days are filled with the previous day's values.
+Returns one entry for each day of the month (1–31). Missing days are filled with the previous day's values. Values are positive magnitudes; a day dominated by refunds can be negative.
 
 ---
 
 ### GET /api/data/income_moving_average
 
-Same as spend moving average, but for income transactions.
+Same as spend moving average, but for income transactions (normalized to positive values).
 
 **Auth required:** Yes
 

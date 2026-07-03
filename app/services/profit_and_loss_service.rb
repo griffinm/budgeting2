@@ -18,6 +18,7 @@ class ProfitAndLossService
 
     base = @account.plaid_transactions
       .not_pending
+      .not_split_parent
       .where('plaid_transactions.date >= ? AND plaid_transactions.date <= ?', start_time, end_time)
       .group("DATE_PART('month', #{tz_date}), DATE_PART('year', #{tz_date})")
       .select("sum(amount) as amount, DATE_PART('month', #{tz_date}) as month, DATE_PART('year', #{tz_date}) as year")
@@ -27,16 +28,19 @@ class ProfitAndLossService
 
     months = month_keys(start_time, end_time).index_with { { expense: 0.0, income: 0.0 } }
 
+    # Sign-correct rather than abs (see PlaidTransaction.spend_total): expenses
+    # are stored positive and income negative, and abs would flip the sign of a
+    # refund-heavy month instead of letting it net out.
     expenses_by_month.each do |row|
       key = [row.year.to_i, row.month.to_i]
       months[key] ||= { expense: 0.0, income: 0.0 }
-      months[key][:expense] = (row.amount || 0).abs.round(2)
+      months[key][:expense] = (row.amount || 0).round(2)
     end
 
     income_by_month.each do |row|
       key = [row.year.to_i, row.month.to_i]
       months[key] ||= { expense: 0.0, income: 0.0 }
-      months[key][:income] = (row.amount || 0).abs.round(2)
+      months[key][:income] = (-(row.amount || 0)).round(2)
     end
 
     months.map do |(year, month), data|

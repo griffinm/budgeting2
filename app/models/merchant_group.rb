@@ -49,6 +49,6 @@ class MerchantGroup < ApplicationRecord
   def total_spend(months_back = nil)
     query = all_transactions
     query = query.where(date: months_back.months.ago..Time.current) if months_back
-    query.sum(:amount).abs
+    query.spend_total
   end
 end

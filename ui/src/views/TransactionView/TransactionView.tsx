@@ -1,17 +1,22 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { urls } from "@/utils/urls";
-import { Breadcrumbs, Card } from "@mantine/core";
+import { Breadcrumbs, Button, Card } from "@mantine/core";
+import { IconArrowsSplit } from "@tabler/icons-react";
 import { Merchant, MerchantCategory, Tag, Transaction } from "@/utils/types";
-import { getTransaction, TransactionUpdateParams } from "@/api/transaction-client";
+import { getTransaction, unsplitTransaction, TransactionUpdateParams } from "@/api/transaction-client";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { fetchMerchantCategories } from "@/api/merchant-categories-client";
 import { fetchTags } from "@/api/tags-client";
 import { createTransactionTag, deleteTransactionTag } from "@/api/transaction-tags-client";
+import { NotificationContext } from "@/providers/Notification/NotificationContext";
 import { PendingTransaction } from "./PendingTransaction";
 import { DetailsCard } from "./DetailsCard";
 import { TransactionNote } from "./TransactionNote";
 import { TransactionHeader } from "./TransactionHeader";
+import { SplitTransactionModal } from "./SplitTransactionModal";
+import { SplitChildrenCard } from "./SplitChildrenCard";
+import { SplitParentBanner } from "./SplitParentBanner";
 
 interface TransactionViewProps {
     transaction: Transaction;
@@ -20,13 +25,35 @@ interface TransactionViewProps {
 }
 
 export function TransactionView({ transaction, setTransaction, updateTransaction }: TransactionViewProps) {
+  const { showNotification } = useContext(NotificationContext);
   const [merchantCategories, setMerchantCategories] = useState<MerchantCategory[]>([]);
   const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [splitModalOpened, setSplitModalOpened] = useState(false);
 
   useEffect(() => {
     fetchMerchantCategories().then(setMerchantCategories);
     fetchTags().then(setAllTags);
   }, []);
+
+  // Pending transactions can't be split (Plaid replaces them on posting),
+  // and splits are single-level (a child can't be split again).
+  const canSplit = !transaction.pending && !transaction.parentTransactionId;
+
+  const handleUnsplit = () => {
+    unsplitTransaction({ id: transaction.id })
+      .then((updated) => {
+        setTransaction(updated);
+        showNotification({ title: 'Split removed', message: 'The original transaction was restored.', type: 'success' });
+      })
+      .catch((error) => {
+        const errors = error.response?.data?.errors;
+        showNotification({
+          title: 'Error',
+          message: Array.isArray(errors) ? errors.join(' ') : 'Failed to unsplit transaction.',
+          type: 'error',
+        });
+      });
+  };
 
   const addTransactionTag = (transactionId: number, tagId: number) => {
     createTransactionTag({ plaidTransactionId: transactionId, tagId }).then((newTag) => {
@@ -73,9 +100,29 @@ export function TransactionView({ transaction, setTransaction, updateTransaction
           allTags={allTags}
           onMerchantUpdated={handleMerchantUpdated}
           onTagCreated={handleTagCreated}
+          actions={canSplit && !transaction.split && (
+            <Button
+              variant="outline"
+              size="xs"
+              leftSection={<IconArrowsSplit className="w-4 h-4" />}
+              onClick={() => setSplitModalOpened(true)}
+            >
+              Split
+            </Button>
+          )}
         />
 
         {transaction.pending && <PendingTransaction />}
+
+        {transaction.parentTransaction && <SplitParentBanner parent={transaction.parentTransaction} />}
+
+        {transaction.split && (
+          <SplitChildrenCard
+            transaction={transaction}
+            onEditSplit={() => setSplitModalOpened(true)}
+            onUnsplit={handleUnsplit}
+          />
+        )}
 
         <Card>
           <DetailsCard
@@ -99,6 +146,14 @@ export function TransactionView({ transaction, setTransaction, updateTransaction
           />
         </Card>
       </div>
+
+      <SplitTransactionModal
+        transaction={transaction}
+        merchantCategories={merchantCategories}
+        opened={splitModalOpened}
+        onClose={() => setSplitModalOpened(false)}
+        onSplit={setTransaction}
+      />
     </div>
   );
 }

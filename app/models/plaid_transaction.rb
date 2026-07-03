@@ -5,32 +5,63 @@ class PlaidTransaction < ApplicationRecord
     transfer: 'transfer'
   }
 
+  CLASSIFICATION_SOURCES = %w[merchant_default category_default plaid_category sign_inference user].freeze
+
   belongs_to :account
   belongs_to :plaid_sync_event
   belongs_to :plaid_account
   belongs_to :merchant
   belongs_to :merchant_tag, optional: true
+  belongs_to :parent_transaction, class_name: 'PlaidTransaction',
+    foreign_key: 'parent_plaid_transaction_id', optional: true
+  has_many :child_transactions, class_name: 'PlaidTransaction',
+    foreign_key: 'parent_plaid_transaction_id', dependent: :destroy
   has_many :tag_plaid_transactions
   has_many :tags, through: :tag_plaid_transactions
-  
+
   validates :transaction_type, presence: true, inclusion: { in: TRANSACTION_TYPES.values }
+  validate :no_nested_splits
+  validates :classification_source, inclusion: { in: CLASSIFICATION_SOURCES }, allow_nil: true
   validates :plaid_id,
     presence: true,
     uniqueness: { scope: :account_id, message: "Transaction already exists" }
-  before_create :set_default_categories
+  # before_validation (not before_create) so the type is set before the
+  # presence validation runs — synced transactions arrive with no type.
+  # Skipped for split children: their category/type are chosen by the user
+  # at split time and must not be clobbered by merchant defaults.
+  before_validation :set_default_categories, on: :create, unless: :split_child?
   after_create :apply_merchant_default_tags
 
   scope :not_pending, -> { where(pending: false) }
+  scope :not_split_parent, -> { where(split: false) }
   scope :expense, -> { where(transaction_type: TRANSACTION_TYPES[:expense]) }
   scope :income, -> { where(transaction_type: TRANSACTION_TYPES[:income]) }
   scope :transfer, -> { where(transaction_type: TRANSACTION_TYPES[:transfer]) }
   scope :in_month, -> (month, year) { where(date: Date.new(year, month, 1)..Date.new(year, month, -1)) }
 
+  # Canonical aggregation convention (raw-SQL services replicate this inline):
+  #   spend  = SUM(amount) over expense rows  (positive; refunds net out)
+  #   income = -SUM(amount) over income rows  (positive; Plaid stores income negative)
+  #   transfers are excluded from both, everywhere.
+  def self.spend_total
+    expense.not_split_parent.sum(:amount)
+  end
+
+  def self.income_total
+    -income.not_split_parent.sum(:amount)
+  end
+
+  # Split parents are NOT excluded here — show pages need them. Callers that
+  # aggregate over this query must add .not_split_parent themselves.
   def self.base_query_for_api(account_id)
     joins(:plaid_account, :merchant)
       .includes(:plaid_account, :merchant_tag, tag_plaid_transactions: :tag, merchant: [:default_merchant_tag])
       .where(plaid_transactions: { account_id: account_id })
       .order(date: :desc)
+  end
+
+  def split_child?
+    parent_plaid_transaction_id.present?
   end
 
   def is_check?
@@ -43,12 +74,14 @@ class PlaidTransaction < ApplicationRecord
   end
 
   def set_default_categories
-    default_category = self.merchant.default_merchant_tag_id
-    default_type = self.merchant.default_transaction_type
+    return if merchant.nil?
+
+    default_category = merchant.default_merchant_tag_id
+    default_type = merchant.default_transaction_type
 
     # Fall back to group merchant defaults if this merchant doesn't have its own
-    if self.merchant.merchant_group && (default_category.blank? || default_type.blank?)
-      self.merchant.merchant_group.merchants.each do |group_merchant|
+    if merchant.merchant_group && (default_category.blank? || default_type.blank?)
+      merchant.merchant_group.merchants.each do |group_merchant|
         default_category ||= group_merchant.default_merchant_tag_id
         default_type ||= group_merchant.default_transaction_type
         break if default_category.present? && default_type.present?
@@ -56,16 +89,38 @@ class PlaidTransaction < ApplicationRecord
     end
 
     self.merchant_tag_id = default_category if default_category.present?
-    self.transaction_type = default_type if default_type.present?
 
-    if self.transaction_type.blank?
-      # Infer the transaction type based on the amount
-      if self.amount < 0
-        # negative amount is income, it's just the way plaid works
-        self.transaction_type = 'income'
-      else
-        self.transaction_type = 'expense'
-      end
+    # An explicitly assigned type (imports, console, specs) always wins
+    return if transaction_type.present?
+
+    if default_type.present?
+      self.transaction_type = default_type
+      self.classification_source = 'merchant_default'
+    elsif default_category.present? && (category_type = MerchantTag.where(id: default_category).pick(:tag_type))
+      # Category drives type: the default category types the transaction.
+      # Explicit merchant defaults still win, and this deliberately precedes
+      # Plaid's transfer detection — set default_transaction_type = 'transfer'
+      # on the merchant to route around it.
+      self.transaction_type = category_type
+      self.classification_source = 'category_default'
+    elsif plaid_category_primary == 'INCOME'
+      self.transaction_type = TRANSACTION_TYPES[:income]
+      self.classification_source = 'plaid_category'
+    elsif %w[TRANSFER_IN TRANSFER_OUT].include?(plaid_category_primary)
+      self.transaction_type = TRANSACTION_TYPES[:transfer]
+      self.classification_source = 'plaid_category'
+    elsif plaid_category_primary.present?
+      # Any other Plaid category is a spend category. A negative amount here
+      # is a refund: negative spend, not income.
+      self.transaction_type = TRANSACTION_TYPES[:expense]
+      self.classification_source = 'plaid_category'
+    elsif amount.present? && amount < 0
+      # negative amount is income, it's just the way plaid works
+      self.transaction_type = TRANSACTION_TYPES[:income]
+      self.classification_source = 'sign_inference'
+    else
+      self.transaction_type = TRANSACTION_TYPES[:expense]
+      self.classification_source = 'sign_inference'
     end
   end
 
@@ -108,7 +163,6 @@ class PlaidTransaction < ApplicationRecord
       currency_code: plaid_transaction.iso_currency_code,
       pending: plaid_transaction.pending,
       payment_channel: plaid_transaction.payment_channel,
-      transaction_type: "expense",
       plaid_category_primary: plaid_transaction.personal_finance_category.primary,
       plaid_category_detail: plaid_transaction.personal_finance_category.detailed,
       plaid_category_confidence_level: plaid_transaction.personal_finance_category.confidence_level,
@@ -116,32 +170,12 @@ class PlaidTransaction < ApplicationRecord
     }
   end
 
-  def self.monthly_average_by_type(transaction_type, months_back = 1)
-    
-    if !TRANSACTION_TYPES.key?(transaction_type.to_sym)
-      raise "Invalid transaction type: #{transaction_type}"
-    end
+  # Splits are single-level: a child can never be a parent, and vice versa.
+  private def no_nested_splits
+    return unless split_child?
 
-    monthly_averages = []
-    current_month_back = 0
-    while current_month_back < months_back
-      start_date = Date.current.beginning_of_month - current_month_back.months
-      end_date = start_date - 1.month
-      current_month_back += 1
-
-      transactions = where(transaction_type: TRANSACTION_TYPES[transaction_type.to_sym])
-        .where(account_id: account_id)
-        .where(date: start_date..end_date)
-        .not_pending
-        .pluck(:amount)
-
-      return 0 if transactions.empty?
-      
-      monthly_average = (transactions.sum / transactions.length.to_f).round(2)
-      monthly_averages << monthly_average
-    end
-
-    monthly_averages.reduce(:+) / monthly_averages.length.to_f
+    errors.add(:base, 'A split child cannot itself be split') if split
+    errors.add(:base, 'Cannot split a child of another split') if parent_transaction&.split_child?
   end
 
   def self.get_transaction_date(plaid_transaction)

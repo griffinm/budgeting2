@@ -16,10 +16,10 @@ export function DayHeader({
   const totalAmount = filteredTransactions.reduce((acc, transaction) => acc + (transaction.amount * -1), 0);
 
   return (
-    <div className="sticky top-0 z-10 border-b bg-neutral-100 dark:bg-[var(--mantine-color-dark-6)] border-gray-300 dark:border-gray-600 py-2 px-3 flex flex-row justify-between">
-      
+    <div className="sticky top-0 z-10 flex flex-row items-center justify-between gap-3 border-b border-gray-100 dark:border-[var(--mantine-color-dark-4)] bg-white/80 dark:bg-[var(--mantine-color-dark-7)]/80 backdrop-blur-sm px-4 py-2">
+
       {/* Desktop display */}
-      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 hidden md:block">
         {new Date(date).toLocaleDateString('en-US', {
           weekday: 'long',
           year: 'numeric',
@@ -29,7 +29,7 @@ export function DayHeader({
       </h3>
 
       {/* Mobile display */}
-      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 visible md:hidden">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 visible md:hidden">
         {new Date(date).toLocaleDateString('en-US', {
           weekday: 'short',
           year: 'numeric',
@@ -38,12 +38,12 @@ export function DayHeader({
         })}
       </h3>
         {transactionCount > 0 && (
-          <div>
-            <span className="text-xs text-gray-500 dark:text-gray-400 mr-3">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-gray-400 dark:text-gray-500">
               {transactionCount} transaction{transactionCount > 1 ? 's' : ''}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">
-              <Currency amount={totalAmount} applyColor={false} useBold={false} />
+            <span className="text-xs font-semibold tabular-nums">
+              <Currency amount={totalAmount} applyColor={true} useBold={false} />
             </span>
           </div>
         )}

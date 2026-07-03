@@ -15,6 +15,7 @@ export interface TransactionSearchParams {
   amount_less_than?: string;
   amount_equal_to?: string;
   has_no_category?: boolean;
+  needs_review?: boolean;
   merchant_tag_id?: number;
   merchant_group_id?: number;
   plaid_account_ids?: number[];
@@ -68,5 +69,33 @@ export const updateTransaction = async ({
     useAsDefault,
     merchantId,
   });
+  return response.data;
+};
+
+export interface SplitChildParams {
+  amount: number;
+  name: string;
+  merchantCategoryId?: number | null;
+}
+
+export const splitTransaction = async ({
+  id,
+  children,
+}: {
+  id: number;
+  children: SplitChildParams[];
+}): Promise<Transaction> => {
+  const response = await baseClient.post<Transaction>(`/transactions/${id}/split`, {
+    children: children.map((child) => ({
+      amount: child.amount,
+      name: child.name,
+      merchantTagId: child.merchantCategoryId,
+    })),
+  });
+  return response.data;
+};
+
+export const unsplitTransaction = async ({ id }: { id: number }): Promise<Transaction> => {
+  const response = await baseClient.delete<Transaction>(`/transactions/${id}/split`);
   return response.data;
 };

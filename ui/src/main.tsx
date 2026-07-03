@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { AppRoutes } from './routes.tsx'
 import { MantineProvider } from '@mantine/core'
+import { ModalsProvider } from '@mantine/modals'
 import { NotificationProvider } from '@/providers'
 import { theme } from '@/theme'
 
@@ -20,10 +21,12 @@ function getColorSchemeFromCookie(): 'light' | 'dark' | 'auto' {
 
 createRoot(document.getElementById('root')!).render(
   <MantineProvider theme={theme} defaultColorScheme={getColorSchemeFromCookie()}>
-    <NotificationProvider>
-      <StrictMode>
-        <AppRoutes />
-      </StrictMode>
-    </NotificationProvider>
+    <ModalsProvider>
+      <NotificationProvider>
+        <StrictMode>
+          <AppRoutes />
+        </StrictMode>
+      </NotificationProvider>
+    </ModalsProvider>
   </MantineProvider>
 )

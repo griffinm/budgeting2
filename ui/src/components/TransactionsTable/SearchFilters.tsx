@@ -117,6 +117,13 @@ export function SearchFilters({
           onChange={(e) => updateLocalParam('has_no_category', e.currentTarget.checked)}
           size="sm"
         />
+        <Switch
+          label="Needs review"
+          description="Type was guessed and never confirmed"
+          checked={localParams.needs_review || false}
+          onChange={(e) => updateLocalParam('needs_review', e.currentTarget.checked)}
+          size="sm"
+        />
       </FilterSection>
 
       <FilterSection label="Date Range">
@@ -202,6 +209,7 @@ export function countActiveFilters(params: TransactionSearchParams): number {
   if (params.amount_greater_than || params.amount_less_than || params.amount_equal_to) count++;
   if (params.transaction_type) count++;
   if (params.has_no_category) count++;
+  if (params.needs_review) count++;
   if (params.plaid_account_ids && params.plaid_account_ids.length > 0) count++;
   if (params.tag_ids && params.tag_ids.length > 0) count++;
   return count;

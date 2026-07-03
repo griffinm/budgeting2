@@ -13,6 +13,7 @@ class TransactionSearchService < BaseService
     amount_less_than: nil,
     amount_equal_to: nil,
     has_no_category: nil,
+    needs_review: nil,
     merchant_tag_id: nil,
     merchant_group_id: nil,
     plaid_account_ids: nil,
@@ -32,6 +33,7 @@ class TransactionSearchService < BaseService
     @amount_less_than = amount_less_than
     @amount_equal_to = amount_equal_to
     @has_no_category = has_no_category
+    @needs_review = needs_review
     @merchant_tag_id = merchant_tag_id
     @merchant_group_id = merchant_group_id
     @plaid_account_ids = plaid_account_ids
@@ -60,6 +62,8 @@ class TransactionSearchService < BaseService
           { merchant_group: [:primary_merchant, :merchants] }
         ]
       )
+      # Split parents are represented by their children in every list
+      .not_split_parent
       .order(date: :desc)
       
     if @merchant_group_id.present? || @merchant_id.present?
@@ -82,16 +86,27 @@ class TransactionSearchService < BaseService
       transactions = transactions.where(merchant_tag_id: nil)
     end
 
+    # "Needs review" = the type was never confirmed or set deliberately:
+    # legacy rows (nil) and amount-sign guesses
+    if @needs_review.present? && @needs_review == "true"
+      transactions = transactions.where(
+        "plaid_transactions.classification_source IS NULL OR plaid_transactions.classification_source = ?",
+        'sign_inference'
+      )
+    end
+
+    # Amount filters compare magnitudes — income is stored negative (Plaid
+    # convention), and users filter by "how big", not by sign.
     if @amount_greater_than.present?
-      transactions = transactions.where("amount > ?", @amount_greater_than)
+      transactions = transactions.where("ABS(plaid_transactions.amount) > ?", @amount_greater_than)
     end
 
     if @amount_equal_to.present?
-      transactions = transactions.where("amount = ?", @amount_equal_to)
+      transactions = transactions.where("ABS(plaid_transactions.amount) = ?", @amount_equal_to)
     end
 
     if @amount_less_than.present?
-      transactions = transactions.where("amount < ?", @amount_less_than)
+      transactions = transactions.where("ABS(plaid_transactions.amount) < ?", @amount_less_than)
     end
 
     if @start_date.present? || @end_date.present?
@@ -123,8 +138,8 @@ class TransactionSearchService < BaseService
 
     if @search_term.present?
       if @search_term.to_f.to_s == @search_term
-        # If the search term is a number, search for the amount
-        transactions = transactions.where("plaid_transactions.amount = ?", @search_term.to_f)
+        # If the search term is a number, search for the amount by magnitude
+        transactions = transactions.where("ABS(plaid_transactions.amount) = ?", @search_term.to_f)
       else
         # If the search term is not a number, search for the name or merchant name
         transactions = transactions.where("plaid_transactions.name ILIKE ? OR merchants.merchant_name ILIKE ?", "%#{@search_term}%", "%#{@search_term}%")

@@ -19,6 +19,7 @@ class TransactionsController < ApplicationController
         amount_less_than: search_params[:amount_less_than],
         amount_equal_to: search_params[:amount_equal_to],
         has_no_category: search_params[:has_no_category],
+        needs_review: search_params[:needs_review],
         merchant_tag_id: search_params[:merchant_tag_id],
         merchant_group_id: search_params[:merchant_group_id],
         plaid_account_ids: search_params[:plaid_account_ids],
@@ -52,24 +53,90 @@ class TransactionsController < ApplicationController
       return
     end
 
-    if @transaction.update(transaction_params)
-      # If the transaction is being updated to use the default category, 
+    type_changed_by_user = transaction_params[:transaction_type].present?
+    attrs = transaction_params.to_h
+    attrs[:classification_source] = 'user' if type_changed_by_user
+
+    # Category drives type: assigning a category re-types the transaction,
+    # unless this same request explicitly set a type (explicit type wins).
+    # Removing a category (null) never re-types.
+    assigned_tag = if transaction_params[:merchant_tag_id].present?
+      current_user.account.merchant_tags.find_by(id: transaction_params[:merchant_tag_id])
+    end
+    if assigned_tag && !type_changed_by_user
+      attrs[:transaction_type] = assigned_tag.tag_type
+      attrs[:classification_source] = 'user'
+    end
+
+    if @transaction.update(attrs)
+      # If the transaction is being updated to use the default category,
       # update all transactions for the merchant to have the same category
-      # and update the merchant's default category to the new category
+      # and update the merchant's default category to the new category.
+      # When the type was part of this update, propagate it the same way.
       if update_all_transactions
+        propagated = { merchant_tag_id: @transaction.merchant_tag_id }
+        merchant_defaults = { default_merchant_tag_id: @transaction.merchant_tag_id }
+
+        if type_changed_by_user
+          propagated[:transaction_type] = @transaction.transaction_type
+          propagated[:classification_source] = 'merchant_default'
+          merchant_defaults[:default_transaction_type] = @transaction.transaction_type
+        elsif assigned_tag
+          # The category's type follows the category to the siblings. The
+          # merchant's default_transaction_type stays nil so the category
+          # keeps driving classification of future transactions.
+          propagated[:transaction_type] = @transaction.transaction_type
+          propagated[:classification_source] = 'merchant_default'
+        end
+
         @transaction.account.plaid_transactions
           .where(merchant_id: merchant_id)
-          .update_all(merchant_tag_id: @transaction.merchant_tag_id)
+          .update_all(propagated)
 
         current_user.account.merchants
           .find_by(id: merchant_id)
-          .update(default_merchant_tag_id: @transaction.merchant_tag_id)
+          .update(merchant_defaults)
       end
 
       render :show
     else
       render json: { errors: @transaction.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  # POST /transactions/:id/split
+  def split
+    transaction = current_user.account.plaid_transactions.find(params[:id])
+    result = TransactionSplitService
+      .new(transaction: transaction, account: current_user.account)
+      .split(split_params[:children])
+
+    render_split_result(result)
+  end
+
+  # DELETE /transactions/:id/split
+  def unsplit
+    transaction = current_user.account.plaid_transactions.find(params[:id])
+    result = TransactionSplitService
+      .new(transaction: transaction, account: current_user.account)
+      .unsplit
+
+    render_split_result(result)
+  end
+
+  private def render_split_result(result)
+    if result[:errors].present?
+      render json: { errors: result[:errors] }, status: :unprocessable_entity
+    else
+      @transaction = PlaidTransaction
+        .base_query_for_api(current_user.account_id)
+        .find(result[:transaction].id)
+      render :show
+    end
+  end
+
+  private def split_params
+    params.permit(children: [:amount, :name, :merchant_tag_id])
   end
 
   private def search_params
@@ -86,6 +153,7 @@ class TransactionsController < ApplicationController
       :amount_less_than,
       :amount_equal_to,
       :has_no_category,
+      :needs_review,
       :merchant_tag_id,
       :merchant_group_id,
       :page,

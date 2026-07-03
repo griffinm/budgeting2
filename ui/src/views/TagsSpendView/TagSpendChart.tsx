@@ -1,6 +1,7 @@
 import { BarChart } from "@mantine/charts";
 import { Tag, TagSpendStats } from "@/utils/types";
 import { formatSpendStatsForChart } from "./utils";
+import { chartCurrencyFormatter } from "@/utils/currencyUtils";
 
 export function TagSpendChart({
   stats,
@@ -42,9 +43,7 @@ export function TagSpendChart({
       type="stacked"
       withLegend={true}
       withYAxis={false}
-      valueFormatter={(value: number) =>
-        `$${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`
-      }
+      valueFormatter={chartCurrencyFormatter({ cents: true })}
     />
   );
 }

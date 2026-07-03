@@ -57,6 +57,13 @@ export interface PlaidAccount {
 
 export type TransactionType = 'expense' | 'income' | 'transfer';
 
+export type ClassificationSource =
+  | 'merchant_default'
+  | 'category_default'
+  | 'plaid_category'
+  | 'sign_inference'
+  | 'user';
+
 export interface Merchant {
   id: number;
   name: string;
@@ -146,6 +153,7 @@ export interface Transaction {
   plaidCategoryDetail: string | null;
   paymentChannel: string | null;
   transactionType: TransactionType;
+  classificationSource?: ClassificationSource | null;
   checkNumber: string | null;
   merchant: Merchant;
   plaidAccount: PlaidAccount;
@@ -158,6 +166,10 @@ export interface Transaction {
   categoryConfidenceLevel: string | null;
   isCheck: boolean;
   transactionTags: TransactionTag[];
+  split: boolean;
+  parentTransactionId: number | null;
+  childTransactions?: Transaction[]; // present on show for a split parent
+  parentTransaction?: Transaction; // present on show for a split child
 }
 
 export interface MerchantCategory {
@@ -171,6 +183,7 @@ export interface MerchantCategory {
   children: MerchantCategory[];
   targetBudget?: number | null;
   isLeaf: boolean;
+  tagType: 'expense' | 'income';
 }
 
 export interface MantineTreeNode {
@@ -188,6 +201,8 @@ export interface MerchantSpendStats {
   monthsBack: number;
   monthlySpend: MerchantSpendMonth[];
   allTimeSpend: number;
+  monthlyIncome?: MerchantSpendMonth[];
+  allTimeIncome?: number;
 }
 
 export interface ProfitAndLossItem {
@@ -274,9 +289,3 @@ export interface MovingAverage {
   cumulativeAveragePerDay: number;
 }
 
-export interface TotalForDateRange {
-  transactionType: TransactionType;
-  startDate: Date;
-  endDate: Date;
-  total: number;
-}

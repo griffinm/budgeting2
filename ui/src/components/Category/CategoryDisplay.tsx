@@ -1,7 +1,7 @@
 import { MerchantCategory } from "@/utils/types";
 import { useState } from "react";
 import { CategoryEdit } from "./CategoryEdit";
-import { fullyQualifiedCategoryName } from "@/utils/merchantCategoryUtils";
+import { categoryParentPath } from "@/utils/merchantCategoryUtils";
 
 export function CategoryDisplay({
   category,
@@ -50,12 +50,14 @@ export function Display({
       return <div className="text-gray-500 dark:text-gray-400 italic">No category</div>
     }
 
+    const parentPath = categoryParentPath(tag, allCategories);
+
     return (
-      <div className="flex flex-row gap-2">
-        <div className="flex flex-col">
-          <div className="text-gray-500 dark:text-gray-400 text-sm">{fullyQualifiedCategoryName(tag, allCategories)}</div>
-          <div className="font-bold">{tag.name}</div>
-        </div>
+      <div className="flex flex-col min-w-0">
+        {parentPath && (
+          <div className="text-gray-500 dark:text-gray-400 text-xs truncate">{parentPath}</div>
+        )}
+        <div className="font-bold truncate">{tag.name}</div>
       </div>
     )
   }

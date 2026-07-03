@@ -20,7 +20,8 @@ class DefaultMerchantTagsService
         account_id: @account.id,
         user_id: @user.id,
         name: category[:name],
-        color: category[:color]
+        color: category[:color],
+        tag_type: category[:tag_type] || 'expense'
       )
       tags[category[:name]] = tag
     end
@@ -54,7 +55,7 @@ class DefaultMerchantTagsService
       { name: "Entertainment", color: "#96CEB4" },
       { name: "Bills & Utilities", color: "#FFEAA7" },
       { name: "Healthcare", color: "#DDA0DD" },
-      { name: "Income", color: "#98D8C8" },
+      { name: "Income", color: "#98D8C8", tag_type: "income" },
       { name: "Savings & Investments", color: "#F7DC6F" },
       { name: "Personal Care", color: "#BB8FCE" },
       { name: "Education", color: "#85C1E9" }
@@ -69,7 +70,9 @@ class DefaultMerchantTagsService
       "Entertainment" => ["Movies", "Streaming Services", "Sports", "Concerts", "Games"],
       "Bills & Utilities" => ["Electric", "Water", "Internet", "Phone", "Insurance"],
       "Healthcare" => ["Doctor Visits", "Pharmacy", "Dental", "Vision", "Emergency"],
-      "Income" => ["Salary", "Freelance", "Investment Returns", "Refunds", "Cashback"],
+      # No "Refunds" here: refunds are negative spend inside their expense
+      # category, not income
+      "Income" => ["Salary", "Freelance", "Investment Returns", "Cashback"],
       "Savings & Investments" => ["Emergency Fund", "Retirement", "Stocks", "Bonds", "Savings Account"],
       "Personal Care" => ["Haircuts", "Skincare", "Gym", "Massage", "Beauty Products"],
       "Education" => ["Tuition", "Books", "Online Courses", "Certifications", "Supplies"]

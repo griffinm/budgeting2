@@ -163,6 +163,14 @@ class PlaidService < BaseService
       end
 
       transaction_attrs = PlaidTransaction.parse_plaid_transaction(transaction, @account, plaid_account, plaid_sync_event)
+
+      # Bank fidelity wins: keep syncing the parent even when split, but flag
+      # the drift — the children no longer sum to the parent and the UI
+      # surfaces an out-of-sync warning prompting an edit of the split.
+      if existing_transaction.split && existing_transaction.amount != transaction_attrs[:amount]
+        Rails.logger.warn("Split transaction #{existing_transaction.id} amount changed by Plaid sync from #{existing_transaction.amount} to #{transaction_attrs[:amount]}; its children no longer sum to the parent")
+      end
+
       existing_transaction.update(transaction_attrs)
     end
   end

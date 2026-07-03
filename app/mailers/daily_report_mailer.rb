@@ -38,11 +38,10 @@ class DailyReportMailer < ApplicationMailer
   def compute_monthly_summary
     current_day = @today.day
 
-    expenses = @user.plaid_transactions.expense.not_pending.in_month(@today.month, @today.year)
-    income = @user.plaid_transactions.income.not_pending.in_month(@today.month, @today.year)
+    base = @user.plaid_transactions.not_pending.in_month(@today.month, @today.year)
 
-    @expenses_this_month = expenses.sum { |t| t.amount.abs }
-    @income_this_month = income.sum { |t| t.amount.abs }
+    @expenses_this_month = base.spend_total
+    @income_this_month = base.income_total
     @profit_this_month = @income_this_month - @expenses_this_month
 
     moving_avg = MonthlySpendService.new(@user.id)
@@ -77,7 +76,9 @@ class DailyReportMailer < ApplicationMailer
     )
 
     all_tags = @account.merchant_tags.active.index_by(&:id)
-    top_level_tags = @account.merchant_tags.active.where(parent_merchant_tag_id: nil)
+    # Expense categories only: income targets mean "expected income", which
+    # would corrupt a budget-vs-actual table built around spending caps
+    top_level_tags = @account.merchant_tags.active.where(parent_merchant_tag_id: nil, tag_type: 'expense')
 
     @category_spending = top_level_tags.filter_map do |tag|
       budget = recursive_budget(tag.id, all_tags)

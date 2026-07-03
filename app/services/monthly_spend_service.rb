@@ -6,6 +6,15 @@ class MonthlySpendService
   end
 
   def moving_average(months_back: 6, transaction_type: 'expense')
+    unless PlaidTransaction::TRANSACTION_TYPES.value?(transaction_type)
+      raise ArgumentError, "Invalid transaction type: #{transaction_type}"
+    end
+
+    # Sign convention (see PlaidTransaction.spend_total): expenses are stored
+    # positive, income negative — negate income so all series read as positive
+    # magnitudes while refunds/corrections still net out.
+    sign = transaction_type == PlaidTransaction::TRANSACTION_TYPES[:income] ? -1 : 1
+
     sql = <<-SQL
     SELECT
         day_of_month,
@@ -21,7 +30,7 @@ class MonthlySpendService
     FROM (
         SELECT
             EXTRACT(DAY FROM pt.date)::INTEGER AS day_of_month,
-            SUM(pt.amount) / #{months_back.to_i} AS day_average,
+            SUM(pt.amount) * #{sign} / #{months_back.to_i} AS day_average,
             COUNT(*) AS transaction_count
         FROM
             plaid_transactions pt
@@ -30,7 +39,8 @@ class MonthlySpendService
               AND pau.user_id = #{@user_id}
         WHERE
             pt.date >= CURRENT_DATE - INTERVAL '#{months_back.to_i} months'
-            AND pt.transaction_type = '#{transaction_type}'
+            AND pt.transaction_type = #{ActiveRecord::Base.connection.quote(transaction_type)}
+            AND pt.split = FALSE
         GROUP BY
             EXTRACT(DAY FROM pt.date)
     ) subquery
@@ -41,10 +51,10 @@ class MonthlySpendService
     data = ActiveRecord::Base.connection.execute(sql).to_a
     result_map = data.map do |row|
       {
-        dayOfMonth: row['day_of_month'].abs,
-        dayAverage: row['day_average'].abs,
-        cumulativeTotal: row['cumulative_total'].abs,
-        cumulativeAveragePerDay: row['cumulative_average_per_day'].abs
+        dayOfMonth: row['day_of_month'],
+        dayAverage: row['day_average'],
+        cumulativeTotal: row['cumulative_total'],
+        cumulativeAveragePerDay: row['cumulative_average_per_day']
       }
     end.sort_by { |item| item[:dayOfMonth] }
     

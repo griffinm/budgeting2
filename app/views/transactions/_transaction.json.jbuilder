@@ -9,12 +9,15 @@ json.plaidCategoryPrimary transaction.plaid_category_primary
 json.plaidCategoryDetail transaction.plaid_category_detail
 json.paymentChannel transaction.payment_channel
 json.transactionType transaction.transaction_type
+json.classificationSource transaction.classification_source
 json.isCheck transaction.is_check?
 json.checkNumber transaction.check_number
 json.currencyCode transaction.currency_code
 json.hasDefaultMerchantTag transaction.has_default_merchant_tag?
 json.note transaction.note
 json.recurring transaction.recurring
+json.split transaction.split
+json.parentTransactionId transaction.parent_plaid_transaction_id
 json.categoryPrimary transaction.plaid_category_primary
 json.categoryDetail transaction.plaid_category_detail
 json.categoryConfidenceLevel transaction.plaid_category_confidence_level

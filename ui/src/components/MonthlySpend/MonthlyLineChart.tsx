@@ -1,6 +1,7 @@
 import { MovingAverage, Transaction, TransactionType } from "@/utils/types";
 import { LineChart } from "@mantine/charts";
 import { transactionArrayToDailySeries } from "@/utils/chartUtils";
+import { chartCurrencyFormatter } from "@/utils/currencyUtils";
 
 export function MonthlyLineChart({
   currentMonthTransactions,
@@ -36,7 +37,7 @@ export function MonthlyLineChart({
         yAxisLabel={transactionType === 'expense' ? 'Expenses' : 'Income'}
         xAxisLabel="Day of Month"
         tooltipAnimationDuration={200}
-        valueFormatter={(value: number) => `$${value.toLocaleString('en-US', { maximumFractionDigits: 0 })}`}
+        valueFormatter={chartCurrencyFormatter()}
         series={[
           { name: 'currentMonth', color: lineColor, label: 'This Month' },
           { name: 'previousMonth', color: 'gray', label: '6-Month Average' },

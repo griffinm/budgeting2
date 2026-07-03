@@ -1,260 +1,340 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { Button, Paper, Text } from "@mantine/core";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconPlus, IconTag } from "@tabler/icons-react";
+import classNames from "classnames";
+import { differenceInCalendarMonths } from "date-fns";
 import { MerchantCategory } from "@/utils/types";
-import {
-  createMerchantCategory,
-  CreateMerchantCategoryRequest,
-  fetchMerchantCategorySpendStats,
-  fetchMerchantCategories,
-  updateMerchantCategory,
-  UpdateMerchantCategoryRequest,
-} from "@/api";
+import { CreateMerchantCategoryRequest, UpdateMerchantCategoryRequest } from "@/api";
+import { useCategorySpendData } from "@/hooks/useCategorySpendData";
+import { findCategoryInTree, getDescendantIds } from "@/utils/merchantCategoryUtils";
+import { Currency } from "../Currency";
 import { Loading } from "../Loading";
-import { Button, Select, SegmentedControl } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
-import { formatMerchantCategoriesAsTree } from "@/utils/merchantCategoryUtils";
-import {
-  endOfMonth,
-  startOfMonth,
-  subMonths,
-} from "date-fns";
-import { DateInput } from "@mantine/dates";
-import { TransactionModal } from "./TransactionModal";
+import { CategoryCard } from "./CategoryCard";
+import { CategoryDnd, CategoryHandlers } from "./CategoryRow";
+import { DateRange, DateRangeControl, rangeForOption } from "./DateRangeControl";
 import { EditCategoryModal } from "./EditCategoryModal";
-import { MerchantCategoryRow } from "./MerchantCategoryRow";
-import '@mantine/dates/styles.css';
-
-const defaultStartDate = startOfMonth(new Date());
-const defaultEndDate = endOfMonth(new Date());
-
-const quickOptions = [
-  { label: "This Month", monthsBack: 0 },
-  { label: "Last Month", monthsBack: 1 },
-  { label: "Last 3 Months", monthsBack: 3 },
-  { label: "Last 6 Months", monthsBack: 6 },
-  { label: "Last 12 Months", monthsBack: 12 },
-]
+import { SummaryStrip } from "./SummaryStrip";
+import { TransactionModal } from "./TransactionModal";
+import { buildSparklineData } from "./TrendSparkline";
 
 export const View = () => {
-  const [merchantCategories, setMerchantCategories] = useState<MerchantCategory[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
-  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
-  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [selectedMerchantCategory, setSelectedMerchantCategory] = useState<MerchantCategory | undefined>();
-  const [monthsBack, setMonthsBack] = useState(0);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingMerchantCategory, setEditingMerchantCategory] = useState<MerchantCategory | undefined>();
-  const [rawMerchantCategories, setRawMerchantCategories] = useState<MerchantCategory[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
+  const [range, setRange] = useState<DateRange>(() => rangeForOption("this")!);
+  const {
+    tree,
+    flat,
+    monthlyByTagId,
+    uncategorizedTotal,
+    loading,
+    saving,
+    create,
+    update,
+    remove,
+  } = useCategorySpendData(range);
+  const monthsInRange = Math.max(
+    differenceInCalendarMonths(range.endDate, range.startDate) + 1,
+    1,
+  );
 
-  const refreshData = () => {
-    setLoading(true);
-    Promise.all([
-      fetchMerchantCategorySpendStats({ startDate: new Date(startDate || defaultStartDate), endDate: new Date(endDate || defaultEndDate) }),
-      fetchMerchantCategories(),
-    ])
-    .then(([merchantCategorySpendStats, allCategories]) => {
-      setMerchantCategories(formatMerchantCategoriesAsTree({ merchantCategories: merchantCategorySpendStats as MerchantCategory[] }));
-      setRawMerchantCategories(allCategories);
-    })
-    .finally(() => {
-      setLoading(false);
-    });
+  const [transactionCategory, setTransactionCategory] = useState<MerchantCategory | undefined>();
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<MerchantCategory | undefined>();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editErrors, setEditErrors] = useState<string[]>([]);
+  const [draggingId, setDraggingId] = useState<number | null>(null);
+
+  const extractErrors = (error: unknown): string[] =>
+    (error as { response?: { data?: { errors?: string[] } } })?.response?.data?.errors || [
+      "Something went wrong",
+    ];
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingCategory(undefined);
+    setEditErrors([]);
   };
 
-  useEffect(() => {
-    refreshData();
-  }, [startDate, endDate]);
-
-  const onViewTransactions = (merchantCategory: MerchantCategory) => {
-    setSelectedMerchantCategory(merchantCategory);
-    setIsTransactionModalOpen(true);
-  }
-
-  const onEdit = (merchantCategory: MerchantCategory) => {
-    setEditingMerchantCategory(merchantCategory);
+  const openNewCategoryModal = () => {
+    setEditingCategory(undefined);
+    setEditErrors([]);
     setIsEditModalOpen(true);
   };
 
-  const [editErrors, setEditErrors] = useState<string[]>([]);
-
-  const onSaveEdit = (params: UpdateMerchantCategoryRequest) => {
-    setIsSaving(true);
+  const handleSaveEdit = async (params: UpdateMerchantCategoryRequest) => {
     setEditErrors([]);
-    updateMerchantCategory({ data: params })
-      .then(() => {
-        setIsEditModalOpen(false);
-        setEditingMerchantCategory(undefined);
-        refreshData();
-      })
-      .catch((error) => {
-        setEditErrors(error.response?.data?.errors || ["Something went wrong"]);
-      })
-      .finally(() => {
-        setIsSaving(false);
-      });
+    try {
+      await update(params);
+      closeEditModal();
+    } catch (error) {
+      setEditErrors(extractErrors(error));
+    }
   };
 
-  const onCreateCategory = (params: CreateMerchantCategoryRequest) => {
-    setIsSaving(true);
+  const handleCreate = async (params: CreateMerchantCategoryRequest) => {
     setEditErrors([]);
-    createMerchantCategory({ data: params })
-      .then(() => {
-        setIsEditModalOpen(false);
-        refreshData();
-      })
-      .catch((error) => {
-        setEditErrors(error.response?.data?.errors || ["Something went wrong"]);
-      })
-      .finally(() => {
-        setIsSaving(false);
-      });
+    try {
+      await create(params);
+      closeEditModal();
+    } catch (error) {
+      setEditErrors(extractErrors(error));
+    }
   };
 
-  const renderTable = () => {
-    return (
-      <div className="w-full flex flex-col overflow-x-auto">
-        {merchantCategories.map((category) => (
-          <MerchantCategoryRow
-            key={category.id}
-            tag={category}
-            onEdit={onEdit}
-            onViewTransactions={onViewTransactions}
-            monthsBack={monthsBack}
-          />
-        ))}
-      </div>
-    )
-  }
+  const handleDelete = (category: MerchantCategory) => {
+    const descendantCount = getDescendantIds(category).length - 1;
+    modals.openConfirmModal({
+      title: `Delete ${category.name}?`,
+      children: (
+        <Text size="sm">
+          {descendantCount > 0 &&
+            `Its ${descendantCount} ${descendantCount === 1 ? "subcategory" : "subcategories"} will move up a level. `}
+          Transactions in this category will become uncategorized. This cannot be undone.
+        </Text>
+      ),
+      labels: { confirm: "Delete", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: () => {
+        remove(category.id)
+          .then(() => notifications.show({ message: `Deleted ${category.name}`, color: "green" }))
+          .catch(() =>
+            notifications.show({ message: `Could not delete ${category.name}`, color: "red" }),
+          );
+      },
+    });
+  };
+
+  const handlers: CategoryHandlers = {
+    onEdit: (category) => {
+      setEditingCategory(category);
+      setEditErrors([]);
+      setIsEditModalOpen(true);
+    },
+    onViewTransactions: (category) => {
+      setTransactionCategory(category);
+      setIsTransactionModalOpen(true);
+    },
+    onDelete: handleDelete,
+    onSaveBudget: (category, targetBudget) => {
+      update({ id: category.id, data: { targetBudget } }).catch(() =>
+        notifications.show({
+          message: `Could not update budget for ${category.name}`,
+          color: "red",
+        }),
+      );
+    },
+  };
+
+  const expenseTree = tree.filter((category) => category.tagType !== "income");
+  const incomeTree = tree.filter((category) => category.tagType === "income");
+
+  const draggingCategory =
+    draggingId !== null ? findCategoryInTree(tree, draggingId) : undefined;
+  const draggingDescendants = useMemo(
+    () =>
+      draggingCategory
+        ? new Set(getDescendantIds(draggingCategory))
+        : new Set<number>(),
+    [draggingCategory],
+  );
+
+  const dnd: CategoryDnd = {
+    draggingId,
+    startDrag: (category) => setDraggingId(category.id),
+    endDrag: () => setDraggingId(null),
+    canDropOn: (targetId) => {
+      if (!draggingCategory) return false;
+      if (targetId === null) return draggingCategory.parentMerchantTagId !== null;
+      if (draggingDescendants.has(targetId)) return false;
+      return targetId !== draggingCategory.parentMerchantTagId;
+    },
+    dropOn: (targetId) => {
+      if (!draggingCategory) return;
+      const dragged = draggingCategory;
+      const target = targetId !== null ? findCategoryInTree(tree, targetId) : undefined;
+      setDraggingId(null);
+      modals.openConfirmModal({
+        title: "Move category",
+        children: (
+          <Text size="sm">
+            Move <b>{dragged.name}</b>{" "}
+            {target ? (
+              <>
+                under <b>{target.name}</b>
+              </>
+            ) : (
+              "to the top level"
+            )}
+            ?
+          </Text>
+        ),
+        labels: { confirm: "Move", cancel: "Cancel" },
+        onConfirm: () => {
+          update({ id: dragged.id, data: { parentMerchantTagId: targetId } }).catch(() =>
+            notifications.show({ message: `Could not move ${dragged.name}`, color: "red" }),
+          );
+        },
+      });
+    },
+  };
+
+  const renderEmptyState = () => (
+    <Paper p="xl" radius="md" withBorder className="flex flex-col items-center gap-3 py-16">
+      <IconTag size={40} stroke={1.5} className="text-gray-300 dark:text-gray-600" />
+      <div className="text-lg font-semibold">No categories yet</div>
+      <Text size="sm" c="dimmed" className="text-center max-w-sm">
+        Categories group your merchants so you can budget and track spending by area — like
+        Food, Home, or Travel.
+      </Text>
+      <Button leftSection={<IconPlus size={16} />} onClick={openNewCategoryModal}>
+        New Category
+      </Button>
+    </Paper>
+  );
 
   return (
-    <div>
-      <div className="flex flex-col sm:flex-row gap-3 mb-5 sm:items-center justify-between">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <DateFields
-            onChange={({ startDate, endDate, monthsBack }) => {
-              setStartDate(startDate);
-              setEndDate(endDate);
-              setMonthsBack(monthsBack);
-            }}
-          />
-        </div>
-
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+        <DateRangeControl onChange={setRange} />
         <Button
           size="sm"
           variant="outline"
           leftSection={<IconPlus size={16} />}
-          onClick={() => {
-            setEditingMerchantCategory(undefined);
-            setIsEditModalOpen(true);
-          }}
+          onClick={openNewCategoryModal}
         >
           New Category
         </Button>
       </div>
 
-      <div className="border border-b border-gray-200 border-1 mb-3" />
+      {loading ? (
+        <Loading />
+      ) : tree.length === 0 ? (
+        renderEmptyState()
+      ) : (
+        <>
+          <SummaryStrip
+            expenseTree={expenseTree}
+            incomeTree={incomeTree}
+            uncategorizedTotal={uncategorizedTotal}
+            monthsInRange={monthsInRange}
+          />
 
-      {loading ? <Loading /> : renderTable()}
+          {draggingId !== null && dnd.canDropOn(null) && (
+            <TopLevelDropZone onDropTopLevel={() => dnd.dropOn(null)} />
+          )}
+
+          <div className="flex flex-col gap-3">
+            {incomeTree.length > 0 && expenseTree.length > 0 && (
+              <SectionHeading label="Spending" />
+            )}
+            {expenseTree.map((category) => (
+              <CategoryCard
+                key={category.id}
+                category={category}
+                monthsMultiplier={monthsInRange}
+                sparklineData={buildSparklineData(monthlyByTagId.get(category.id))}
+                defaultExpanded={tree.length <= 3}
+                handlers={handlers}
+                dnd={dnd}
+              />
+            ))}
+
+            {uncategorizedTotal > 0 && (
+              <Paper
+                p={0}
+                radius="md"
+                withBorder
+                shadow="none"
+                style={{ borderLeft: "4px solid var(--mantine-color-gray-4)" }}
+              >
+                <div className="flex items-center gap-2.5 px-3 sm:px-4 py-3">
+                  <span className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0" />
+                  <span className="font-semibold text-gray-500 dark:text-gray-400">
+                    Uncategorized
+                  </span>
+                  <span className="ml-auto">
+                    <Currency
+                      amount={uncategorizedTotal}
+                      applyColor={false}
+                      showCents={false}
+                      useBold={true}
+                    />
+                  </span>
+                </div>
+              </Paper>
+            )}
+
+            {incomeTree.length > 0 && (
+              <>
+                <SectionHeading label="Income" />
+                {incomeTree.map((category) => (
+                  <CategoryCard
+                    key={category.id}
+                    category={category}
+                    monthsMultiplier={monthsInRange}
+                    sparklineData={buildSparklineData(monthlyByTagId.get(category.id))}
+                    defaultExpanded={tree.length <= 3}
+                    handlers={handlers}
+                    dnd={dnd}
+                  />
+                ))}
+              </>
+            )}
+          </div>
+        </>
+      )}
+
       <TransactionModal
-        merchantCategory={selectedMerchantCategory}
+        merchantCategory={transactionCategory}
         onClose={() => setIsTransactionModalOpen(false)}
         isOpen={isTransactionModalOpen}
       />
       <EditCategoryModal
-        merchantCategory={editingMerchantCategory}
-        allMerchantCategories={rawMerchantCategories}
+        merchantCategory={editingCategory}
+        allMerchantCategories={flat}
         isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setEditingMerchantCategory(undefined);
-          setEditErrors([]);
-        }}
-        onSave={onSaveEdit}
-        onCreate={onCreateCategory}
-        isSaving={isSaving}
+        onClose={closeEditModal}
+        onSave={handleSaveEdit}
+        onCreate={handleCreate}
+        isSaving={saving}
         errors={editErrors}
       />
     </div>
   );
 };
 
-interface DateFieldsProps {
-  onChange: (params: { startDate: Date; endDate: Date; monthsBack: number }) => void;
+function SectionHeading({ label }: { label: string }) {
+  return (
+    <div className="text-xs font-medium tracking-wide uppercase text-gray-500 dark:text-gray-400 mt-2 first:mt-0">
+      {label}
+    </div>
+  );
 }
 
-const DateFields = ({ onChange }: DateFieldsProps) => {
-  const [selectedOption, setSelectedOption] = useState('0');
-  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate);
-  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate);
-
-  const segmentData = [
-    ...quickOptions.map((option) => ({
-      label: option.label,
-      value: String(option.monthsBack),
-    })),
-    { label: "Custom", value: "custom" },
-  ];
-
-  const handleSegmentChange = (value: string) => {
-    setSelectedOption(value);
-    if (value !== 'custom') {
-      const monthsBack = Number(value);
-      const newStart = startOfMonth(subMonths(new Date(), monthsBack));
-      const newEnd = defaultEndDate;
-      setStartDate(newStart);
-      setEndDate(newEnd);
-      onChange({ startDate: newStart, endDate: newEnd, monthsBack });
-    }
-  };
+function TopLevelDropZone({ onDropTopLevel }: { onDropTopLevel: () => void }) {
+  const [dragOver, setDragOver] = useState(false);
 
   return (
-    <>
-      <div className="hidden sm:block">
-        <SegmentedControl
-          size="sm"
-          value={selectedOption}
-          onChange={handleSegmentChange}
-          data={segmentData}
-        />
-      </div>
-      <div className="sm:hidden">
-        <Select
-          size="sm"
-          value={selectedOption}
-          onChange={(value) => value && handleSegmentChange(value)}
-          data={segmentData}
-        />
-      </div>
-      {selectedOption === 'custom' && (
-        <div className="flex gap-2 items-center">
-          <DateInput
-            size="sm"
-            value={startDate}
-            onChange={(date) => {
-              const d = date ? new Date(date) : null;
-              setStartDate(d);
-              if (d && endDate) {
-                onChange({ startDate: d, endDate, monthsBack: 0 });
-              }
-            }}
-            placeholder="Start date"
-          />
-          <span>—</span>
-          <DateInput
-            size="sm"
-            value={endDate}
-            onChange={(date) => {
-              const d = date ? new Date(date) : null;
-              setEndDate(d);
-              if (startDate && d) {
-                onChange({ startDate, endDate: d, monthsBack: 0 });
-              }
-            }}
-            placeholder="End date"
-          />
-        </div>
+    <div
+      className={classNames(
+        "border-2 border-dashed rounded-md px-4 py-3 text-sm text-center transition-colors",
+        dragOver
+          ? "border-primary-400 bg-primary-0 text-primary-700 dark:bg-[var(--mantine-color-dark-6)] dark:text-primary-200"
+          : "border-gray-300 dark:border-[var(--mantine-color-dark-4)] text-gray-500 dark:text-gray-400",
       )}
-    </>
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        onDropTopLevel();
+      }}
+    >
+      Drop here to move to the top level
+    </div>
   );
-};
+}

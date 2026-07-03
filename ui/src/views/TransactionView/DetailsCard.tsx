@@ -4,6 +4,7 @@ import { MerchantCategory } from "@/utils/types";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { format } from "date-fns";
 import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
+import { ConfirmTypeButton } from "@/components/TransactionsTable/TableRow/ConfirmTypeButton";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
 import { TransactionTags } from "@/components/TransactionTags/TransactionTags";
 import { Badge } from "@mantine/core";
@@ -60,16 +61,19 @@ export function DetailsCard({
         )}
 
         <DetailRow label="Type">
-          <TransactionType
-            transaction={transaction}
-            onSave={(txId, transactionType) =>
-              updateTransaction(txId, {
-                transactionType,
-                useAsDefault: false,
-                merchantId: merchant.id,
-              })
-            }
-          />
+          <div className="flex items-center gap-1">
+            <TransactionType
+              transaction={transaction}
+              onSave={(txId, transactionType) =>
+                updateTransaction(txId, {
+                  transactionType,
+                  useAsDefault: false,
+                  merchantId: merchant.id,
+                })
+              }
+            />
+            <ConfirmTypeButton transaction={transaction} updateTransaction={updateTransaction} />
+          </div>
         </DetailRow>
 
         <DetailRow label="Category">

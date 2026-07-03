@@ -3,15 +3,22 @@ class DataController < ApplicationController
 
   # GET /api/data/total_for_date_range
   def total_for_date_range
-    transaction_type = params[:transaction_type] || 'expense'
+    transaction_type = params[:transaction_type].presence || 'expense'
+    unless PlaidTransaction::TRANSACTION_TYPES.value?(transaction_type)
+      render json: { error: 'Invalid transaction type' }, status: :unprocessable_entity
+      return
+    end
+
     start_date = params[:start_date] || Date.today - 1.month
     end_date = params[:end_date] || Date.today
 
     amount = PlaidTransaction.base_query_for_api(current_user.account.id)
-      .send(transaction_type)
+      .not_split_parent
+      .where(transaction_type: transaction_type)
       .where(date: start_date..end_date)
-      .all
       .sum(:amount)
+    # Income is stored negative (Plaid convention); present magnitudes
+    amount = -amount if transaction_type == PlaidTransaction::TRANSACTION_TYPES[:income]
 
     render json: {
       transactionType: transaction_type,
