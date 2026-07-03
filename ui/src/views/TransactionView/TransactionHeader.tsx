@@ -47,7 +47,7 @@ export function TransactionHeader({
 
       <div className="ml-auto">
         <div className="text-3xl">
-          <TransactionAmount amount={transaction.amount} />
+          <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
         </div>
       </div>
     </div>

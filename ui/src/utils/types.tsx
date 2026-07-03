@@ -57,6 +57,13 @@ export interface PlaidAccount {
 
 export type TransactionType = 'expense' | 'income' | 'transfer';
 
+export type ClassificationSource =
+  | 'merchant_default'
+  | 'category_default'
+  | 'plaid_category'
+  | 'sign_inference'
+  | 'user';
+
 export interface Merchant {
   id: number;
   name: string;
@@ -146,6 +153,7 @@ export interface Transaction {
   plaidCategoryDetail: string | null;
   paymentChannel: string | null;
   transactionType: TransactionType;
+  classificationSource?: ClassificationSource | null;
   checkNumber: string | null;
   merchant: Merchant;
   plaidAccount: PlaidAccount;

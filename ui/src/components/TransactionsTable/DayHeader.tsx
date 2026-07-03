@@ -42,8 +42,8 @@ export function DayHeader({
             <span className="text-xs text-gray-500 dark:text-gray-400 mr-3">
               {transactionCount} transaction{transactionCount > 1 ? 's' : ''}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400 font-bold">
-              <Currency amount={totalAmount} applyColor={false} useBold={false} />
+            <span className="text-xs font-bold">
+              <Currency amount={totalAmount} applyColor={true} useBold={false} />
             </span>
           </div>
         )}

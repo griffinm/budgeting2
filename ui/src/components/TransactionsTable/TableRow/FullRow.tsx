@@ -8,6 +8,7 @@ import { urls } from "@/utils/urls";
 import { Link } from "@/components/Link";
 import { TransactionUpdateParams } from "@/api/transaction-client";
 import { Logo } from "../Logo";
+import { ConfirmTypeButton } from "./ConfirmTypeButton";
 import { PendingBadge } from "./PendingBadge";
 import { TransactionNote } from "./TransactionNote";
 import { ActionIcon, Menu } from "@mantine/core";
@@ -56,10 +57,13 @@ export function FullRow({
             <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
               {transaction.plaidAccount.nickname || transaction.plaidAccount.plaidOfficialName}
             </span>
-            <TransactionType
-              transaction={transaction}
-              onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
-            />
+            <div className="flex items-center gap-1">
+              <TransactionType
+                transaction={transaction}
+                onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
+              />
+              <ConfirmTypeButton transaction={transaction} updateTransaction={updateTransaction} />
+            </div>
           </div>
         </div>
 
@@ -91,7 +95,7 @@ export function FullRow({
         <div className="flex items-center gap-1.5 flex-shrink-0 ml-auto pl-3">
           {transaction.pending && <PendingBadge />}
           <div className="text-right cursor-pointer hover:underline" onClick={() => navigate(urls.transaction.path(transaction.id))}>
-            <TransactionAmount amount={transaction.amount} />
+            <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
           </div>
         </div>
 
@@ -143,18 +147,19 @@ export function FullRow({
             onClick={(e) => { e.stopPropagation(); navigate(urls.transaction.path(transaction.id)); }}
           >
             {transaction.pending && <PendingBadge />}
-            <TransactionAmount amount={transaction.amount} />
+            <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
           </div>
         </div>
 
         {/* Expanded: Type + Category + Tags */}
         {isMobileExpanded && (
           <div className="flex items-center flex-wrap w-full">
-            <div className="w-1/4">
+            <div className="w-1/4 flex items-center gap-1">
               <TransactionType
                 transaction={transaction}
                 onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
               />
+              <ConfirmTypeButton transaction={transaction} updateTransaction={updateTransaction} />
             </div>
             <div className="text-center w-1/2 flex justify-center">
               <CategoryDisplay

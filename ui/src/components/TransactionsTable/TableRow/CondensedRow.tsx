@@ -6,6 +6,7 @@ import { urls } from "@/utils/urls";
 import { merchantDisplayName } from "@/utils/merchantsUtils";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
 import { TransactionUpdateParams } from "@/api/transaction-client";
+import { ConfirmTypeButton } from "./ConfirmTypeButton";
 
 export function CondensedRow({
   transaction,
@@ -35,16 +36,17 @@ export function CondensedRow({
         </div>
 
         {/* Type badge */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex items-center gap-1">
           <TransactionType
             transaction={transaction}
             onSave={(id, transactionType) => updateTransaction(id, { transactionType, useAsDefault: false, merchantId: transaction.merchant.id })}
           />
+          <ConfirmTypeButton transaction={transaction} updateTransaction={updateTransaction} />
         </div>
 
         {/* Amount — right-aligned */}
         <div className="flex-shrink-0 ml-auto text-right">
-          <TransactionAmount amount={transaction.amount} />
+          <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
         </div>
       </div>
     </div>
