@@ -5,7 +5,8 @@ FactoryBot.define do
     association :plaid_account
     association :merchant
     plaid_id { "transaction_#{SecureRandom.hex(8)}" }
-    amount { -50.00 }
+    # Plaid's raw sign convention: positive = money out (expense), negative = money in
+    amount { 50.00 }
     name { "Test Transaction" }
     authorized_at { 1.day.ago }
     date { 1.day.ago.to_date }
@@ -20,13 +21,17 @@ FactoryBot.define do
   end
 
   trait :income do
-    amount { 1000.00 }
+    amount { -1000.00 }
     transaction_type { "income" }
+    plaid_category_primary { "INCOME" }
+    plaid_category_detail { "INCOME_WAGES" }
   end
 
   trait :transfer do
-    amount { -500.00 }
+    amount { 500.00 }
     transaction_type { "transfer" }
+    plaid_category_primary { "TRANSFER_OUT" }
+    plaid_category_detail { "TRANSFER_OUT_ACCOUNT_TRANSFER" }
   end
 
   trait :pending do

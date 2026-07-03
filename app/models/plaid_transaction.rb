@@ -5,6 +5,8 @@ class PlaidTransaction < ApplicationRecord
     transfer: 'transfer'
   }
 
+  CLASSIFICATION_SOURCES = %w[merchant_default plaid_category sign_inference user].freeze
+
   belongs_to :account
   belongs_to :plaid_sync_event
   belongs_to :plaid_account
@@ -14,10 +16,13 @@ class PlaidTransaction < ApplicationRecord
   has_many :tags, through: :tag_plaid_transactions
   
   validates :transaction_type, presence: true, inclusion: { in: TRANSACTION_TYPES.values }
+  validates :classification_source, inclusion: { in: CLASSIFICATION_SOURCES }, allow_nil: true
   validates :plaid_id,
     presence: true,
     uniqueness: { scope: :account_id, message: "Transaction already exists" }
-  before_create :set_default_categories
+  # before_validation (not before_create) so the type is set before the
+  # presence validation runs — synced transactions arrive with no type.
+  before_validation :set_default_categories, on: :create
   after_create :apply_merchant_default_tags
 
   scope :not_pending, -> { where(pending: false) }
@@ -43,12 +48,14 @@ class PlaidTransaction < ApplicationRecord
   end
 
   def set_default_categories
-    default_category = self.merchant.default_merchant_tag_id
-    default_type = self.merchant.default_transaction_type
+    return if merchant.nil?
+
+    default_category = merchant.default_merchant_tag_id
+    default_type = merchant.default_transaction_type
 
     # Fall back to group merchant defaults if this merchant doesn't have its own
-    if self.merchant.merchant_group && (default_category.blank? || default_type.blank?)
-      self.merchant.merchant_group.merchants.each do |group_merchant|
+    if merchant.merchant_group && (default_category.blank? || default_type.blank?)
+      merchant.merchant_group.merchants.each do |group_merchant|
         default_category ||= group_merchant.default_merchant_tag_id
         default_type ||= group_merchant.default_transaction_type
         break if default_category.present? && default_type.present?
@@ -56,16 +63,31 @@ class PlaidTransaction < ApplicationRecord
     end
 
     self.merchant_tag_id = default_category if default_category.present?
-    self.transaction_type = default_type if default_type.present?
 
-    if self.transaction_type.blank?
-      # Infer the transaction type based on the amount
-      if self.amount < 0
-        # negative amount is income, it's just the way plaid works
-        self.transaction_type = 'income'
-      else
-        self.transaction_type = 'expense'
-      end
+    # An explicitly assigned type (imports, console, specs) always wins
+    return if transaction_type.present?
+
+    if default_type.present?
+      self.transaction_type = default_type
+      self.classification_source = 'merchant_default'
+    elsif plaid_category_primary == 'INCOME'
+      self.transaction_type = TRANSACTION_TYPES[:income]
+      self.classification_source = 'plaid_category'
+    elsif %w[TRANSFER_IN TRANSFER_OUT].include?(plaid_category_primary)
+      self.transaction_type = TRANSACTION_TYPES[:transfer]
+      self.classification_source = 'plaid_category'
+    elsif plaid_category_primary.present?
+      # Any other Plaid category is a spend category. A negative amount here
+      # is a refund: negative spend, not income.
+      self.transaction_type = TRANSACTION_TYPES[:expense]
+      self.classification_source = 'plaid_category'
+    elsif amount.present? && amount < 0
+      # negative amount is income, it's just the way plaid works
+      self.transaction_type = TRANSACTION_TYPES[:income]
+      self.classification_source = 'sign_inference'
+    else
+      self.transaction_type = TRANSACTION_TYPES[:expense]
+      self.classification_source = 'sign_inference'
     end
   end
 
@@ -108,7 +130,6 @@ class PlaidTransaction < ApplicationRecord
       currency_code: plaid_transaction.iso_currency_code,
       pending: plaid_transaction.pending,
       payment_channel: plaid_transaction.payment_channel,
-      transaction_type: "expense",
       plaid_category_primary: plaid_transaction.personal_finance_category.primary,
       plaid_category_detail: plaid_transaction.personal_finance_category.detailed,
       plaid_category_confidence_level: plaid_transaction.personal_finance_category.confidence_level,

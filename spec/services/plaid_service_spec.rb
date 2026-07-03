@@ -172,6 +172,22 @@ RSpec.describe PlaidService do
             expect { service.sync_transactions }.not_to change(Merchant, :count)
           end
         end
+
+        context 'when Plaid categorizes the transaction as income' do
+          before do
+            allow(mock_transaction).to receive(:amount).and_return(-2000.00)
+            allow(mock_personal_finance_category).to receive(:primary).and_return("INCOME")
+            allow(mock_personal_finance_category).to receive(:detailed).and_return("INCOME_WAGES")
+          end
+
+          it 'creates the transaction as income classified by plaid_category' do
+            service.sync_transactions
+            transaction = PlaidTransaction.last
+
+            expect(transaction.transaction_type).to eq("income")
+            expect(transaction.classification_source).to eq("plaid_category")
+          end
+        end
       end
 
       context 'when there are modified transactions' do
@@ -206,6 +222,28 @@ RSpec.describe PlaidService do
           existing_transaction.reload
           expect(existing_transaction.amount).to eq(-75.00)
           expect(existing_transaction.name).to eq("Updated Transaction")
+        end
+
+        context 'when the transaction was manually classified' do
+          let(:merchant_tag) { create(:merchant_tag, account: account, user: user) }
+          let!(:existing_transaction) do
+            create(:plaid_transaction, :income,
+              account: account,
+              plaid_id: "txn_123",
+              plaid_account: plaid_account,
+              classification_source: 'user',
+              merchant_tag_id: merchant_tag.id)
+          end
+
+          it 'preserves the manual classification' do
+            service.sync_transactions
+            existing_transaction.reload
+
+            expect(existing_transaction.name).to eq("Updated Transaction")
+            expect(existing_transaction.transaction_type).to eq("income")
+            expect(existing_transaction.classification_source).to eq("user")
+            expect(existing_transaction.merchant_tag_id).to eq(merchant_tag.id)
+          end
         end
       end
 
