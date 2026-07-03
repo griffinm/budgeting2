@@ -56,6 +56,17 @@ class TransactionsController < ApplicationController
     attrs = transaction_params.to_h
     attrs[:classification_source] = 'user' if type_changed_by_user
 
+    # Category drives type: assigning a category re-types the transaction,
+    # unless this same request explicitly set a type (explicit type wins).
+    # Removing a category (null) never re-types.
+    assigned_tag = if transaction_params[:merchant_tag_id].present?
+      current_user.account.merchant_tags.find_by(id: transaction_params[:merchant_tag_id])
+    end
+    if assigned_tag && !type_changed_by_user
+      attrs[:transaction_type] = assigned_tag.tag_type
+      attrs[:classification_source] = 'user'
+    end
+
     if @transaction.update(attrs)
       # If the transaction is being updated to use the default category,
       # update all transactions for the merchant to have the same category
@@ -69,6 +80,12 @@ class TransactionsController < ApplicationController
           propagated[:transaction_type] = @transaction.transaction_type
           propagated[:classification_source] = 'merchant_default'
           merchant_defaults[:default_transaction_type] = @transaction.transaction_type
+        elsif assigned_tag
+          # The category's type follows the category to the siblings. The
+          # merchant's default_transaction_type stays nil so the category
+          # keeps driving classification of future transactions.
+          propagated[:transaction_type] = @transaction.transaction_type
+          propagated[:classification_source] = 'merchant_default'
         end
 
         @transaction.account.plaid_transactions

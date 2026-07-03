@@ -5,7 +5,7 @@ class PlaidTransaction < ApplicationRecord
     transfer: 'transfer'
   }
 
-  CLASSIFICATION_SOURCES = %w[merchant_default plaid_category sign_inference user].freeze
+  CLASSIFICATION_SOURCES = %w[merchant_default category_default plaid_category sign_inference user].freeze
 
   belongs_to :account
   belongs_to :plaid_sync_event
@@ -82,6 +82,13 @@ class PlaidTransaction < ApplicationRecord
     if default_type.present?
       self.transaction_type = default_type
       self.classification_source = 'merchant_default'
+    elsif default_category.present? && (category_type = MerchantTag.where(id: default_category).pick(:tag_type))
+      # Category drives type: the default category types the transaction.
+      # Explicit merchant defaults still win, and this deliberately precedes
+      # Plaid's transfer detection — set default_transaction_type = 'transfer'
+      # on the merchant to route around it.
+      self.transaction_type = category_type
+      self.classification_source = 'category_default'
     elsif plaid_category_primary == 'INCOME'
       self.transaction_type = TRANSACTION_TYPES[:income]
       self.classification_source = 'plaid_category'

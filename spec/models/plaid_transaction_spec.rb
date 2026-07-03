@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe PlaidTransaction, type: :model do
   let(:account) { create(:account) }
+  let(:user) { create(:user, account: account) }
   let(:merchant) { create(:merchant, account: account) }
 
   # Classification only runs when no type was explicitly assigned, so every
@@ -33,6 +34,52 @@ RSpec.describe PlaidTransaction, type: :model do
 
         expect(transaction.transaction_type).to eq('income')
         expect(transaction.classification_source).to eq('merchant_default')
+      end
+    end
+
+    context 'when the merchant has a default category' do
+      it 'uses the category type over the Plaid category' do
+        income_tag = create(:merchant_tag, :income, account: account, user: user)
+        merchant.update!(default_merchant_tag_id: income_tag.id)
+
+        transaction = classify(plaid_category_primary: 'FOOD_AND_DRINK', amount: -2000.00)
+
+        expect(transaction.transaction_type).to eq('income')
+        expect(transaction.classification_source).to eq('category_default')
+        expect(transaction.merchant_tag_id).to eq(income_tag.id)
+      end
+
+      it 'lets an explicit merchant default type beat the category type' do
+        income_tag = create(:merchant_tag, :income, account: account, user: user)
+        merchant.update!(default_merchant_tag_id: income_tag.id, default_transaction_type: 'expense')
+
+        transaction = classify(plaid_category_primary: 'FOOD_AND_DRINK', amount: 50.00)
+
+        expect(transaction.transaction_type).to eq('expense')
+        expect(transaction.classification_source).to eq('merchant_default')
+      end
+
+      it 'uses a group merchant fallback category the same way' do
+        income_tag = create(:merchant_tag, :income, account: account, user: user)
+        sibling = create(:merchant, account: account, merchant_name: 'Sibling', default_merchant_tag_id: income_tag.id)
+        group = MerchantGroup.create!(account: account, name: 'Group', primary_merchant_id: sibling.id)
+        group.add_merchant(sibling)
+        group.add_merchant(merchant)
+
+        transaction = classify(plaid_category_primary: 'FOOD_AND_DRINK', amount: -100.00)
+
+        expect(transaction.transaction_type).to eq('income')
+        expect(transaction.classification_source).to eq('category_default')
+      end
+
+      it 'beats Plaid transfer detection (documented bypass)' do
+        income_tag = create(:merchant_tag, :income, account: account, user: user)
+        merchant.update!(default_merchant_tag_id: income_tag.id)
+
+        transaction = classify(plaid_category_primary: 'TRANSFER_OUT', amount: 500.00)
+
+        expect(transaction.transaction_type).to eq('income')
+        expect(transaction.classification_source).to eq('category_default')
       end
     end
 

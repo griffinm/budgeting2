@@ -25,6 +25,47 @@ RSpec.describe 'Transactions', type: :request do
       expect(transaction.classification_source).to eq('user')
     end
 
+    context 'when assigning a category' do
+      let(:income_tag) { create(:merchant_tag, :income, account: account, user: user) }
+
+      it 're-types the transaction to the category type' do
+        patch "/api/transactions/#{transaction.id}",
+          params: { transaction: { merchant_tag_id: income_tag.id } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+        transaction.reload
+        expect(transaction.merchant_tag_id).to eq(income_tag.id)
+        expect(transaction.transaction_type).to eq('income')
+        expect(transaction.classification_source).to eq('user')
+      end
+
+      it 'lets an explicit type in the same request win over the category type' do
+        patch "/api/transactions/#{transaction.id}",
+          params: { transaction: { merchant_tag_id: income_tag.id, transaction_type: 'expense' } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+        transaction.reload
+        expect(transaction.merchant_tag_id).to eq(income_tag.id)
+        expect(transaction.transaction_type).to eq('expense')
+        expect(transaction.classification_source).to eq('user')
+      end
+
+      it 'never re-types when the category is removed' do
+        transaction.update!(merchant_tag_id: income_tag.id, transaction_type: 'income', classification_source: 'user')
+
+        patch "/api/transactions/#{transaction.id}",
+          params: { transaction: { merchant_tag_id: nil } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+        transaction.reload
+        expect(transaction.merchant_tag_id).to be_nil
+        expect(transaction.transaction_type).to eq('income')
+      end
+    end
+
     context 'with use_as_default' do
       it 'propagates a type change to the merchant and its other transactions' do
         patch "/api/transactions/#{transaction.id}",
@@ -48,7 +89,7 @@ RSpec.describe 'Transactions', type: :request do
         expect(other_merchant_transaction.merchant.default_transaction_type).to be_nil
       end
 
-      it 'does not touch transaction types when only the category changed' do
+      it 'propagates the category type with the category (category always wins)' do
         merchant_tag = create(:merchant_tag, account: account, user: user)
         sibling_transaction.update!(transaction_type: 'income', classification_source: 'user')
 
@@ -64,11 +105,13 @@ RSpec.describe 'Transactions', type: :request do
 
         sibling_transaction.reload
         expect(sibling_transaction.merchant_tag_id).to eq(merchant_tag.id)
-        expect(sibling_transaction.transaction_type).to eq('income')
-        expect(sibling_transaction.classification_source).to eq('user')
+        expect(sibling_transaction.transaction_type).to eq('expense')
+        expect(sibling_transaction.classification_source).to eq('merchant_default')
 
         merchant.reload
         expect(merchant.default_merchant_tag_id).to eq(merchant_tag.id)
+        # The type deliberately does not become a merchant default: the
+        # category keeps driving classification of future transactions
         expect(merchant.default_transaction_type).to be_nil
       end
 

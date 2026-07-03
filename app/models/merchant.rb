@@ -39,8 +39,16 @@ class Merchant < ApplicationRecord
   end
 
   def apply_default_merchant_tag_to_all_transactions
+    attrs = { merchant_tag_id: default_merchant_tag_id }
+    if default_merchant_tag
+      # Category drives type; an explicit default_transaction_type still wins
+      # because apply_default_transaction_type_to_all_transactions runs after
+      attrs[:transaction_type] = default_merchant_tag.tag_type
+      attrs[:classification_source] = 'merchant_default'
+    end
+
     PlaidTransaction.where(merchant_id: grouped_merchant_ids, account_id: account_id).each do |transaction|
-      transaction.update(merchant_tag_id: default_merchant_tag_id)
+      transaction.update(attrs)
     end
   end
 
