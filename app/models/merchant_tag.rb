@@ -2,6 +2,12 @@ class MerchantTag < ApplicationRecord
   audited
   has_associated_audits
 
+  # Invariant: every tag in a connected tree has the root's tag_type. Children
+  # inherit on save; changing a tag's type cascades to its descendants. For an
+  # expense tag target_budget is a spending cap; for an income tag it is the
+  # expected income.
+  TAG_TYPES = %w[expense income].freeze
+
   belongs_to :account
   belongs_to :user
   belongs_to :parent_merchant_tag, class_name: 'MerchantTag', optional: true
@@ -9,6 +15,7 @@ class MerchantTag < ApplicationRecord
   has_many :plaid_transactions
 
   validates :target_budget, { numericality: { greater_than_or_equal_to: 0 }, allow_nil: true }
+  validates :tag_type, inclusion: { in: TAG_TYPES }
 
   scope :active, -> { where(deleted_at: nil) }
   scope :leaf, -> { where(is_leaf: true) }
@@ -17,7 +24,9 @@ class MerchantTag < ApplicationRecord
   before_create :initialize_color
   before_save :set_is_leaf
   before_save :validate_target_budget
+  before_save :inherit_tag_type_from_parent
   after_save :sync_parent_leafness
+  after_save :cascade_tag_type_to_descendants
   before_destroy :detach_dependents
   after_destroy :sync_parent_leafness_after_destroy
 
@@ -66,6 +75,24 @@ class MerchantTag < ApplicationRecord
     else
       self.is_leaf = true
     end
+  end
+
+  private def inherit_tag_type_from_parent
+    return if parent_merchant_tag_id.blank?
+
+    self.tag_type = parent_merchant_tag.tag_type
+  end
+
+  # One update_all covers the whole subtree (child_ids is recursive), so this
+  # deliberately bypasses callbacks and auditing on the descendants — a
+  # per-record save would re-trigger the cascade at every level.
+  private def cascade_tag_type_to_descendants
+    return unless saved_change_to_tag_type?
+
+    descendant_ids = child_ids - [id]
+    return if descendant_ids.empty?
+
+    MerchantTag.where(id: descendant_ids).update_all(tag_type: tag_type, updated_at: Time.current)
   end
 
   # set_is_leaf only runs when a tag itself is saved, so gaining or losing a

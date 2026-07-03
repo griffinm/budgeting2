@@ -7,5 +7,9 @@ FactoryBot.define do
     trait :with_budget do
       target_budget { 100.00 }
     end
+
+    trait :income do
+      tag_type { 'income' }
+    end
   end
 end

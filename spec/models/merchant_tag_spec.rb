@@ -70,6 +70,88 @@ RSpec.describe MerchantTag, type: :model do
     end
   end
 
+  describe 'tag type' do
+    it 'defaults to expense' do
+      expect(make_tag.tag_type).to eq('expense')
+    end
+
+    it 'rejects invalid values' do
+      expect(build(:merchant_tag, account: account, user: user, tag_type: 'transfer')).not_to be_valid
+    end
+
+    it 'forces children to inherit the parent type regardless of what was passed' do
+      income_root = make_tag(tag_type: 'income')
+      child = make_tag(parent_merchant_tag: income_root, tag_type: 'expense')
+
+      expect(child.tag_type).to eq('income')
+    end
+
+    it 'cascades a root type change to all descendants' do
+      root = make_tag
+      child = make_tag(parent_merchant_tag: root)
+      grandchild = make_tag(parent_merchant_tag: child)
+
+      root.reload.update!(tag_type: 'income')
+
+      expect(child.reload.tag_type).to eq('income')
+      expect(grandchild.reload.tag_type).to eq('income')
+    end
+
+    it 're-types a subtree when it is reparented under a different-type root' do
+      income_root = make_tag(tag_type: 'income')
+      expense_root = make_tag
+      child = make_tag(parent_merchant_tag: expense_root)
+      grandchild = make_tag(parent_merchant_tag: child)
+
+      child.reload.update!(parent_merchant_tag_id: income_root.id)
+
+      expect(child.reload.tag_type).to eq('income')
+      expect(grandchild.reload.tag_type).to eq('income')
+    end
+
+    it 'keeps its type when promoted to top level' do
+      income_root = make_tag(tag_type: 'income')
+      child = make_tag(parent_merchant_tag: income_root)
+
+      child.reload.update!(parent_merchant_tag_id: nil)
+
+      expect(child.reload.tag_type).to eq('income')
+    end
+
+    it 'preserves leaf budgets through a cascade' do
+      root = make_tag
+      child = make_tag(parent_merchant_tag: root, target_budget: 500)
+
+      root.reload.update!(tag_type: 'income')
+
+      expect(child.reload.target_budget).to eq(500)
+      expect(child.tag_type).to eq('income')
+    end
+
+    it 'keeps promoted children type-consistent when a mid-tree tag is destroyed' do
+      income_root = make_tag(tag_type: 'income')
+      middle = make_tag(parent_merchant_tag: income_root)
+      leaf = make_tag(parent_merchant_tag: middle)
+
+      middle.reload.destroy!
+
+      leaf.reload
+      expect(leaf.parent_merchant_tag_id).to eq(income_root.id)
+      expect(leaf.tag_type).to eq('income')
+    end
+
+    it 'keeps children income-typed when an income root is destroyed' do
+      income_root = make_tag(tag_type: 'income')
+      child = make_tag(parent_merchant_tag: income_root)
+
+      income_root.reload.destroy!
+
+      child.reload
+      expect(child.parent_merchant_tag_id).to be_nil
+      expect(child.tag_type).to eq('income')
+    end
+  end
+
   describe '#destroy' do
     it 'promotes children to the deleted tag\'s parent' do
       grandparent = make_tag
