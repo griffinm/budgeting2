@@ -359,9 +359,9 @@ Update a transaction's category, notes, or transaction type.
 |---|---|
 | `transaction[merchant_tag_id]` | Category ID to assign |
 | `transaction[note]` | Free text note |
-| `transaction[transaction_type]` | `"expense"` or `"income"` |
+| `transaction[transaction_type]` | `"expense"`, `"income"`, or `"transfer"` |
 | `merchant_id` | Required when `use_as_default` is true |
-| `use_as_default` | When true, applies the category to all transactions for the merchant and sets it as the merchant's default |
+| `use_as_default` | When true, applies the category — and, if `transaction[transaction_type]` is present in the same request, the transaction type — to all of the merchant's transactions and sets them as the merchant's defaults |
 
 **Response (200):** Returns the full transaction object (same shape as show).
 

@@ -34,7 +34,7 @@ class Merchant < ApplicationRecord
 
   def apply_default_transaction_type_to_all_transactions
     PlaidTransaction.where(merchant_id: grouped_merchant_ids, account_id: account_id).each do |transaction|
-      transaction.update(transaction_type: default_transaction_type)
+      transaction.update(transaction_type: default_transaction_type, classification_source: 'merchant_default')
     end
   end
 

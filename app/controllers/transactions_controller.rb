@@ -52,18 +52,32 @@ class TransactionsController < ApplicationController
       return
     end
 
-    if @transaction.update(transaction_params)
-      # If the transaction is being updated to use the default category, 
+    type_changed_by_user = transaction_params[:transaction_type].present?
+    attrs = transaction_params.to_h
+    attrs[:classification_source] = 'user' if type_changed_by_user
+
+    if @transaction.update(attrs)
+      # If the transaction is being updated to use the default category,
       # update all transactions for the merchant to have the same category
-      # and update the merchant's default category to the new category
+      # and update the merchant's default category to the new category.
+      # When the type was part of this update, propagate it the same way.
       if update_all_transactions
+        propagated = { merchant_tag_id: @transaction.merchant_tag_id }
+        merchant_defaults = { default_merchant_tag_id: @transaction.merchant_tag_id }
+
+        if type_changed_by_user
+          propagated[:transaction_type] = @transaction.transaction_type
+          propagated[:classification_source] = 'merchant_default'
+          merchant_defaults[:default_transaction_type] = @transaction.transaction_type
+        end
+
         @transaction.account.plaid_transactions
           .where(merchant_id: merchant_id)
-          .update_all(merchant_tag_id: @transaction.merchant_tag_id)
+          .update_all(propagated)
 
         current_user.account.merchants
           .find_by(id: merchant_id)
-          .update(default_merchant_tag_id: @transaction.merchant_tag_id)
+          .update(merchant_defaults)
       end
 
       render :show
