@@ -7,7 +7,7 @@ import { useMerchantCategories } from "@/hooks/useMerchantCategories";
 import { BarChart } from "@mantine/charts";
 import { formatSpendStatsForChart } from "./utils";
 import { MonthsBackSelect } from "@/components/MonthsBackSelect/MonthsBackSelect";
-import { chartCurrencyFormatter } from "@/utils/currencyUtils";
+import { chartCompactCurrencyFormatter, chartCurrencyFormatter } from "@/utils/currencyUtils";
 
 export function TrendReport({
   tagId,
@@ -91,5 +91,6 @@ function TrendChart({
     type="stacked"
     withLegend={true}
     valueFormatter={chartCurrencyFormatter({ cents: true })}
+    yAxisProps={{ tickFormatter: chartCompactCurrencyFormatter() }}
   />;
 }

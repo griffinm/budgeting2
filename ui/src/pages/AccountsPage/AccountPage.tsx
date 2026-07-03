@@ -92,7 +92,7 @@ export default function AccountsPage() {
   return (
     <div className="h-full flex flex-col gap-8">
       {/* Net Worth Header */}
-      <HeroBox className="p-8">
+      <HeroBox className="shrink-0 p-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <div className="text-primary-200 text-sm font-medium tracking-wide uppercase mb-1">
@@ -137,7 +137,7 @@ export default function AccountsPage() {
       </HeroBox>
 
       {/* Account Sections */}
-      <div className="flex flex-col gap-6">
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-6">
         {ACCOUNT_TYPES.map(config => {
           const accounts = getAccountsByType(plaidAccounts, config.type);
           if (accounts.length === 0) return null;

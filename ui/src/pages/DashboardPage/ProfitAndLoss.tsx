@@ -5,7 +5,7 @@ import { BarChart } from "@mantine/charts";
 import { Group, Select, Table, Text } from "@mantine/core";
 import { format as formatDate } from 'date-fns';
 import { useMemo } from "react";
-import { chartCurrencyFormatter } from "@/utils/currencyUtils";
+import { chartCompactCurrencyFormatter, chartCurrencyFormatter } from "@/utils/currencyUtils";
 
 function monthLabel(item: ProfitAndLossItem) {
   return formatDate(new Date(item.year, item.month - 1, 1), 'MMM yyyy');
@@ -55,6 +55,7 @@ export function ProfitAndLoss({
             withLegend={true}
             
             valueFormatter={chartCurrencyFormatter({ cents: true })}
+            yAxisProps={{ tickFormatter: chartCompactCurrencyFormatter() }}
             referenceLines={[
               {
                 y: averageExpense,

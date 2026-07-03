@@ -2,7 +2,7 @@ import { Loading } from "@/components/Loading";
 import { MerchantSpendStats } from "@/utils/types";
 import { BarChart } from "@mantine/charts";
 import { Group, Select, Text } from "@mantine/core";
-import { chartCurrencyFormatter, formatDollars } from "@/utils/currencyUtils";
+import { chartCompactCurrencyFormatter, chartCurrencyFormatter, formatDollars } from "@/utils/currencyUtils";
 
 export function TrendChart({
   merchantSpendStats,
@@ -60,6 +60,7 @@ export function TrendChart({
             strokeDasharray: '3 3',
           }] : []}
           valueFormatter={chartCurrencyFormatter()}
+          yAxisProps={{ tickFormatter: chartCompactCurrencyFormatter() }}
         />
       </div>
     </div>
