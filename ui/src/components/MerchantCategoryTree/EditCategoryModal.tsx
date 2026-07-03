@@ -4,14 +4,7 @@ import { IconCheck, IconX } from "@tabler/icons-react";
 import { MerchantCategory } from "@/utils/types";
 import { CreateMerchantCategoryRequest, UpdateMerchantCategoryRequest } from "@/api";
 import { Errors } from "@/components/Errors/Errors";
-
-function getDescendantIds(category: MerchantCategory): number[] {
-  const ids: number[] = [category.id];
-  for (const child of category.children) {
-    ids.push(...getDescendantIds(child));
-  }
-  return ids;
-}
+import { getDescendantIds } from "@/utils/merchantCategoryUtils";
 
 export function EditCategoryModal({
   merchantCategory,

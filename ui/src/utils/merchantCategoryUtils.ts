@@ -60,6 +60,27 @@ export function formatMerchantCategoriesAsTree({ merchantCategories }: { merchan
   return rootCategories;
 }
 
+export function getDescendantIds(category: MerchantCategory): number[] {
+  const ids: number[] = [category.id];
+  for (const child of category.children) {
+    ids.push(...getDescendantIds(child));
+  }
+  return ids;
+}
+
+export function findCategoryInTree(tree: MerchantCategory[], id: number): MerchantCategory | undefined {
+  for (const category of tree) {
+    if (category.id === id) {
+      return category;
+    }
+    const found = findCategoryInTree(category.children, id);
+    if (found) {
+      return found;
+    }
+  }
+  return undefined;
+}
+
 export function fullyQualifiedCategoryName(category: MerchantCategory, merchantCategories: MerchantCategory[]): string {
   if (category.parentMerchantTagId === null || category.parentMerchantTagId === undefined) {
     return category.name;

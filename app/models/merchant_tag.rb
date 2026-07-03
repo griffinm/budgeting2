@@ -8,7 +8,7 @@ class MerchantTag < ApplicationRecord
   has_many :child_tags, class_name: 'MerchantTag', foreign_key: 'parent_merchant_tag_id'
   has_many :plaid_transactions
 
-  validates :target_budget, { numericality: { greater_than_or_equal_to: 0 } }
+  validates :target_budget, { numericality: { greater_than_or_equal_to: 0 }, allow_nil: true }
 
   scope :active, -> { where(deleted_at: nil) }
   scope :leaf, -> { where(is_leaf: true) }
@@ -17,6 +17,9 @@ class MerchantTag < ApplicationRecord
   before_create :initialize_color
   before_save :set_is_leaf
   before_save :validate_target_budget
+  after_save :sync_parent_leafness
+  before_destroy :detach_dependents
+  after_destroy :sync_parent_leafness_after_destroy
 
   def is_leaf?
     self.is_leaf
@@ -64,4 +67,27 @@ class MerchantTag < ApplicationRecord
       self.is_leaf = true
     end
   end
-end 
+
+  # set_is_leaf only runs when a tag itself is saved, so gaining or losing a
+  # child must explicitly re-save the affected parents.
+  private def sync_parent_leafness
+    return unless saved_change_to_parent_merchant_tag_id?
+
+    old_parent_id, new_parent_id = saved_change_to_parent_merchant_tag_id
+    [old_parent_id, new_parent_id].compact.uniq.each do |parent_id|
+      MerchantTag.find_by(id: parent_id)&.save!
+    end
+  end
+
+  # Children, transactions, and merchants all hold FK references to this tag;
+  # detach them so destroy doesn't raise. Children are promoted one level up.
+  private def detach_dependents
+    child_tags.update_all(parent_merchant_tag_id: parent_merchant_tag_id)
+    plaid_transactions.update_all(merchant_tag_id: nil)
+    Merchant.where(default_merchant_tag_id: id).update_all(default_merchant_tag_id: nil)
+  end
+
+  private def sync_parent_leafness_after_destroy
+    MerchantTag.find_by(id: parent_merchant_tag_id)&.save!
+  end
+end

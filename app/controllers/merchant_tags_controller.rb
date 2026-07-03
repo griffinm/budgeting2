@@ -43,8 +43,8 @@ class MerchantTagsController < ApplicationController
   # GET /api/merchant_tags/spend_stats
   # GET /api/merchant_tags/:merchant_tag_id/spend_stats
   def spend_stats
-    start_date = params[:start_date] || 6.months.ago.to_date
-    end_date = params[:end_date] || Date.today
+    start_date = (params[:start_date].presence || 6.months.ago).to_date
+    end_date = (params[:end_date].presence || Date.today).to_date
     merchant_tag_service = MerchantTagService.new(
       account_id: current_user.account_id,
       user_id: current_user.id,
@@ -57,9 +57,18 @@ class MerchantTagsController < ApplicationController
         months_back: params[:months_back],
       )
       render :spend_stats_for_one
+    elsif params[:group_by] == 'month'
+      @data = merchant_tag_service.monthly_spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
+      render :spend_stats_for_one
     else
       @data = merchant_tag_service.spend_stats_for_all_tags(start_date: start_date, end_date: end_date)
       @all_tags = current_user.account.merchant_tags
+      @uncategorized_total = current_user.account.plaid_transactions
+        .where(merchant_tag_id: nil)
+        .where('date >= ? AND date <= ?', start_date, end_date)
+        .sum('ABS(amount)')
+        .to_f
+        .round(2)
       render :spend_stats_for_all
     end
   end

@@ -897,7 +897,7 @@ Update an existing category.
 
 ### DELETE /api/merchant_tags/:id
 
-Delete a category.
+Delete a category. Its child categories are promoted one level up (to the deleted category's parent, or to top-level), its transactions become uncategorized, and merchants defaulting to it lose that default.
 
 **Auth required:** Yes
 
@@ -913,7 +913,7 @@ Delete a category.
 
 ```json
 {
-  "errors": ["Cannot delete category with associated transactions"]
+  "errors": ["..."]
 }
 ```
 
@@ -931,21 +931,38 @@ Get spend statistics for all categories in a date range.
 |---|---|---|---|
 | `start_date` | date | 6 months ago | Start of date range |
 | `end_date` | date | today | End of date range |
+| `group_by` | string | — | Pass `month` to get a monthly breakdown per category instead |
 
-**Response (200):** Returns all categories with their total transaction amounts:
+**Response (200):** Returns all categories with their total transaction amounts (rolled up from descendants), plus the total of uncategorized transactions in the range:
+
+```json
+{
+  "tags": [
+    {
+      "id": 5,
+      "name": "Groceries",
+      "parentMerchantTagId": null,
+      "color": "#4CAF50",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z",
+      "targetBudget": 500,
+      "isLeaf": true,
+      "totalTransactionAmount": 2345.67
+    }
+  ],
+  "uncategorizedTotal": 210.55
+}
+```
+
+**Response (200) with `group_by=month`:** one row per category per month with activity, amounts rolled up to include descendants:
 
 ```json
 [
   {
-    "id": 5,
-    "name": "Groceries",
-    "parentMerchantTagId": null,
-    "color": "#4CAF50",
-    "createdAt": "2025-01-01T00:00:00.000Z",
-    "updatedAt": "2025-01-01T00:00:00.000Z",
-    "targetBudget": 500,
-    "isLeaf": true,
-    "totalTransactionAmount": 2345.67
+    "month": 1,
+    "year": 2025,
+    "tagId": 5,
+    "totalAmount": 487.50
   }
 ]
 ```

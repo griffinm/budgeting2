@@ -41,8 +41,8 @@ export function TransactionModal({
         size="xl"
         padding={0}
       >
-        <div className="flex flex-col h-[400px] bg-white">
-          <div className="mb-4 border border-gray-200 overflow-y-auto scrollbar-hide">
+        <div className="flex flex-col h-[400px]">
+          <div className="mb-4 border border-gray-200 dark:border-[var(--mantine-color-dark-4)] overflow-y-auto scrollbar-hide">
             <TransactionsTable
               transactions={transactions}
               isLoading={isLoading}
