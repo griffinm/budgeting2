@@ -11,17 +11,37 @@ class MerchantGroupSpendService < BaseService
     @merchant_group.all_transactions.spend_total
   end
 
+  def all_time_income
+    @merchant_group.all_transactions.income_total
+  end
+
   def monthly_spend(months_back: 6)
-    data = @merchant_group.all_transactions.expense
+    monthly_totals(type: :expense, months_back: months_back)
+  end
+
+  def monthly_income(months_back: 6)
+    monthly_totals(type: :income, months_back: months_back)
+  end
+
+  private
+
+  def monthly_totals(type:, months_back:)
+    # Convention (see PlaidTransaction.spend_total/income_total): income is
+    # stored negative, so it is negated to read as a positive magnitude
+    sign = type == :income ? -1 : 1
+    data = @merchant_group.all_transactions.public_send(type)
       .where(date: months_back.months.ago..Time.current)
       .group_by { |t| t.date.strftime('%Y-%m') }
-      .map { |month, transactions| [month, transactions.sum(&:amount)] }
+      .map { |month, transactions| [month, sign * transactions.sum(&:amount)] }
       .to_h
 
-    # Make sure all months are present
+    fill_and_sort_months(data, months_back)
+  end
+
+  def fill_and_sort_months(data, months_back)
     start_month = months_back.months.ago.beginning_of_month
     end_month = Time.current.beginning_of_month
-    
+
     while start_month <= end_month
       month_key = start_month.strftime('%Y-%m')
       data[month_key] ||= 0

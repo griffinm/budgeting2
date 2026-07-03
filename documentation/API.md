@@ -513,7 +513,7 @@ Update a merchant's custom name, default transaction type, default category, and
 
 ### GET /api/merchants/:merchant_id/spend_stats
 
-Get spending statistics for a merchant, including monthly breakdown. Totals count expense transactions only — refunds net out, income and transfers are excluded.
+Get spending and income statistics for a merchant, including monthly breakdowns. `monthlySpend`/`allTimeSpend` count expense transactions (refunds net out); `monthlyIncome`/`allTimeIncome` count income transactions as positive magnitudes; transfers are excluded from both.
 
 **Auth required:** Yes
 
@@ -531,7 +531,11 @@ Get spending statistics for a merchant, including monthly breakdown. Totals coun
   "monthlySpend": [
     { "month": "2025-01", "amount": 150.00 }
   ],
-  "allTimeSpend": 2500.00
+  "allTimeSpend": 2500.00,
+  "monthlyIncome": [
+    { "month": "2025-01", "amount": 0 }
+  ],
+  "allTimeIncome": 0
 }
 ```
 
@@ -674,7 +678,7 @@ Update a merchant group's name or description.
 
 ### GET /api/merchant_groups/:id/spend_stats
 
-Get spending statistics for a merchant group. Totals count expense transactions only — refunds net out, income and transfers are excluded.
+Get spending and income statistics for a merchant group. `monthlySpend`/`allTimeSpend` count expense transactions (refunds net out); `monthlyIncome`/`allTimeIncome` count income transactions as positive magnitudes; transfers are excluded from both.
 
 **Auth required:** Yes
 
@@ -691,7 +695,11 @@ Get spending statistics for a merchant group. Totals count expense transactions 
   "monthlySpend": [
     { "month": "2025-01", "amount": 450.00 }
   ],
-  "allTimeSpend": 7500.00
+  "allTimeSpend": 7500.00,
+  "monthlyIncome": [
+    { "month": "2025-01", "amount": 0 }
+  ],
+  "allTimeIncome": 0
 }
 ```
 

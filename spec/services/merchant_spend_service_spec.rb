@@ -24,6 +24,46 @@ RSpec.describe MerchantSpendService do
     end
   end
 
+  describe '#all_time_income' do
+    it 'sums income as a positive magnitude, excluding expenses and transfers' do
+      make_transaction(merchant: merchant, amount: -2000.00, transaction_type: 'income')
+      make_transaction(merchant: merchant, amount: 100.00, transaction_type: 'income') # reversal nets
+      make_transaction(merchant: merchant, amount: 40.00)
+      make_transaction(merchant: merchant, amount: 500.00, transaction_type: 'transfer')
+
+      expect(service.all_time_income).to eq(1900.00)
+    end
+  end
+
+  describe '#monthly_income' do
+    it 'buckets income by month as positive magnitudes, filling missing months' do
+      make_transaction(merchant: merchant, amount: -2000.00, transaction_type: 'income')
+      make_transaction(merchant: merchant, amount: 40.00)
+
+      results = service.monthly_income(months_back: 3)
+
+      entry = results.find { |r| r[:month] == month_key }
+      expect(entry[:amount]).to eq(2000.00)
+      expect(results.sum { |r| r[:amount] }).to eq(2000.00)
+      expect(results.length).to eq(4)
+    end
+
+    it 'includes group merchants when requested' do
+      sibling = create(:merchant, account: account, merchant_name: 'Sibling')
+      group = MerchantGroup.create!(account: account, name: 'Group', primary_merchant_id: merchant.id)
+      group.add_merchant(merchant)
+      group.add_merchant(sibling)
+
+      make_transaction(merchant: merchant, amount: -1000.00, transaction_type: 'income')
+      make_transaction(merchant: sibling, amount: -500.00, transaction_type: 'income')
+
+      results = service.monthly_income(months_back: 3, include_group: true)
+
+      entry = results.find { |r| r[:month] == month_key }
+      expect(entry[:amount]).to eq(1500.00)
+    end
+  end
+
   describe '#monthly_spend' do
     it 'buckets expense spend by month, excluding income and transfers' do
       make_transaction(merchant: merchant, amount: 40.00)

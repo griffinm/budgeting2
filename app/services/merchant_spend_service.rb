@@ -11,32 +11,43 @@ class MerchantSpendService < BaseService
     @merchant.plaid_transactions.spend_total
   end
 
+  def all_time_income
+    @merchant.plaid_transactions.income_total
+  end
+
   def monthly_spend(months_back: 6, include_group: false)
-    if include_group && @merchant.merchant_group.present?
-      data = @merchant.merchant_group.all_transactions.expense
-        .where(date: months_back.months.ago..Time.current)
-        .group_by { |t| t.date.strftime('%Y-%m') }
-        .map { |month, transactions| [month, transactions.sum(&:amount)] }
-        .to_h
-    elsif @merchant.merchant_group.present?
-      data = @merchant.merchant_group.group_transactions.expense
-        .where(date: months_back.months.ago..Time.current)
-        .group_by { |t| t.date.strftime('%Y-%m') }
-        .map { |month, transactions| [month, transactions.sum(&:amount)] }
-        .to_h
+    monthly_totals(type: :expense, months_back: months_back, include_group: include_group)
+  end
+
+  def monthly_income(months_back: 6, include_group: false)
+    monthly_totals(type: :income, months_back: months_back, include_group: include_group)
+  end
+
+  private
+
+  def monthly_totals(type:, months_back:, include_group:)
+    scope = if include_group && @merchant.merchant_group.present?
+      @merchant.merchant_group.all_transactions
     else
-      # Merchant has no group, use its own transactions
-      data = @merchant.plaid_transactions.expense
-        .where(date: months_back.months.ago..Time.current)
-        .group_by { |t| t.date.strftime('%Y-%m') }
-        .map { |month, transactions| [month, transactions.sum(&:amount)] }
-        .to_h
+      @merchant.plaid_transactions
     end
 
-    # Make sure all months are present
+    # Convention (see PlaidTransaction.spend_total/income_total): income is
+    # stored negative, so it is negated to read as a positive magnitude
+    sign = type == :income ? -1 : 1
+    data = scope.public_send(type)
+      .where(date: months_back.months.ago..Time.current)
+      .group_by { |t| t.date.strftime('%Y-%m') }
+      .map { |month, transactions| [month, sign * transactions.sum(&:amount)] }
+      .to_h
+
+    fill_and_sort_months(data, months_back)
+  end
+
+  def fill_and_sort_months(data, months_back)
     start_month = months_back.months.ago.beginning_of_month
     end_month = Time.current.beginning_of_month
-    
+
     while start_month <= end_month
       month_key = start_month.strftime('%Y-%m')
       data[month_key] ||= 0
