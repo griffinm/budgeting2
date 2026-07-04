@@ -96,9 +96,6 @@ class PlaidService < BaseService
         update_transactions(modified_transactions, plaid_sync_event)
         remove_transactions(removed_transactions, plaid_sync_event)
 
-        # Enrich the transactions
-        # enrich_transactions(transactions: added_transactions + modified_transactions)
-
         plaid_sync_event.update(cursor: sync_response.next_cursor)
         access_token.update(next_cursor: sync_response.next_cursor)
       end
