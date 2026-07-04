@@ -41,6 +41,8 @@ class PlaidService < BaseService
     access_tokens.each do |access_token|
       sync_transactions_for_token(access_token)
     end
+
+    RecurringDetectionService.detect_safely(account_id: @account.id)
   end
 
   private def sync_transactions_for_token(access_token)

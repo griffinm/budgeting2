@@ -14,6 +14,7 @@ class Merchant < ApplicationRecord
   has_many :merchant_group_memberships, dependent: :destroy
   has_many :merchant_groups, through: :merchant_group_memberships
   has_many :primary_merchant_groups, class_name: 'MerchantGroup', foreign_key: 'primary_merchant_id'
+  has_many :recurring_streams, dependent: :destroy
 
   scope :in_group, -> (group_id) { where(merchant_group_id: group_id) }
 

@@ -31,6 +31,16 @@ Rails.application.routes.draw do
       post 'create_group', to: 'merchants#create_group'
     end
 
+    resources :recurring_streams, only: [:index] do
+      member do
+        patch 'confirm', to: 'recurring_streams#confirm'
+        patch 'dismiss', to: 'recurring_streams#dismiss'
+      end
+      collection do
+        post 'detect', to: 'recurring_streams#detect'
+      end
+    end
+
     resources :merchant_groups, only: [:index, :update] do
       member do
         post 'add_merchant', to: 'merchant_groups#add_merchant'

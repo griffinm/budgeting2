@@ -13,6 +13,7 @@ class Account < ApplicationRecord
   has_many :tag_reports, dependent: :destroy
   has_many :tag_plaid_transactions, through: :tags
   has_many :account_balances, through: :plaid_accounts
+  has_many :recurring_streams, dependent: :destroy
 
   scope :demo_accounts, -> { where(is_demo: true) }
   scope :live_accounts, -> { where(is_demo: false) }
