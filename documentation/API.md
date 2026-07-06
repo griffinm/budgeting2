@@ -1771,3 +1771,90 @@ Sync transactions and balances (for loan and investment accounts) for all accoun
   "error": "Unauthorized"
 }
 ```
+
+---
+
+## 16. Recurring Streams
+
+Recurring streams are detected series of transactions (subscriptions, bills, paychecks). Detection is heuristic — it groups an account's transactions by merchant and transaction type, clusters them by amount, and looks for regular cadences (weekly, biweekly, monthly, annually). Detection runs automatically after every Plaid sync and can be triggered manually.
+
+Lifecycle: streams are created as `suggested`. Confirming a stream marks all of its transactions `recurring: true` (and new transactions joining the stream are flagged automatically). Dismissing a stream unflags its transactions and permanently excludes it from future detection runs. The `recurring` field on transactions is only `true` for confirmed streams.
+
+### GET /api/recurring_streams
+
+List recurring streams for the current account, ordered by active status then next predicted date.
+
+**Auth required:** Yes
+
+**Query params:**
+
+| Param | Type | Description |
+|---|---|---|
+| `status` | string | Optional filter: `suggested`, `confirmed`, or `dismissed`. Invalid values return 422 |
+| `active` | boolean | Optional filter for streams that are still occurring |
+| `currentPage` | integer | Page number (default 1) |
+| `perPage` | integer | Items per page (default 25) |
+
+**Response (200):**
+
+```json
+{
+  "items": [
+    {
+      "id": 1,
+      "source": "heuristic",
+      "status": "suggested",
+      "frequency": "monthly",
+      "averageAmount": 15.99,
+      "lastAmount": 15.99,
+      "firstDate": "2026-01-04",
+      "lastDate": "2026-06-04",
+      "predictedNextDate": "2026-07-04",
+      "occurrenceCount": 6,
+      "confidence": 0.93,
+      "active": true,
+      "createdAt": "2026-07-04T12:00:00.000Z",
+      "updatedAt": "2026-07-04T12:00:00.000Z",
+      "merchant": { "id": 12, "name": "Netflix" }
+    }
+  ],
+  "page": {
+    "currentPage": 1,
+    "totalPages": 1,
+    "totalCount": 1
+  }
+}
+```
+
+### PATCH /api/recurring_streams/:id/confirm
+
+Confirm a suggested stream. Marks all linked transactions `recurring: true`. Returns 422 if the stream is dismissed.
+
+**Auth required:** Yes
+
+**Response (200):** the stream object (same shape as an `items` entry above) with `"status": "confirmed"`.
+
+### PATCH /api/recurring_streams/:id/dismiss
+
+Dismiss a stream. Marks its transactions `recurring: false` and excludes the stream from future detection runs. Confirmed streams can be dismissed.
+
+**Auth required:** Yes
+
+**Response (200):** the stream object with `"status": "dismissed"`.
+
+### POST /api/recurring_streams/detect
+
+Run heuristic detection for the current account synchronously.
+
+**Auth required:** Yes
+
+**Response (200):**
+
+```json
+{
+  "message": "Detection complete",
+  "created": 3,
+  "updated": 5,
+  "skipped_dismissed": 1
+}
+```

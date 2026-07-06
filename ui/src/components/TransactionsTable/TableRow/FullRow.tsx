@@ -10,6 +10,7 @@ import { TransactionUpdateParams } from "@/api/transaction-client";
 import { Logo } from "../Logo";
 import { ConfirmTypeButton } from "./ConfirmTypeButton";
 import { PendingBadge } from "./PendingBadge";
+import { RecurringBadge } from "./RecurringBadge";
 import { SplitBadge } from "./SplitBadge";
 import { TransactionNote } from "./TransactionNote";
 import { ActionIcon, Menu } from "@mantine/core";
@@ -97,6 +98,7 @@ export function FullRow({
         <div className="flex items-center gap-2 flex-shrink-0 ml-auto pl-3">
           {transaction.pending && <PendingBadge />}
           {transaction.parentTransactionId && <SplitBadge />}
+          {transaction.recurring && <RecurringBadge />}
           <div className="text-right cursor-pointer hover:underline underline-offset-2 decoration-1" onClick={() => navigate(urls.transaction.path(transaction.id))}>
             <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
           </div>
@@ -151,6 +153,7 @@ export function FullRow({
           >
             {transaction.pending && <PendingBadge />}
             {transaction.parentTransactionId && <SplitBadge />}
+            {transaction.recurring && <RecurringBadge />}
             <TransactionAmount amount={transaction.amount} transactionType={transaction.transactionType} />
           </div>
         </div>

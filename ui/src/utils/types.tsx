@@ -289,3 +289,23 @@ export interface MovingAverage {
   cumulativeAveragePerDay: number;
 }
 
+export type RecurringStreamStatus = 'suggested' | 'confirmed' | 'dismissed';
+export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'annually';
+
+export interface RecurringStream {
+  id: number;
+  source: 'heuristic' | 'plaid';
+  status: RecurringStreamStatus;
+  frequency: RecurringFrequency;
+  averageAmount: number;
+  lastAmount: number;
+  firstDate: string;
+  lastDate: string;
+  predictedNextDate: string;
+  occurrenceCount: number;
+  confidence: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  merchant: Merchant;
+}

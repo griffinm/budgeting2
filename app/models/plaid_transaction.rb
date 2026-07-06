@@ -12,6 +12,7 @@ class PlaidTransaction < ApplicationRecord
   belongs_to :plaid_account
   belongs_to :merchant
   belongs_to :merchant_tag, optional: true
+  belongs_to :recurring_stream, optional: true
   belongs_to :parent_transaction, class_name: 'PlaidTransaction',
     foreign_key: 'parent_plaid_transaction_id', optional: true
   has_many :child_transactions, class_name: 'PlaidTransaction',

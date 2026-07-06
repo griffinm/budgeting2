@@ -41,7 +41,7 @@ db/
   schema.rb        # Current schema
   migrate/         # Migrations
 spec/              # RSpec tests (factories, models, services)
-lib/tasks/         # Rake tasks (sync, import, enrich)
+lib/tasks/         # Rake tasks (sync, import, recurring detection)
 ui/
   src/
     api/           # API client modules (axios-based)

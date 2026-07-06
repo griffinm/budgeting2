@@ -11,6 +11,7 @@ import {
   IconCreditCard,
   IconBookmarks,
   IconReportAnalytics,
+  IconRepeat,
   IconLayoutSidebarLeftCollapse,
   IconLayoutSidebarLeftExpand,
 } from '@tabler/icons-react';
@@ -29,6 +30,7 @@ const COLLAPSE_KEY = 'budgeting:sidebar-collapsed';
 const NAV_ICONS: Record<string, TablerIcon> = {
   Dashboard: IconDashboard,
   Transactions: IconReceipt,
+  Recurring: IconRepeat,
   Merchants: IconBuildingStore,
   Categories: IconTag,
   Tags: IconBookmarks,
