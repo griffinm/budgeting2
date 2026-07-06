@@ -20,6 +20,7 @@ const SignupPage = lazy(() => import('@/pages/SignupPage/SignupPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage/ProfilePage'));
 const PlaidAccountsPage = lazy(() => import('@/pages/AccountsPage/AccountPage'));
 const ReportsPage = lazy(() => import('@/pages/ReportsPage/ReportsPage'));
+const RecurringPage = lazy(() => import('@/pages/RecurringPage/RecurringPage'));
 
 interface Url {
   path: (...args: any[]) => string;
@@ -43,6 +44,13 @@ export const urls: Record<string, Url> = {
     label: 'Transactions',
     title: () => 'Transactions' + TITLE_SUFFIX,
     component: TransactionsPage,
+    section: 'main',
+  },
+  recurring: {
+    path: () => '/recurring',
+    label: 'Recurring',
+    title: () => 'Recurring' + TITLE_SUFFIX,
+    component: RecurringPage,
     section: 'main',
   },
   login: {
