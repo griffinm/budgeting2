@@ -29,7 +29,7 @@ class MerchantsController < ApplicationController
 
     ActiveRecord::Base.transaction do
       unless @merchant.update(update_params)
-        render json: { errors: @merchant.errors.full_messages }, status: :unprocessable_entity
+        render json: { errors: @merchant.errors.full_messages }, status: :unprocessable_content
         return
       end
 
@@ -134,7 +134,7 @@ class MerchantsController < ApplicationController
         }
       }
     else
-      render json: { errors: ["Failed to create group"] }, status: :unprocessable_entity
+      render json: { errors: ["Failed to create group"] }, status: :unprocessable_content
     end
   end
 

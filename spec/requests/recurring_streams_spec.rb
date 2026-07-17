@@ -39,7 +39,7 @@ RSpec.describe 'RecurringStreams', type: :request do
     it 'rejects an invalid status filter' do
       get '/api/recurring_streams.json', params: { status: 'bogus' }, headers: headers
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body)['errors']).to be_present
     end
 
@@ -66,7 +66,7 @@ RSpec.describe 'RecurringStreams', type: :request do
 
       patch "/api/recurring_streams/#{stream.id}/confirm", headers: headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(stream.reload.status).to eq('dismissed')
     end
 

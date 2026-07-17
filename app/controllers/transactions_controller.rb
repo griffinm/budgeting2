@@ -49,7 +49,7 @@ class TransactionsController < ApplicationController
     merchant_id = update_transaction_meta_params[:merchant_id]
 
     if update_all_transactions && merchant_id.nil?
-      render json: { errors: 'Merchant ID is required when updating all transactions' }, status: :unprocessable_entity
+      render json: { errors: 'Merchant ID is required when updating all transactions' }, status: :unprocessable_content
       return
     end
 
@@ -100,7 +100,7 @@ class TransactionsController < ApplicationController
 
       render :show
     else
-      render json: { errors: @transaction.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @transaction.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -126,7 +126,7 @@ class TransactionsController < ApplicationController
 
   private def render_split_result(result)
     if result[:errors].present?
-      render json: { errors: result[:errors] }, status: :unprocessable_entity
+      render json: { errors: result[:errors] }, status: :unprocessable_content
     else
       @transaction = PlaidTransaction
         .base_query_for_api(current_user.account_id)

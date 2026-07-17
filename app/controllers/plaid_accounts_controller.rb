@@ -18,7 +18,7 @@ class PlaidAccountsController < ApplicationController
     if @plaid_account.update(attrs)
       render partial: 'plaid_accounts/plaid_account', locals: { plaid_account: @plaid_account }
     else
-      render json: { error: @plaid_account.errors.full_messages }, status: :unprocessable_entity
+      render json: { error: @plaid_account.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -160,7 +160,7 @@ class PlaidAccountsController < ApplicationController
         plaid_access_token.destroy
         render json: {
           error: "These accounts are already connected. Use \"Reconnect\" on the account to repair its connection instead of adding it again."
-        }, status: :unprocessable_entity
+        }, status: :unprocessable_content
         return
       end
 
