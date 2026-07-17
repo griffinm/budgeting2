@@ -5,7 +5,7 @@ class DataController < ApplicationController
   def total_for_date_range
     transaction_type = params[:transaction_type].presence || 'expense'
     unless PlaidTransaction::TRANSACTION_TYPES.value?(transaction_type)
-      render json: { error: 'Invalid transaction type' }, status: :unprocessable_entity
+      render json: { error: 'Invalid transaction type' }, status: :unprocessable_content
       return
     end
 

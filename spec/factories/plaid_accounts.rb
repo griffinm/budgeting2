@@ -10,5 +10,9 @@ FactoryBot.define do
     plaid_subtype { "checking" }
     plaid_institution_id { "ins_#{SecureRandom.hex(6)}" }
     nickname { "My Test Account" }
+
+    trait :archived do
+      archived_at { Time.current }
+    end
   end
 end 

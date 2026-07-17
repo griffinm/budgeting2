@@ -6,7 +6,7 @@ class RecurringStreamsController < ApplicationController
 
     if params[:status].present?
       unless RecurringStream::STATUSES.include?(params[:status])
-        render json: { errors: ["Invalid status: #{params[:status]}"] }, status: :unprocessable_entity
+        render json: { errors: ["Invalid status: #{params[:status]}"] }, status: :unprocessable_content
         return
       end
       streams = streams.where(status: params[:status])
@@ -26,7 +26,7 @@ class RecurringStreamsController < ApplicationController
     @recurring_stream = current_user.account.recurring_streams.find(params[:id])
 
     if @recurring_stream.status == "dismissed"
-      render json: { errors: ["Cannot confirm a dismissed stream"] }, status: :unprocessable_entity
+      render json: { errors: ["Cannot confirm a dismissed stream"] }, status: :unprocessable_content
       return
     end
 

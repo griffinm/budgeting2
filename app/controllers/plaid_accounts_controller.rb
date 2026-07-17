@@ -6,13 +6,19 @@ class PlaidAccountsController < ApplicationController
   end
 
   # PATCH /api/plaid_accounts/:id
+  # Accepts `nickname` and/or `archived` — only keys present in the request are
+  # updated, so an archive-only PATCH doesn't wipe the nickname.
   def update
     @plaid_account = current_user.plaid_accounts.includes(:users).find(params[:id])
-    
-    if @plaid_account.update(nickname: params[:nickname])
+
+    attrs = {}
+    attrs[:nickname] = params[:nickname] if params.key?(:nickname)
+    attrs[:archived] = params[:archived] if params.key?(:archived)
+
+    if @plaid_account.update(attrs)
       render partial: 'plaid_accounts/plaid_account', locals: { plaid_account: @plaid_account }
     else
-      render json: { error: @plaid_account.errors.full_messages }, status: :unprocessable_entity
+      render json: { error: @plaid_account.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -154,7 +160,7 @@ class PlaidAccountsController < ApplicationController
         plaid_access_token.destroy
         render json: {
           error: "These accounts are already connected. Use \"Reconnect\" on the account to repair its connection instead of adding it again."
-        }, status: :unprocessable_entity
+        }, status: :unprocessable_content
         return
       end
 

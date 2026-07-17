@@ -9,7 +9,7 @@ class UsersController < ApplicationController
     if result[:success]
       render json: { user: result[:user].as_json, token: result[:token] }, status: :created
     else
-      render json: { errors: result[:errors] }, status: :unprocessable_entity
+      render json: { errors: result[:errors] }, status: :unprocessable_content
     end
   end
 
@@ -48,7 +48,7 @@ class UsersController < ApplicationController
 
       render json: { user: current_user.as_json, token: token }, status: :ok
     else
-      render json: { errors: current_user.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: current_user.errors.full_messages }, status: :unprocessable_content
     end
   end
 

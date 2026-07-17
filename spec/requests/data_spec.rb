@@ -31,7 +31,7 @@ RSpec.describe 'Data', type: :request do
         get '/api/data/total_for_date_range', params: { transaction_type: 'delete_all' }, headers: headers
       }.not_to change(PlaidTransaction, :count)
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body)['error']).to eq('Invalid transaction type')
     end
   end

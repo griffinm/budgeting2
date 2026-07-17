@@ -307,6 +307,110 @@ RSpec.describe PlaidService do
       end
     end
 
+    context 'when an archived account shares a token with an active sibling' do
+      let(:archived_account) { create(:plaid_account, :archived, account: account, plaid_access_token: plaid_access_token) }
+      let(:active_sibling) { create(:plaid_account, account: account, plaid_access_token: plaid_access_token) }
+      let!(:archived_pau) { create(:plaid_accounts_user, user: user, plaid_account: archived_account) }
+      let!(:active_pau) { create(:plaid_accounts_user, user: user, plaid_account: active_sibling) }
+
+      let(:mock_added_for_archived) do
+        double(account_id: archived_account.plaid_id, transaction_id: 'txn_archived_1')
+      end
+
+      let(:mock_added_for_active) do
+        double(
+          account_id: active_sibling.plaid_id,
+          transaction_id: 'txn_active_1',
+          amount: -50.00,
+          name: 'Active Sibling Transaction',
+          merchant_name: nil,
+          authorized_date: Date.current,
+          date: Date.current,
+          datetime: nil,
+          check_number: nil,
+          iso_currency_code: 'USD',
+          pending: false,
+          personal_finance_category: mock_personal_finance_category,
+          payment_channel: 'online',
+          merchant_entity_id: 'entity_123',
+          logo_url: nil,
+          category: ['Food and Drink']
+        )
+      end
+
+      before do
+        allow(mock_personal_finance_category).to receive(:primary).and_return('FOOD_AND_DRINK')
+        allow(mock_personal_finance_category).to receive(:detailed).and_return('RESTAURANTS')
+        allow(mock_personal_finance_category).to receive(:confidence_level).and_return('HIGH')
+      end
+
+      it 'skips added transactions for the archived account but keeps the sibling' do
+        allow(mock_sync_response).to receive(:added).and_return([mock_added_for_archived, mock_added_for_active])
+
+        expect { service.sync_transactions }.to change(PlaidTransaction, :count).by(1)
+        expect(PlaidTransaction.last.plaid_account).to eq(active_sibling)
+      end
+
+      it 'does not modify existing transactions on the archived account' do
+        existing = create(:plaid_transaction, account: account, plaid_account: archived_account,
+                          plaid_id: 'txn_archived_1', amount: -10.00)
+        allow(mock_sync_response).to receive(:modified)
+          .and_return([double(account_id: archived_account.plaid_id, transaction_id: 'txn_archived_1')])
+
+        service.sync_transactions
+
+        expect(existing.reload.amount).to eq(-10.00)
+      end
+
+      it 'does not remove transactions from the archived account' do
+        create(:plaid_transaction, account: account, plaid_account: archived_account, plaid_id: 'txn_archived_1')
+        allow(mock_sync_response).to receive(:removed)
+          .and_return([double(transaction_id: 'txn_archived_1')])
+
+        expect { service.sync_transactions }.not_to change(PlaidTransaction, :count)
+      end
+
+      it 'creates balance snapshots only for the unarchived sibling' do
+        balances = double(current: 100.0, available: 90.0, limit: nil)
+        allow(mock_sync_response).to receive(:accounts).and_return([
+          double(account_id: archived_account.plaid_id, balances: balances),
+          double(account_id: active_sibling.plaid_id, balances: balances)
+        ])
+
+        expect { service.sync_transactions }.to change(AccountBalance, :count).by(1)
+        expect(AccountBalance.last.plaid_accounts_user).to eq(active_pau)
+      end
+    end
+
+    context 'when every account on a token is archived' do
+      let!(:archived_account) { create(:plaid_account, :archived, account: account, plaid_access_token: plaid_access_token) }
+
+      before do
+        plaid_access_token.update!(next_cursor: 'frozen_cursor')
+      end
+
+      it 'does not call the Plaid API' do
+        expect(mock_api_client).not_to receive(:transactions_sync)
+        service.sync_transactions
+      end
+
+      it 'does not create a sync event' do
+        expect { service.sync_transactions }.not_to change(PlaidSyncEvent, :count)
+      end
+
+      it 'leaves the cursor untouched' do
+        service.sync_transactions
+        expect(plaid_access_token.reload.next_cursor).to eq('frozen_cursor')
+      end
+
+      it 'resumes syncing after the account is unarchived' do
+        archived_account.update!(archived: false)
+
+        expect { service.sync_transactions }.to change(PlaidSyncEvent, :count).by(1)
+        expect(plaid_access_token.reload.next_cursor).to eq('next_cursor_123')
+      end
+    end
+
     context 'when account has no access tokens' do
       let(:service) { described_class.new(account_id: account.id, plaid_access_tokens: []) }
       before do
@@ -616,6 +720,52 @@ RSpec.describe PlaidService do
 
       it 'does not create any balance records' do
         expect { service.sync_balances }.not_to change(AccountBalance, :count)
+      end
+    end
+
+    context 'when the plaid account is archived' do
+      let(:plaid_account) do
+        create(:plaid_account, :archived,
+          account: account,
+          plaid_access_token: plaid_access_token,
+          plaid_type: 'investment',
+          plaid_subtype: '401k')
+      end
+
+      let(:active_sibling) do
+        create(:plaid_account,
+          account: account,
+          plaid_access_token: plaid_access_token,
+          plaid_type: 'investment',
+          plaid_subtype: 'ira')
+      end
+
+      let!(:active_pau) { create(:plaid_accounts_user, user: user, plaid_account: active_sibling) }
+
+      let(:mock_balance) { double(current: 1_000.00, available: nil, limit: nil) }
+
+      before do
+        allow(mock_api_client).to receive(:accounts_get).and_return(mock_accounts_response)
+        allow(mock_accounts_response).to receive(:accounts).and_return([
+          double(account_id: plaid_account.plaid_id, balances: mock_balance),
+          double(account_id: active_sibling.plaid_id, balances: mock_balance)
+        ])
+      end
+
+      it 'creates balances only for the unarchived sibling' do
+        expect { service.sync_balances }.to change(AccountBalance, :count).by(1)
+        expect(AccountBalance.last.plaid_accounts_user).to eq(active_pau)
+      end
+    end
+
+    context 'when every account on the token is archived' do
+      let!(:plaid_account) do
+        create(:plaid_account, :archived, account: account, plaid_access_token: plaid_access_token)
+      end
+
+      it 'does not call the Plaid API' do
+        expect(mock_api_client).not_to receive(:accounts_get)
+        service.sync_balances
       end
     end
 

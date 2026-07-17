@@ -13,7 +13,7 @@ class MerchantGroupsController < ApplicationController
     if @merchant_group.update(merchant_group_params)
       render :show
     else
-      render json: { errors: @merchant_group.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @merchant_group.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -37,7 +37,7 @@ class MerchantGroupsController < ApplicationController
     if @merchant_group.add_merchant(merchant)
       render :show
     else
-      render json: { errors: ["Failed to add merchant to group"] }, status: :unprocessable_entity
+      render json: { errors: ["Failed to add merchant to group"] }, status: :unprocessable_content
     end
   end
 
@@ -48,7 +48,7 @@ class MerchantGroupsController < ApplicationController
     if @merchant_group.remove_merchant(merchant)
       render :show
     else
-      render json: { errors: ["Failed to remove merchant from group"] }, status: :unprocessable_entity
+      render json: { errors: ["Failed to remove merchant from group"] }, status: :unprocessable_content
     end
   end
 
@@ -59,7 +59,7 @@ class MerchantGroupsController < ApplicationController
     if @merchant_group.set_primary_merchant(merchant)
       render :show
     else
-      render json: { errors: ["Failed to set primary merchant"] }, status: :unprocessable_entity
+      render json: { errors: ["Failed to set primary merchant"] }, status: :unprocessable_content
     end
   end
 

@@ -75,7 +75,7 @@ RSpec.describe 'Transactions', type: :request do
         params: { children: [{ amount: 1.00 }, { amount: 2.00 }] },
         headers: headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body)['errors']).to include('Child amounts must sum to the parent amount')
     end
 
@@ -106,7 +106,7 @@ RSpec.describe 'Transactions', type: :request do
     it 'returns 422 for a transaction that is not split' do
       delete "/api/transactions/#{transaction.id}/split", headers: headers, as: :json
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(JSON.parse(response.body)['errors']).to include('Transaction is not split')
     end
   end
@@ -238,7 +238,7 @@ RSpec.describe 'Transactions', type: :request do
           },
           headers: headers, as: :json
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 

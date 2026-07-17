@@ -7,6 +7,8 @@ json.plaidMask plaid_account.plaid_mask
 json.createdAt plaid_account.created_at
 json.updatedAt plaid_account.updated_at
 json.nickname plaid_account.nickname
+json.archived plaid_account.archived?
+json.archivedAt plaid_account.archived_at
 json.plaidAccessTokenId plaid_account.plaid_access_token_id
 json.connectionStatus plaid_account.plaid_access_token&.status
 json.needsReconnect plaid_account.plaid_access_token.present? && !plaid_account.plaid_access_token.healthy?
