@@ -7,14 +7,14 @@ interface UseAccountBalancesProps {
   loading: boolean;
 }
 
-export const useAccountBalances = (): UseAccountBalancesProps => {
+export const useAccountBalances = (includeArchived = false): UseAccountBalancesProps => {
   const [accountBalances, setAccountBalances] = useState<AccountBalance[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchAccountBalances = async () => {
       setLoading(true);
-      getAccountBalances().then((accountBalances) => {
+      getAccountBalances(includeArchived).then((accountBalances) => {
         setAccountBalances(accountBalances);
       }).catch((error) => {
         console.error(error);
@@ -24,7 +24,7 @@ export const useAccountBalances = (): UseAccountBalancesProps => {
     };
 
     fetchAccountBalances();
-  }, []);
+  }, [includeArchived]);
 
   return { accountBalances, loading };
 };

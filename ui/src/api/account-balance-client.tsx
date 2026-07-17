@@ -1,8 +1,10 @@
 import { AccountBalance, AccountBalanceHistory, AccountType, TimeRange } from "@/utils/types";
 import { baseClient } from "./base-client";
 
-export const getAccountBalances = async (): Promise<AccountBalance[]> => {
-  const response = await baseClient.get<AccountBalance[]>('/plaid_accounts/account_balance');
+export const getAccountBalances = async (includeArchived = false): Promise<AccountBalance[]> => {
+  const response = await baseClient.get<AccountBalance[]>('/plaid_accounts/account_balance', {
+    params: includeArchived ? { include_archived: true } : {},
+  });
   return response.data;
 };
 

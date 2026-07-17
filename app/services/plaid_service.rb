@@ -10,6 +10,7 @@ class PlaidService < BaseService
         Rails.logger.info "Updating balance for account #{plaid_api_account.account_id}"
         plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
         next unless plaid_account
+        next if plaid_account.archived?
         current = plaid_api_account.balances.current&.to_f
         available = plaid_api_account.balances.available&.to_f
         limit = plaid_api_account.balances.limit&.to_f
@@ -39,6 +40,13 @@ class PlaidService < BaseService
     # Each access token is an independent Plaid Item. A failure on one Item
     # (e.g. a broken bank login) must not abort syncing for the others.
     access_tokens.each do |access_token|
+      # Every account on this Item is archived: skip the Plaid call entirely.
+      # The cursor stays frozen, so unarchiving replays the gap on the next sync.
+      if access_token.plaid_accounts.any? && access_token.plaid_accounts.not_archived.none?
+        Rails.logger.info "Skipping sync for access token #{access_token.id}: all accounts archived"
+        next
+      end
+
       sync_transactions_for_token(access_token)
     end
 
@@ -137,6 +145,11 @@ class PlaidService < BaseService
         next
       end
 
+      if plaid_account.archived?
+        Rails.logger.info("Skipping transaction #{transaction.transaction_id}: PlaidAccount #{plaid_account.id} is archived")
+        next
+      end
+
       transaction_attrs = PlaidTransaction.parse_plaid_transaction(transaction, @account, plaid_account, plaid_sync_event)
       new_transaction = PlaidTransaction.new(transaction_attrs)
 
@@ -161,6 +174,11 @@ class PlaidService < BaseService
         next
       end
 
+      if plaid_account.archived?
+        Rails.logger.info("Skipping update for transaction #{transaction.transaction_id}: PlaidAccount #{plaid_account.id} is archived")
+        next
+      end
+
       transaction_attrs = PlaidTransaction.parse_plaid_transaction(transaction, @account, plaid_account, plaid_sync_event)
 
       # Bank fidelity wins: keep syncing the parent even when split, but flag
@@ -178,6 +196,9 @@ class PlaidService < BaseService
     Rails.logger.info("Removing #{transactions.count} transactions for account #{@account.id} sync event #{plaid_sync_event.id}")
     transactions.each do |transaction|
       plaid_transaction = PlaidTransaction.find_by(plaid_id: transaction.transaction_id)
+
+      # Never prune history from an archived account.
+      next if plaid_transaction&.plaid_account&.archived?
 
       if plaid_transaction
         plaid_transaction&.destroy
@@ -241,6 +262,11 @@ class PlaidService < BaseService
     access_tokens = @account.plaid_access_tokens
 
     access_tokens.each do |access_token|
+      if access_token.plaid_accounts.any? && access_token.plaid_accounts.not_archived.none?
+        Rails.logger.info "Skipping balance sync for access token #{access_token.id}: all accounts archived"
+        next
+      end
+
       begin
         request = Plaid::AccountsGetRequest.new(
           client_id: ENV["PLAID_CLIENT_ID"],
@@ -253,6 +279,7 @@ class PlaidService < BaseService
         response.accounts.each do |plaid_api_account|
           plaid_account = PlaidAccount.find_by(plaid_id: plaid_api_account.account_id, account_id: @account.id)
           next unless plaid_account
+          next if plaid_account.archived?
           next if plaid_types.present? && plaid_types.exclude?(plaid_account.plaid_type)
 
           current = plaid_api_account.balances.current&.to_f || 0.0

@@ -25,6 +25,11 @@ class PlaidAccount < ApplicationRecord
   validates :plaid_id, presence: true, uniqueness: { scope: :account_id }
 
   scope :active, -> { where(deleted_at: nil) }
+  # Archived = user closed the real bank account. History stays visible but the
+  # account is skipped by all Plaid syncing. Distinct from paranoia's deleted_at,
+  # which hides the record entirely.
+  scope :not_archived, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
 
   def self.types_for_category(category)
     case category
@@ -54,6 +59,16 @@ class PlaidAccount < ApplicationRecord
     else
       nil
     end
+  end
+
+  def archived?
+    archived_at.present?
+  end
+
+  # Virtual attribute so the API can toggle with archived: true/false.
+  # Re-archiving an already-archived account preserves the original timestamp.
+  def archived=(value)
+    self.archived_at = ActiveModel::Type::Boolean.new.cast(value) ? (archived_at || Time.current) : nil
   end
 
   def current_balance

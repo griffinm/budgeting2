@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_04_133241) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_17_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "dblink"
   enable_extension "pg_catalog.plpgsql"
@@ -167,6 +167,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_133241) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "plaid_access_token_id"
+    t.datetime "archived_at"
     t.index ["account_id"], name: "index_plaid_accounts_on_account_id"
     t.index ["plaid_access_token_id"], name: "index_plaid_accounts_on_plaid_access_token_id"
   end
@@ -431,6 +432,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_04_133241) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "time_zone"
+    t.string "digest_frequency", default: "off", null: false
     t.index ["account_id"], name: "index_users_on_account_id"
   end
 

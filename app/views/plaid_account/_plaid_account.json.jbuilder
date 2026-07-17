@@ -5,5 +5,6 @@ json.plaidOfficialName plaid_account.plaid_official_name
 json.plaidType plaid_account.plaid_type
 json.plaidSubtype plaid_account.plaid_subtype
 json.nickname plaid_account.nickname
+json.archived plaid_account.archived?
 json.createdAt plaid_account.created_at
 json.updatedAt plaid_account.updated_at

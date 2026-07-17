@@ -1334,6 +1334,8 @@ List all linked bank accounts for the current user.
     "createdAt": "2025-01-01T00:00:00.000Z",
     "updatedAt": "2025-01-01T00:00:00.000Z",
     "nickname": "Main Checking",
+    "archived": false,
+    "archivedAt": null,
     "users": [
       {
         "id": 1,
@@ -1353,7 +1355,7 @@ List all linked bank accounts for the current user.
 
 ### PATCH /api/plaid_accounts/:id
 
-Update a Plaid account's nickname.
+Update a Plaid account's nickname and/or archived state. Only keys present in the request body are updated.
 
 **Auth required:** Yes
 
@@ -1361,9 +1363,12 @@ Update a Plaid account's nickname.
 
 ```json
 {
-  "nickname": "Main Checking"
+  "nickname": "Main Checking",
+  "archived": true
 }
 ```
+
+Archiving an account (e.g. after closing the real bank account) stops all syncing for it — no new transactions, no new balance snapshots — while keeping its history queryable. Archiving is reversible via `"archived": false`. When every account on a Plaid Item is archived, the Item is skipped entirely and its sync cursor freezes, so unarchiving replays the gap. Caveat: if an archived account shares an Item with accounts that keep syncing, transactions occurring while it was archived are not backfilled on unarchive (the shared cursor has moved past them).
 
 **Response (200):** Returns the updated Plaid account object (same shape as list items).
 
@@ -1481,9 +1486,15 @@ Remove a user's access to a Plaid account.
 
 ### GET /api/plaid_accounts/account_balance
 
-Get the latest balance for each of the user's linked accounts.
+Get the latest balance for each of the user's linked accounts. Archived accounts are excluded by default.
 
 **Auth required:** Yes
+
+**Query parameters:**
+
+| Param | Type | Description |
+|-------|------|-------------|
+| `include_archived` | boolean | Optional. When `true`, also returns the last-known balance of archived accounts. Default `false`. |
 
 **Response (200):**
 
@@ -1503,6 +1514,7 @@ Get the latest balance for each of the user's linked accounts.
       "plaidType": "depository",
       "plaidSubtype": "checking",
       "nickname": "Main Checking",
+      "archived": false,
       "createdAt": "2025-01-01T00:00:00.000Z",
       "updatedAt": "2025-01-01T00:00:00.000Z"
     }

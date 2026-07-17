@@ -178,7 +178,7 @@ export function SearchFilters({
           onChange={(values) => updateLocalParam('plaid_account_ids', values.map(Number))}
           data={deduplicateOptions(plaidAccounts.map((account) => ({
             value: String(account.id),
-            label: account.nickname || account.plaidOfficialName || `Account ${account.plaidMask}`,
+            label: `${account.nickname || account.plaidOfficialName || `Account ${account.plaidMask}`}${account.archived ? ' (archived)' : ''}`,
           })))}
           searchable
           clearable

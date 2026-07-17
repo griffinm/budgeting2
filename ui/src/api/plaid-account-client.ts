@@ -58,6 +58,19 @@ export const exchangePublicToken = async (publicToken: string): Promise<{
   return response.data;
 };
 
+export const updatePlaidAccountArchived = async ({
+  plaidAccountId,
+  archived,
+}: {
+  plaidAccountId: number;
+  archived: boolean;
+}): Promise<PlaidAccount> => {
+  const response = await baseClient.patch(`/plaid_accounts/${plaidAccountId}`, {
+    archived,
+  });
+  return response.data;
+};
+
 export const updatePlaidAccountNickname = async ({
   plaidAccountId,
   nickname,

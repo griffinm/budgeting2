@@ -5,6 +5,7 @@ import {
   addUserToPlaidAccount,
   removeUserFromPlaidAccount,
   updatePlaidAccountNickname as updatePlaidAccountNicknameApi,
+  updatePlaidAccountArchived as updatePlaidAccountArchivedApi,
 } from "@/api";
 import { NotificationContext } from "@/providers";
 
@@ -14,6 +15,7 @@ interface PlaidAccountProps {
   error: Error | null;
   updateAccountAccess: (props: ChangeAccountAccessProps) => Promise<void>;
   updatePlaidAccountNickname: (id: number, nickname: string) => Promise<void>;
+  setPlaidAccountArchived: (plaidAccount: PlaidAccount, archived: boolean) => Promise<void>;
   refreshAccounts: () => Promise<void>;
 }
 
@@ -67,6 +69,19 @@ export const usePlaidAccount = (): PlaidAccountProps => {
     await fetchPlaidAccounts();
   };
 
+  const setPlaidAccountArchived = async (plaidAccount: PlaidAccount, archived: boolean) => {
+    await updatePlaidAccountArchivedApi({ plaidAccountId: plaidAccount.id, archived });
+    const name = plaidAccount.nickname || plaidAccount.plaidOfficialName;
+    showNotification({
+      title: archived ? "Account archived" : "Account restored",
+      message: archived
+        ? `${name} will no longer sync. Its history is still available.`
+        : `${name} will resume syncing.`,
+      type: "success",
+    });
+    await fetchPlaidAccounts();
+  };
+
   const refreshAccounts = async () => {
     await fetchPlaidAccounts();
   };
@@ -77,6 +92,7 @@ export const usePlaidAccount = (): PlaidAccountProps => {
     error,
     updateAccountAccess,
     updatePlaidAccountNickname,
+    setPlaidAccountArchived,
     refreshAccounts,
   };
 };

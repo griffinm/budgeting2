@@ -1,8 +1,15 @@
 class AccountBalancesController < ApplicationController
 
   # GET /api/account_balances
+  # Archived accounts are excluded by default so they don't count toward net
+  # worth; pass include_archived=true to also get their last-known balances.
   def index
-    @account_balances = current_user.account_balances.latest_per_account.includes(:plaid_account)
+    scope = current_user.account_balances
+    unless ActiveModel::Type::Boolean.new.cast(params[:include_archived])
+      scope = scope.joins(plaid_accounts_user: :plaid_account)
+                   .where(plaid_accounts: { archived_at: nil })
+    end
+    @account_balances = scope.latest_per_account.includes(:plaid_account)
   end
 
   # GET /api/account_balances/history

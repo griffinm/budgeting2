@@ -224,6 +224,8 @@ export interface PlaidAccount {
   plaidSubtype: string;
   plaidMask: string;
   nickname: string;
+  archived: boolean;
+  archivedAt: string | null;
   createdAt: string;
   updatedAt: string;
   users: User[];
