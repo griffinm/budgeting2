@@ -29,6 +29,7 @@ export interface TransactionUpdateParams {
   transactionType?: TransactionType;
   merchantCategoryId?: number | null;
   note?: string;
+  date?: string; // YYYY-MM-DD; the server stores it at noon
   useAsDefault?: boolean;
   merchantId?: number; // Only used when updating all transactions for a merchant
 }
