@@ -348,7 +348,7 @@ Get a single transaction by ID.
 
 ### PATCH /api/transactions/:id
 
-Update a transaction's category, notes, or transaction type.
+Update a transaction's category, notes, transaction type, or date.
 
 **Auth required:** Yes
 
@@ -359,7 +359,8 @@ Update a transaction's category, notes, or transaction type.
   "transaction": {
     "merchant_tag_id": 5,
     "note": "Weekly groceries",
-    "transaction_type": "expense"
+    "transaction_type": "expense",
+    "date": "2026-03-09"
   },
   "merchant_id": 10,
   "use_as_default": true
@@ -371,6 +372,7 @@ Update a transaction's category, notes, or transaction type.
 | `transaction[merchant_tag_id]` | Category ID to assign |
 | `transaction[note]` | Free text note |
 | `transaction[transaction_type]` | `"expense"`, `"income"`, or `"transfer"` |
+| `transaction[date]` | New transaction date. A day-only value (`"2026-03-09"`) is stored at noon so no timezone renders the previous day; a value with an explicit time is stored as given. Split children are moved with the parent. An unparseable or blank value returns 422 |
 | `merchant_id` | Required when `use_as_default` is true |
 | `use_as_default` | When true, applies the category — and, if `transaction[transaction_type]` is present in the same request, the transaction type — to all of the merchant's transactions and sets them as the merchant's defaults |
 

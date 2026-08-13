@@ -68,6 +68,16 @@ class TransactionsController < ApplicationController
       attrs[:classification_source] = 'user'
     end
 
+    date_changed_by_user = attrs.key?('date')
+    if date_changed_by_user
+      normalized = normalized_date(attrs['date'])
+      if normalized.nil?
+        render json: { errors: ['Date is invalid'] }, status: :unprocessable_content
+        return
+      end
+      attrs['date'] = normalized
+    end
+
     if @transaction.update(attrs)
       # If the transaction is being updated to use the default category,
       # update all transactions for the merchant to have the same category
@@ -96,6 +106,12 @@ class TransactionsController < ApplicationController
         current_user.account.merchants
           .find_by(id: merchant_id)
           .update(merchant_defaults)
+      end
+
+      # Split children are created with a copy of the parent's date
+      # (TransactionSplitService), so they follow the parent when it moves.
+      if date_changed_by_user
+        @transaction.child_transactions.update_all(date: @transaction.date)
       end
 
       render :show
@@ -169,6 +185,22 @@ class TransactionsController < ApplicationController
   end
 
   private def transaction_params
-    params.require(:transaction).permit(:transaction_type, :merchant_tag_id, :note)
+    params.require(:transaction).permit(:transaction_type, :merchant_tag_id, :note, :date)
+  end
+
+  # Mirrors PlaidTransaction.parse_plaid_transaction: a date with no time
+  # component is stored at noon so that no timezone renders the previous day.
+  # Returns nil when the value cannot be parsed.
+  private def normalized_date(value)
+    parsed = Time.zone.parse(value.to_s)
+    return nil if parsed.nil?
+
+    if parsed.hour.zero? && parsed.min.zero? && parsed.sec.zero?
+      parsed + 12.hours
+    else
+      parsed
+    end
+  rescue ArgumentError
+    nil
   end
 end

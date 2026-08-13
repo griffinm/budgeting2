@@ -242,6 +242,65 @@ RSpec.describe 'Transactions', type: :request do
       end
     end
 
+    context 'when updating the date' do
+      it 'stores the picked day at noon' do
+        patch "/api/transactions/#{transaction.id}",
+          params: { transaction: { date: '2026-03-09' } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+        transaction.reload
+        expect(transaction.date.utc.strftime('%Y-%m-%d %H:%M')).to eq('2026-03-09 12:00')
+      end
+
+      it 'keeps an explicit time when one is given' do
+        patch "/api/transactions/#{transaction.id}",
+          params: { transaction: { date: '2026-03-09T08:30:00Z' } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(transaction.reload.date.utc.strftime('%Y-%m-%d %H:%M')).to eq('2026-03-09 08:30')
+      end
+
+      it 'moves split children with the parent' do
+        parent = create(:plaid_transaction, :split_parent, account: account, merchant: merchant)
+
+        patch "/api/transactions/#{parent.id}",
+          params: { transaction: { date: '2026-03-09' } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:ok)
+        parent.reload
+        expect(parent.child_transactions.count).to eq(2)
+        parent.child_transactions.each do |child|
+          expect(child.date).to eq(parent.date)
+        end
+      end
+
+      it 'rejects an unparseable date' do
+        original = transaction.date
+
+        patch "/api/transactions/#{transaction.id}",
+          params: { transaction: { date: 'not a date' } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(JSON.parse(response.body)['errors']).to eq(['Date is invalid'])
+        expect(transaction.reload.date).to eq(original)
+      end
+
+      it 'rejects a blank date' do
+        original = transaction.date
+
+        patch "/api/transactions/#{transaction.id}",
+          params: { transaction: { date: '' } },
+          headers: headers, as: :json
+
+        expect(response).to have_http_status(:unprocessable_content)
+        expect(transaction.reload.date).to eq(original)
+      end
+    end
+
     it 'rejects requests without a token' do
       patch "/api/transactions/#{transaction.id}",
         params: { transaction: { transaction_type: 'income' } },

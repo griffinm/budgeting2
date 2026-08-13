@@ -7,7 +7,10 @@ import { CategoryDisplay } from "@/components/Category/CategoryDisplay";
 import { ConfirmTypeButton } from "@/components/TransactionsTable/TableRow/ConfirmTypeButton";
 import { TransactionType } from "@/components/TransactionType/TransactionType";
 import { TransactionTags } from "@/components/TransactionTags/TransactionTags";
-import { Badge } from "@mantine/core";
+import { Badge, Button } from "@mantine/core";
+import { DateInput } from "@mantine/dates";
+import { useState } from "react";
+import "@mantine/dates/styles.css";
 
 interface DetailsCardProps {
   transaction: Transaction;
@@ -19,6 +22,54 @@ interface DetailsCardProps {
   onAddTag: (transactionId: number, tagId: number) => void;
   onRemoveTag: (transactionId: number, transactionTagId: number) => void;
   onCreateAndAddTag: (transactionId: number, name: string) => void;
+}
+
+function EditableDate({
+  value,
+  onSave,
+}: {
+  value: string;
+  onSave: (date: string) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newValue, setNewValue] = useState<Date | null>(new Date(value));
+  const pencilClasses = "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer";
+
+  const startEditing = () => {
+    setNewValue(new Date(value));
+    setIsEditing(true);
+  };
+
+  const onSubmit = () => {
+    if (!newValue) {
+      return;
+    }
+    // Send the picked calendar day; the server stores it at noon.
+    onSave(format(newValue, "yyyy-MM-dd"));
+    setIsEditing(false);
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex flex-row items-center gap-2">
+        <DateInput
+          size="xs"
+          value={newValue}
+          onChange={(date) => setNewValue(date ? new Date(date) : null)}
+          aria-label="Transaction date"
+        />
+        <Button type="button" variant="outline" size="xs" onClick={() => setIsEditing(false)}>Cancel</Button>
+        <Button type="button" size="xs" onClick={onSubmit} disabled={!newValue}>Save</Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-row items-center gap-2">
+      <span>{format(new Date(value), "MMMM d, yyyy")}</span>
+      <div className={pencilClasses} onClick={startEditing}>✎</div>
+    </div>
+  );
 }
 
 export function DetailsCard({
@@ -51,7 +102,10 @@ export function DetailsCard({
         </DetailRow>
 
         <DetailRow label="Date">
-          <span>{format(new Date(transaction.date), "MMMM d, yyyy")}</span>
+          <EditableDate
+            value={transaction.date}
+            onSave={(date) => updateTransaction(transaction.id, { date })}
+          />
         </DetailRow>
 
         {transaction.authorizedAt && (
